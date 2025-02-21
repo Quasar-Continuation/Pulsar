@@ -1,4 +1,5 @@
-﻿using Quasar.Server.Utilities;
+﻿using Quasar.Server.Messages;
+using Quasar.Server.Utilities;
 using System;
 using System.Diagnostics;
 using System.Drawing;
@@ -76,6 +77,11 @@ namespace Quasar.Server.Controls
         public void SetFrameUpdatedEvent(FrameUpdatedEventHandler e)
         {
             _frameCounter.FrameUpdated += e;
+        }
+
+        public void SetRemoteDesktopHandler(FrmHvnHandler e)
+        {
+            this.remoteDesktopHandler = e;
         }
 
         /// <summary>
@@ -185,5 +191,7 @@ namespace Quasar.Server.Controls
 
             _frameCounter.Update(deltaTime);
         }
+
+        private FrmHvnHandler remoteDesktopHandler;
     }
 }

@@ -124,6 +124,11 @@ namespace Quasar.Server.Networking
             return this.Equals(obj as Client);
         }
 
+        public bool PEquals(object obj)
+        {
+            return this.EndPoint.Address.Equals((obj as Client).EndPoint.Address);
+        }
+
         /// <summary>
         /// Returns the hashcode for this instance.
         /// </summary>

