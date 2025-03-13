@@ -263,6 +263,7 @@
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
+		<PackageReference Include="Guna.UI2.WinForms" Version="2.0.4.7" />
 		<PackageReference Include="Mono.Cecil">
 			<Version>0.11.6</Version>
 		</PackageReference>

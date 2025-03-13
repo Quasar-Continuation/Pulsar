@@ -38,5 +38,10 @@ namespace Quasar.Server.Forms
         {
             this.Close();
         }
+
+        private void FrmAbout_Load(object sender, EventArgs e)
+        {
+
+        }
     }
 }

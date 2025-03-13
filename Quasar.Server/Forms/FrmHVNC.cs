@@ -431,5 +431,10 @@ namespace Quasar.Server.Forms
         {
             TogglePanelVisibility(true);
         }
+
+        private void panelTop_Paint(object sender, PaintEventArgs e)
+        {
+
+        }
     }
 }

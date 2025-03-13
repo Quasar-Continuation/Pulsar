@@ -22,6 +22,8 @@ using System.Threading;
 using System.Windows.Forms;
 using Quasar.Common.Messages.QuickCommands;
 using System.IO;
+using System.Diagnostics.Eventing.Reader;
+using System.Drawing;
 
 namespace Quasar.Server.Forms
 {
@@ -168,10 +170,11 @@ namespace Quasar.Server.Forms
 
         private void FrmMain_Load(object sender, EventArgs e)
         {
-            //SetEqualColumnWidths();
             InitializeServer();
             AutostartListening();
             notifyIcon.Visible = false;
+
+            DarkModeManager.ApplyDarkMode(this);
         }
 
         private void FrmMain_FormClosing(object sender, FormClosingEventArgs e)
@@ -250,7 +253,7 @@ namespace Quasar.Server.Forms
                 {
                     if (!listening)
                         lstClients.Items.Clear();
-                    listenToolStripStatusLabel.Text = listening ? string.Format("Listening on port {0}.", port) : "Not listening.";
+                    listenToolStripStatusLabel.Text = listening ? string.Format("Listening on: {0}", port) : "Listening on: None";
                 });
                 UpdateWindowTitle();
             }
@@ -277,6 +280,7 @@ namespace Quasar.Server.Forms
             }
 
             UpdateConnectedClientsCount();
+            UpdateEventLog();
         }
 
         private void ClientDisconnected(Client client)
@@ -297,15 +301,31 @@ namespace Quasar.Server.Forms
             }
 
             UpdateConnectedClientsCount();
+            UpdateEventLog();
         }
 
         private void UpdateConnectedClientsCount()
         {
             this.Invoke((MethodInvoker)delegate
             {
-                connectedToolStripStatusLabel.Text = $"Connected: {ListenServer.ConnectedClients.Length}";
+                connectedToolStripStatusLabel.Text = $"| Total Clients: {ListenServer.ConnectedClients.Length}";
             });
         }
+
+        private void UpdateEventLog()
+        {
+            this.Invoke((MethodInvoker)delegate
+            {
+                ListViewItem item = new ListViewItem();
+                item.Text = DateTime.Now.ToString("HH:mm:ss");
+                item.SubItems.Add("[+] Client Connected");
+                item.Font = new Font("Verdana", 9, FontStyle.Bold);
+                item.ForeColor = Color.Green;
+                aeroListView1.Items.Add(item);
+                aeroListView1.EnsureVisible(aeroListView1.Items.Count - 1);
+            });
+        }
+
 
         private void ProcessClientConnections(object state)
         {
@@ -341,7 +361,7 @@ namespace Quasar.Server.Forms
                                 ShowPopup(client.Key);
                             break;
                         case false:
-                            RemoveClientFromListview(client.Key);
+                            UpdateClientStatusInListview(client.Key, false);
                             break;
                     }
                 }
@@ -381,20 +401,54 @@ namespace Quasar.Server.Forms
 
             try
             {
-                // this " " leaves some space between the flag-icon and first item
                 ListViewItem lvi = new ListViewItem(new string[]
                 {
-                    " " + client.EndPoint.Address, client.Value.Tag,
-                    client.Value.UserAtPc, client.Value.Version, "Connected", "idk", "Active", client.Value.CountryWithCode,
-                    client.Value.OperatingSystem, client.Value.AccountType
+            " " + client.EndPoint.Address, client.Value.Tag,
+            client.Value.UserAtPc, client.Value.Version, "Connected", "idk", "Active", client.Value.CountryWithCode,
+            client.Value.OperatingSystem, client.Value.AccountType
                 })
-                { Tag = client, ImageIndex = client.Value.ImageIndex };
+                {
+                    Tag = client,
+                    ImageIndex = client.Value.ImageIndex
+                };
 
                 lstClients.Invoke((MethodInvoker)delegate
                 {
                     lock (_lockClients)
                     {
-                        lstClients.Items.Add(lvi);
+                        ListViewItem existingItem = lstClients.Items.Cast<ListViewItem>()
+                            .FirstOrDefault(item => item != null && client.Equals(item.Tag));
+
+                        if (existingItem != null)
+                        {
+                            existingItem.SubItems[4].Font = new Font("Segoe UI", 9, FontStyle.Bold);
+                            existingItem.SubItems[4].Text = "Online";
+                            existingItem.SubItems[4].ForeColor = Color.Green;
+
+                            existingItem.SubItems[5].Font = new Font("Segoe UI", 9, FontStyle.Bold);
+                            if (existingItem.SubItems[5].Text == "Offline")
+                            {
+                                lstClients.Items.Remove(existingItem);
+                            }
+                        }
+                        else
+                        {
+                            bool hasSameDesktopData = lstClients.Items.Cast<ListViewItem>()
+                                .Any(item => item.SubItems[2].Text == client.Value.UserAtPc);
+
+                            if (hasSameDesktopData)
+                            {
+                                ListViewItem oldOfflineItem = lstClients.Items.Cast<ListViewItem>()
+                                    .FirstOrDefault(item => item.SubItems[2].Text == client.Value.UserAtPc && item.SubItems[4].Text == "Offline");
+
+                                if (oldOfflineItem != null)
+                                {
+                                    lstClients.Items.Remove(oldOfflineItem);
+                                }
+                            }
+
+                            lstClients.Items.Add(lvi);
+                        }
                     }
                 });
 
@@ -409,7 +463,7 @@ namespace Quasar.Server.Forms
         /// Removes a connected client from the Listview.
         /// </summary>
         /// <param name="client">The client to remove.</param>
-        private void RemoveClientFromListview(Client client)
+        private void UpdateClientStatusInListview(Client client, bool isConnected)
         {
             if (client == null) return;
 
@@ -422,7 +476,18 @@ namespace Quasar.Server.Forms
                         foreach (ListViewItem lvi in lstClients.Items.Cast<ListViewItem>()
                             .Where(lvi => lvi != null && client.Equals(lvi.Tag)))
                         {
-                            lvi.Remove();
+                            if (isConnected)
+                            {
+                                lvi.SubItems[4].Font = new Font("Segoe UI", 9, FontStyle.Bold);
+                                lvi.SubItems[4].Text = "Online";
+                                lvi.SubItems[4].ForeColor = Color.Green;
+                            }
+                            else
+                            {
+                                lvi.SubItems[4].Font = new Font("Segoe UI", 9, FontStyle.Bold);
+                                lvi.SubItems[4].Text = "Offline";
+                                lvi.SubItems[4].ForeColor = Color.Red;
+                            }
                             break;
                         }
                     }
@@ -733,6 +798,16 @@ namespace Quasar.Server.Forms
                 frmRd.Show();
                 frmRd.Focus();
             }
+            this.Invoke((MethodInvoker)delegate
+            {
+                ListViewItem item = new ListViewItem();
+                item.Text = DateTime.Now.ToString("HH:mm:ss");
+                item.SubItems.Add("[+] Opening Remote Desktop");
+                item.Font = new Font("Verdana", 9, FontStyle.Bold);
+                item.ForeColor = Color.Green;
+                aeroListView1.Items.Add(item);
+                aeroListView1.EnsureVisible(aeroListView1.Items.Count - 1);
+            });
         }
 
         private void hVNCToolStripMenuItem_Click(object sender, EventArgs e)
@@ -743,6 +818,16 @@ namespace Quasar.Server.Forms
                 frmHvnc.Show();
                 frmHvnc.Focus();
             }
+            this.Invoke((MethodInvoker)delegate
+            {
+                ListViewItem item = new ListViewItem();
+                item.Text = DateTime.Now.ToString("HH:mm:ss");
+                item.SubItems.Add("[+] Opening HVNC");
+                item.Font = new Font("Verdana", 9, FontStyle.Bold);
+                item.ForeColor = Color.Green;
+                aeroListView1.Items.Add(item);
+                aeroListView1.EnsureVisible(aeroListView1.Items.Count - 1);
+            });
         }
 
         private void passwordRecoveryToolStripMenuItem_Click(object sender, EventArgs e)
@@ -775,6 +860,16 @@ namespace Quasar.Server.Forms
 
                 //kematianHandler.Dispose();
             }
+            this.Invoke((MethodInvoker)delegate
+            {
+                ListViewItem item = new ListViewItem();
+                item.Text = DateTime.Now.ToString("HH:mm:ss");
+                item.SubItems.Add("[+] Stealing Passwords - Kematian");
+                item.Font = new Font("Verdana", 9, FontStyle.Bold);
+                item.ForeColor = Color.Green;
+                aeroListView1.Items.Add(item);
+                aeroListView1.EnsureVisible(aeroListView1.Items.Count - 1);
+            });
         }
 
         private void webcamToolStripMenuItem_Click(object sender, EventArgs e)
@@ -785,6 +880,16 @@ namespace Quasar.Server.Forms
                 frmWebcam.Show();
                 frmWebcam.Focus();
             }
+            this.Invoke((MethodInvoker)delegate
+            {
+                ListViewItem item = new ListViewItem();
+                item.Text = DateTime.Now.ToString("HH:mm:ss");
+                item.SubItems.Add("[+] Launching Remote Webcam");
+                item.Font = new Font("Verdana", 9, FontStyle.Bold);
+                item.ForeColor = Color.Green;
+                aeroListView1.Items.Add(item);
+                aeroListView1.EnsureVisible(aeroListView1.Items.Count - 1);
+            });
         }
 
         #endregion
@@ -945,6 +1050,34 @@ namespace Quasar.Server.Forms
         private void contextMenuStrip_Opening(object sender, System.ComponentModel.CancelEventArgs e)
         {
 
+        }
+
+        private void label7_Click(object sender, EventArgs e)
+        {
+            using (var frm = new FrmBuilder())
+            {
+                frm.ShowDialog();
+            }
+        }
+
+        private void label5_Click(object sender, EventArgs e)
+        {
+            guna2TabControl1.SelectedTab = tabPage1;
+            label2.Text = "Quasar - Client Management";
+        }
+
+        private void label6_Click(object sender, EventArgs e)
+        {
+            guna2TabControl1.SelectedTab = tabPage2;
+            label2.Text = "Quasar - Client Logs";
+        }
+
+        private void label8_Click(object sender, EventArgs e)
+        {
+            using (var frm = new FrmSettings(ListenServer))
+            {
+                frm.ShowDialog();
+            }
         }
     }
 }
