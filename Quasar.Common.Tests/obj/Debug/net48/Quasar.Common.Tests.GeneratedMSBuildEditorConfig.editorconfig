@@ -1,0 +1,5 @@
+is_global = true
+build_property.RootNamespace = Quasar.Common.Tests
+build_property.ProjectDir = /home/kali/Desktop/QuasarModdded/Quasar-Modded-main/Quasar.Common.Tests/
+build_property.EnableComHosting = 
+build_property.EnableGeneratedComInterfaceComImportInterop = 

@@ -1,0 +1,137 @@
+{
+  "format": 1,
+  "restore": {
+    "/home/kali/Desktop/QuasarModdded/Quasar-Modded-main/Quasar.Common.Tests/Quasar.Common.Tests.csproj": {}
+  },
+  "projects": {
+    "/home/kali/Desktop/QuasarModdded/Quasar-Modded-main/Quasar.Common.Tests/Quasar.Common.Tests.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/home/kali/Desktop/QuasarModdded/Quasar-Modded-main/Quasar.Common.Tests/Quasar.Common.Tests.csproj",
+        "projectName": "Quasar.Common.Tests",
+        "projectPath": "/home/kali/Desktop/QuasarModdded/Quasar-Modded-main/Quasar.Common.Tests/Quasar.Common.Tests.csproj",
+        "packagesPath": "/home/kali/.nuget/packages/",
+        "outputPath": "/home/kali/Desktop/QuasarModdded/Quasar-Modded-main/Quasar.Common.Tests/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/home/kali/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net48"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net48": {
+            "targetAlias": "net48",
+            "projectReferences": {
+              "/home/kali/Desktop/QuasarModdded/Quasar-Modded-main/Quasar.Common/Quasar.Common.csproj": {
+                "projectPath": "/home/kali/Desktop/QuasarModdded/Quasar-Modded-main/Quasar.Common/Quasar.Common.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        }
+      },
+      "frameworks": {
+        "net48": {
+          "targetAlias": "net48",
+          "dependencies": {
+            "MSTest.TestAdapter": {
+              "target": "Package",
+              "version": "[2.2.10, )"
+            },
+            "MSTest.TestFramework": {
+              "target": "Package",
+              "version": "[2.2.10, )"
+            },
+            "Microsoft.NET.Test.Sdk": {
+              "target": "Package",
+              "version": "[17.3.2, )"
+            },
+            "Microsoft.NETFramework.ReferenceAssemblies": {
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[1.0.3, )",
+              "autoReferenced": true
+            },
+            "System.Resources.Extensions": {
+              "target": "Package",
+              "version": "[9.0.3, )"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/8.0.406/RuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "/home/kali/Desktop/QuasarModdded/Quasar-Modded-main/Quasar.Common/Quasar.Common.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/home/kali/Desktop/QuasarModdded/Quasar-Modded-main/Quasar.Common/Quasar.Common.csproj",
+        "projectName": "Quasar.Common",
+        "projectPath": "/home/kali/Desktop/QuasarModdded/Quasar-Modded-main/Quasar.Common/Quasar.Common.csproj",
+        "packagesPath": "/home/kali/.nuget/packages/",
+        "outputPath": "/home/kali/Desktop/QuasarModdded/Quasar-Modded-main/Quasar.Common/obj/",
+        "projectStyle": "PackageReference",
+        "crossTargeting": true,
+        "configFilePaths": [
+          "/home/kali/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net48"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net48": {
+            "targetAlias": "net48",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        }
+      },
+      "frameworks": {
+        "net48": {
+          "targetAlias": "net48",
+          "dependencies": {
+            "Microsoft.NETFramework.ReferenceAssemblies": {
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[1.0.3, )",
+              "autoReferenced": true
+            },
+            "System.Resources.Extensions": {
+              "target": "Package",
+              "version": "[9.0.3, )"
+            },
+            "protobuf-net": {
+              "target": "Package",
+              "version": "[2.4.8, )"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/8.0.406/RuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}

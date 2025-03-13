@@ -1,0 +1,26 @@
+{
+  "version": 2,
+  "dgSpecHash": "w+nAvFq5Dow=",
+  "success": true,
+  "projectFilePath": "/home/kali/Desktop/QuasarModdded/Quasar-Modded-main/Quasar.Common.Tests/Quasar.Common.Tests.csproj",
+  "expectedPackageFiles": [
+    "/home/kali/.nuget/packages/microsoft.bcl.hashcode/1.1.1/microsoft.bcl.hashcode.1.1.1.nupkg.sha512",
+    "/home/kali/.nuget/packages/microsoft.codecoverage/17.3.2/microsoft.codecoverage.17.3.2.nupkg.sha512",
+    "/home/kali/.nuget/packages/microsoft.net.test.sdk/17.3.2/microsoft.net.test.sdk.17.3.2.nupkg.sha512",
+    "/home/kali/.nuget/packages/microsoft.netframework.referenceassemblies/1.0.3/microsoft.netframework.referenceassemblies.1.0.3.nupkg.sha512",
+    "/home/kali/.nuget/packages/microsoft.netframework.referenceassemblies.net48/1.0.3/microsoft.netframework.referenceassemblies.net48.1.0.3.nupkg.sha512",
+    "/home/kali/.nuget/packages/mstest.testadapter/2.2.10/mstest.testadapter.2.2.10.nupkg.sha512",
+    "/home/kali/.nuget/packages/mstest.testframework/2.2.10/mstest.testframework.2.2.10.nupkg.sha512",
+    "/home/kali/.nuget/packages/protobuf-net/2.4.8/protobuf-net.2.4.8.nupkg.sha512",
+    "/home/kali/.nuget/packages/system.buffers/4.5.1/system.buffers.4.5.1.nupkg.sha512",
+    "/home/kali/.nuget/packages/system.collections.immutable/9.0.3/system.collections.immutable.9.0.3.nupkg.sha512",
+    "/home/kali/.nuget/packages/system.formats.nrbf/9.0.3/system.formats.nrbf.9.0.3.nupkg.sha512",
+    "/home/kali/.nuget/packages/system.memory/4.5.5/system.memory.4.5.5.nupkg.sha512",
+    "/home/kali/.nuget/packages/system.numerics.vectors/4.5.0/system.numerics.vectors.4.5.0.nupkg.sha512",
+    "/home/kali/.nuget/packages/system.reflection.metadata/9.0.3/system.reflection.metadata.9.0.3.nupkg.sha512",
+    "/home/kali/.nuget/packages/system.resources.extensions/9.0.3/system.resources.extensions.9.0.3.nupkg.sha512",
+    "/home/kali/.nuget/packages/system.runtime.compilerservices.unsafe/6.0.0/system.runtime.compilerservices.unsafe.6.0.0.nupkg.sha512",
+    "/home/kali/.nuget/packages/system.valuetuple/4.5.0/system.valuetuple.4.5.0.nupkg.sha512"
+  ],
+  "logs": []
+}
