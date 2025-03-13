@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ImportGroup Condition=" '$(ExcludeRestorePackageImports)' != 'true' ">
+    <Import Project="$(NuGetPackageRoot)system.resources.extensions/9.0.3/buildTransitive/net462/System.Resources.Extensions.targets" Condition="Exists('$(NuGetPackageRoot)system.resources.extensions/9.0.3/buildTransitive/net462/System.Resources.Extensions.targets')" />
+    <Import Project="$(NuGetPackageRoot)microsoft.netframework.referenceassemblies.net48/1.0.3/build/Microsoft.NETFramework.ReferenceAssemblies.net48.targets" Condition="Exists('$(NuGetPackageRoot)microsoft.netframework.referenceassemblies.net48/1.0.3/build/Microsoft.NETFramework.ReferenceAssemblies.net48.targets')" />
+    <Import Project="$(NuGetPackageRoot)mstest.testadapter/2.2.10/build/net46/MSTest.TestAdapter.targets" Condition="Exists('$(NuGetPackageRoot)mstest.testadapter/2.2.10/build/net46/MSTest.TestAdapter.targets')" />
+    <Import Project="$(NuGetPackageRoot)microsoft.codecoverage/17.3.2/build/netstandard1.0/Microsoft.CodeCoverage.targets" Condition="Exists('$(NuGetPackageRoot)microsoft.codecoverage/17.3.2/build/netstandard1.0/Microsoft.CodeCoverage.targets')" />
+    <Import Project="$(NuGetPackageRoot)microsoft.net.test.sdk/17.3.2/build/net45/Microsoft.NET.Test.Sdk.targets" Condition="Exists('$(NuGetPackageRoot)microsoft.net.test.sdk/17.3.2/build/net45/Microsoft.NET.Test.Sdk.targets')" />
+  </ImportGroup>
+</Project>

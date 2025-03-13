@@ -1,0 +1,15 @@
+/home/kali/Desktop/QuasarModdded/Quasar-Modded-main/bin/Debug/net48/Microsoft.VisualStudio.TestPlatform.MSTest.TestAdapter.dll
+/home/kali/Desktop/QuasarModdded/Quasar-Modded-main/bin/Debug/net48/Microsoft.VisualStudio.TestPlatform.MSTestAdapter.PlatformServices.Interface.dll
+/home/kali/Desktop/QuasarModdded/Quasar-Modded-main/bin/Debug/net48/Microsoft.VisualStudio.TestPlatform.MSTestAdapter.PlatformServices.dll
+/home/kali/Desktop/QuasarModdded/Quasar-Modded-main/bin/Debug/net48/Microsoft.TestPlatform.AdapterUtilities.dll
+/home/kali/Desktop/QuasarModdded/Quasar-Modded-main/bin/Debug/net48/Quasar.Common.Tests.dll.config
+/home/kali/Desktop/QuasarModdded/Quasar-Modded-main/bin/Debug/net48/Quasar.Common.Tests.dll
+/home/kali/Desktop/QuasarModdded/Quasar-Modded-main/bin/Debug/net48/Quasar.Common.Tests.pdb
+/home/kali/Desktop/QuasarModdded/Quasar-Modded-main/Quasar.Common.Tests/obj/Debug/net48/Quasar.Common.Tests.csproj.AssemblyReference.cache
+/home/kali/Desktop/QuasarModdded/Quasar-Modded-main/Quasar.Common.Tests/obj/Debug/net48/Quasar.Common.Tests.csproj.SuggestedBindingRedirects.cache
+/home/kali/Desktop/QuasarModdded/Quasar-Modded-main/Quasar.Common.Tests/obj/Debug/net48/Quasar.Common.Tests.dll.config
+/home/kali/Desktop/QuasarModdded/Quasar-Modded-main/Quasar.Common.Tests/obj/Debug/net48/Quasar.Common.Tests.GeneratedMSBuildEditorConfig.editorconfig
+/home/kali/Desktop/QuasarModdded/Quasar-Modded-main/Quasar.Common.Tests/obj/Debug/net48/Quasar.Common.Tests.csproj.CoreCompileInputs.cache
+/home/kali/Desktop/QuasarModdded/Quasar-Modded-main/Quasar.Common.Tests/obj/Debug/net48/Quasar.C.F62C16CF.Up2Date
+/home/kali/Desktop/QuasarModdded/Quasar-Modded-main/Quasar.Common.Tests/obj/Debug/net48/Quasar.Common.Tests.dll
+/home/kali/Desktop/QuasarModdded/Quasar-Modded-main/Quasar.Common.Tests/obj/Debug/net48/Quasar.Common.Tests.pdb
