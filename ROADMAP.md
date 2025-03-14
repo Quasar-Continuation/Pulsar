@@ -9,6 +9,8 @@ To open up the way for Quasar clients in different programming languages the com
 ## Cross-platform support
 A long-term goal is to support operating systems such as MacOS and Linux. The new .NET Core framework will help achieve this goal.
 
+### This has already been achieved partically for the server. Client will be a little different likely however havent looked. ~ 0XC7R
+
 ## Command line (CLI) version of the server
 It should be possible to use the server as a simple CLI tool to accept and forward (proxy) connections to other servers.
 
@@ -23,11 +25,6 @@ Currently the client is installed on a per-user basis and this makes it unflexib
 
 ## Basic client GUI
 Add a basic GUI to the client to allow the user at any time to check the status if a specific feature is active. Additionally it can show a notification when the client gets installed or when someone requests permission to use remote desktop (similar to teamviewer).
-
-# 0XC7R Notes
-
-# Linux Client Support
-Add support for Linux machines
 
 # KDOT NOTES
 

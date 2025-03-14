@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Windows.Forms;
 using System.Xml;
 using System.Xml.XPath;
@@ -14,15 +15,34 @@ namespace Quasar.Server.Models
 
         private static readonly string isDarkMode = _isDarkMode().ToString();
 
+        public static bool DarkMode
+        {
+            get
+            {
+                return bool.Parse(ReadValueSafe("DarkMode", isDarkMode));
+            }
+            set
+            {
+                WriteValue("DarkMode", value.ToString());
+            }
+        }
+
         private static bool _isDarkMode()
         {
-            int res = -1;
             try
             {
-                res = (int)Microsoft.Win32.Registry.GetValue("HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", "AppsUseLightTheme", -1);
+                return Settings.DarkMode;
+                // 0XC7R
+                // FUCK YOU whoever used this shit its gay. this just disregards linux support.
+                //(int)Microsoft.Win32.Registry.GetValue("HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", "AppsUseLightTheme", -1);
             }
-            catch { }
+            catch
+            {
+                Console.WriteLine("Error retrieving Theme. If this is a linux system please ignore. Defaulted to true.");
+                return true;
+            }
 
+            /*
             if (res == 0)
             {
                 return true;
@@ -34,19 +54,7 @@ namespace Quasar.Server.Models
             else
             {
                 return false;
-            }
-        }
-
-        public static bool DarkMode
-        {
-            get
-            {
-                return bool.Parse(ReadValueSafe("DarkMode", isDarkMode));
-            }
-            set
-            {
-                WriteValue("DarkMode", value.ToString());
-            }
+            }*/
         }
 
         public static ushort ListenPort

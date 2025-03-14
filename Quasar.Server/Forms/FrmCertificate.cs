@@ -1,53 +1,107 @@
-﻿using Quasar.Server.Forms.DarkMode;
+﻿using Org.BouncyCastle.Crypto;
+using Org.BouncyCastle.Pkcs;
+using Org.BouncyCastle.X509;
+using Quasar.Server.Forms.DarkMode;
 using Quasar.Server.Helper;
 using Quasar.Server.Models;
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Security.Cryptography.X509Certificates;
 using System.Windows.Forms;
 
 namespace Quasar.Server.Forms
 {
     public partial class FrmCertificate : Form
     {
-        private X509Certificate2 _certificate;
+        private Org.BouncyCastle.X509.X509Certificate _certificate;
+        private AsymmetricKeyParameter _privateKey;
+
 
         public FrmCertificate()
         {
             InitializeComponent();
             DarkModeManager.ApplyDarkMode(this);
         }
-
-        private void SetCertificate(X509Certificate2 certificate)
+        private void SetCertificate(CertificateWithPrivateKey certWithKey)
         {
-            _certificate = certificate;
-            txtDetails.Text = _certificate.ToString(false);
+            if (certWithKey == null || certWithKey.Certificate == null)
+            {
+                throw new ArgumentNullException(nameof(certWithKey), "Certificate cannot be null.");
+            }
+
+            _certificate = certWithKey.Certificate; // Store the certificate
+            _privateKey = certWithKey.PrivateKey; // Store the private key
+            txtDetails.Text = _certificate.ToString();
             btnSave.Enabled = true;
         }
 
         private void btnCreate_Click(object sender, EventArgs e)
         {
-            SetCertificate(CertificateHelper.CreateCertificateAuthority("Mod Server", 4096));
+            try
+            {
+                // Create the certificate authority and get the certificate with the private key
+                var certWithKey = CertificateHelper.CreateCertificateAuthority("Mod Server", 4096);
+
+                // Pass the entire CertificateWithPrivateKey object to the SetCertificate method
+                SetCertificate(certWithKey);
+            }
+            catch (Exception ex)
+            {
+                // Handle exceptions and provide feedback to the user
+                MessageBox.Show(this, $"Error creating certificate: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
+
+
+
 
         private void btnImport_Click(object sender, EventArgs e)
         {
             using (var ofd = new OpenFileDialog())
             {
                 ofd.CheckFileExists = true;
-                ofd.Filter = "*.p12|*.p12";
+                ofd.Filter = "PKCS#12 Files (*.p12)|*.p12";
                 ofd.Multiselect = false;
                 ofd.InitialDirectory = Application.StartupPath;
+
                 if (ofd.ShowDialog(this) == DialogResult.OK)
                 {
                     try
                     {
-                        SetCertificate(new X509Certificate2(ofd.FileName, "", X509KeyStorageFlags.Exportable));
+                        // Load the PKCS#12 file
+                        using (var stream = File.OpenRead(ofd.FileName))
+                        {
+                            var pkcs12Store = new Pkcs12Store();
+                            pkcs12Store.Load(stream, null); // You can provide a password if needed
+
+                            // Assuming you want to get the first certificate
+                            foreach (string alias in pkcs12Store.Aliases)
+                            {
+                                if (pkcs12Store.IsKeyEntry(alias))
+                                {
+                                    var keyEntry = pkcs12Store.GetKey(alias);
+                                    var certificateEntry = pkcs12Store.GetCertificate(alias);
+                                    var certificate = certificateEntry.Certificate;
+
+                                    // Check if the private key exists
+                                    if (keyEntry.Key != null)
+                                    {
+                                        // Set the certificate
+                                        SetCertificate((CertificateWithPrivateKey)certificate);
+                                        MessageBox.Show("Certificate imported successfully and has a private key.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                    }
+                                    else
+                                    {
+                                        MessageBox.Show("Certificate imported successfully but does not have a private key.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                                    }
+                                    break; // Exit after the first certificate
+                                }
+                            }
+                        }
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show(this, $"Error importing the certificate:\n{ex.Message}", "Save error",
+                        MessageBox.Show(this, $"Error importing the certificate:\n{ex.Message}", "Import Error",
                             MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
@@ -59,15 +113,31 @@ namespace Quasar.Server.Forms
             try
             {
                 if (_certificate == null)
-                    throw new ArgumentNullException();
+                    throw new ArgumentNullException(nameof(_certificate), "Certificate cannot be null.");
 
-                if (!_certificate.HasPrivateKey)
-                    throw new ArgumentException();
+                // Use the private key that was set in SetCertificate
+                if (_privateKey == null)
+                    throw new ArgumentException("The certificate does not have an associated private key.");
 
-                File.WriteAllBytes(Settings.CertificatePath, _certificate.Export(X509ContentType.Pkcs12));
+                // Create a new PKCS#12 store
+                var pkcs12Store = new Pkcs12Store();
+                string alias = "QuasarServerCert";
+
+                // Add the private key and certificate to the store
+                pkcs12Store.SetKeyEntry(alias, new AsymmetricKeyEntry(_privateKey), new[] { new X509CertificateEntry(_certificate) });
+
+                // Save the PKCS#12 file
+                using (var stream = File.Create(Settings.CertificatePath))
+                {
+                    // You can set a password for the PKCS#12 file
+                    char[] password = null;
+                    var secureRandom = new Org.BouncyCastle.Security.SecureRandom(); // Create a new SecureRandom instance
+
+                    pkcs12Store.Save(stream, password, secureRandom);
+                }
 
                 MessageBox.Show(this,
-                    "Please backup the certificate now. Loss of the certificate results in loosing all clients!",
+                    "Please backup the certificate now. Loss of the certificate results in losing all clients!",
                     "Certificate backup", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                 string argument = "/select, \"" + Settings.CertificatePath + "\"";
@@ -75,15 +145,14 @@ namespace Quasar.Server.Forms
 
                 this.DialogResult = DialogResult.OK;
             }
-            catch (ArgumentNullException)
+            catch (ArgumentNullException ex)
             {
-                MessageBox.Show(this, "Please create or import a certificate first.", "Save error",
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(this, ex.Message, "Save error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-            catch (ArgumentException)
+            catch (ArgumentException ex)
             {
                 MessageBox.Show(this,
-                    "The imported certificate has no associated private key. Please import a different certificate.",
+                    ex.Message,
                     "Save error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             catch (Exception)

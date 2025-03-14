@@ -1,9 +1,17 @@
-###############################################
-# Need dotnet to be installed on linux system #
-###############################################
+#!/bin/bash
 
-# If youre building this and you get the following error: 
-# error NU1301: Unable to load the service index for source https://api.nuget.org/v3/index.json.
-# Then disable any proxies/vpns youre using then build.
+#############################################################
+#                                                           #
+# ONLY RUN THIS IF YOU WANT TO COMPILE THE SERVER FOR LINUX #
+#                 NEED TO INSTALL WINE!                     #
+#############################################################
 
-dotnet clean && bash ./setup_Linux.sh && dotnet build Quasar.sln
+# Get the absolute path of the script
+SCRIPT_PATH=$(realpath "$0")
+
+# Get the parent directory of the script
+PARENT_DIR=$(dirname "$SCRIPT_PATH")
+
+dotnet clean && dotnet publish $PARENT_DIR/Quasar.sln -c Release -r linux-x64
+
+# bash ./setup_Linux.sh #You dont need to run this however it ***might*** resolve some random issues.

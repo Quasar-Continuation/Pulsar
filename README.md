@@ -8,6 +8,9 @@
 
 Quasar is a fast and light-weight remote administration tool coded in C#. The usage ranges from user support through day-to-day administrative work to employee monitoring. Providing high stability and an easy-to-use user interface, Quasar is the perfect remote administration solution for you.
 
+This mod also allows for the server to be ran/hosted on Linux based systems but also allows for client compilation too!
+Only con is that you cannot use the client on linux machines. Thanks to 0XC7R!
+
 Please check out the [Getting Started](https://github.com/Quasar-Continuation/Quasar-Modded/wiki/Getting-Started) guide.
 
 ---
@@ -26,7 +29,7 @@ Please check out the [Getting Started](https://github.com/Quasar-Continuation/Qu
 ---
 
 ## ✨ Features
-
+- **Linux Server support** (Run your server on a linux machine)
 - **TCP network stream** (IPv4 & IPv6 support)
 - **Fast network serialization** (Protocol Buffers)
 - **Encrypted communication** (TLS)
@@ -58,6 +61,7 @@ Please check out the [Getting Started](https://github.com/Quasar-Continuation/Qu
 
 - **.NET Framework 4.5.2 or higher**
 - **Supported operating systems** (32- and 64-bit):
+  - Linux Debian (Tested on only Kali linux however should work on other debians using wine like ubntu)
   - Windows 11
   - Windows Server 2022
   - Windows 10
@@ -84,6 +88,8 @@ Please check out the [Getting Started](https://github.com/Quasar-Continuation/Qu
 |--------------------------|--------------------|-----------------|
 | **Debug configuration**  | Testing            | The pre-defined [Settings.cs](/Quasar.Client/Config/Settings.cs) will be used. Edit this file before compiling the client. You can execute the client directly with the specified settings. |
 | **Release configuration**| Production         | Start `Quasar.exe` and use the client builder. |
+
+### For linux users. Please run the 
 
 ---
 

@@ -17,6 +17,11 @@ namespace Quasar.Server.Forms
         {
             this._listenServer = listenServer;
 
+            if (listenServer == null)
+            {
+                throw new ArgumentNullException(nameof(listenServer), "The listenServer cannot be null.");
+            }
+
             InitializeComponent();
 
             DarkModeManager.ApplyDarkMode(this);
