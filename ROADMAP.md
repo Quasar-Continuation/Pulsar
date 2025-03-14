@@ -24,6 +24,10 @@ Currently the client is installed on a per-user basis and this makes it unflexib
 ## Basic client GUI
 Add a basic GUI to the client to allow the user at any time to check the status if a specific feature is active. Additionally it can show a notification when the client gets installed or when someone requests permission to use remote desktop (similar to teamviewer).
 
+# 0XC7R Notes
+
+# Linux Client Support
+Add support for Linux machines
 
 # KDOT NOTES
 
