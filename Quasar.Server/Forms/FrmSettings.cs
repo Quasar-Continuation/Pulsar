@@ -2,6 +2,7 @@
 using Quasar.Server.Models;
 using Quasar.Server.Networking;
 using Quasar.Server.Utilities;
+using Quasar.Server.Forms.DiscordRPC; // Added for DiscordRPCManager
 using System;
 using System.Globalization;
 using System.Net.Sockets;
@@ -39,6 +40,7 @@ namespace Quasar.Server.Forms
             txtNoIPHost.Text = Settings.NoIPHost;
             txtNoIPUser.Text = Settings.NoIPUsername;
             txtNoIPPass.Text = Settings.NoIPPassword;
+            chkDiscordRPC.Checked = Settings.DiscordRPC; // Load Discord RPC setting
         }
 
         private ushort GetPortSafe()
@@ -114,6 +116,9 @@ namespace Quasar.Server.Forms
             Settings.NoIPHost = txtNoIPHost.Text;
             Settings.NoIPUsername = txtNoIPUser.Text;
             Settings.NoIPPassword = txtNoIPPass.Text;
+            Settings.DiscordRPC = chkDiscordRPC.Checked; // Save Discord RPC setting
+
+            DiscordRPCManager.ApplyDiscordRPC(this); // Apply RPC state on save
             this.Close();
         }
 
@@ -127,6 +132,13 @@ namespace Quasar.Server.Forms
         private void chkNoIPIntegration_CheckedChanged(object sender, EventArgs e)
         {
             NoIPControlHandler(chkNoIPIntegration.Checked);
+        }
+
+        private void chkDiscordRPC_CheckedChanged(object sender, EventArgs e)
+        {
+            Settings.DiscordRPC = chkDiscordRPC.Checked; // Update setting immediately
+            DiscordRPCManager.ApplyDiscordRPC(this);     // Apply RPC toggle in real-time
+            Console.WriteLine("Discord RPC toggled to: " + chkDiscordRPC.Checked);
         }
 
         private void ToggleListenerSettings(bool enabled)

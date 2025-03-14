@@ -2,15 +2,8 @@
 {
     partial class FrmSettings
     {
-        /// <summary>
-        /// Required designer variable.
-        /// </summary>
         private System.ComponentModel.IContainer components = null;
 
-        /// <summary>
-        /// Clean up any resources being used.
-        /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
             if (disposing && (components != null))
@@ -22,10 +15,6 @@
 
         #region Windows Form Designer generated code
 
-        /// <summary>
-        /// Required method for Designer support - do not modify
-        /// the contents of this method with the code editor.
-        /// </summary>
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FrmSettings));
@@ -48,12 +37,13 @@
             this.chkShowPassword = new System.Windows.Forms.CheckBox();
             this.chkIPv6Support = new System.Windows.Forms.CheckBox();
             this.chkDarkMode = new System.Windows.Forms.CheckBox();
+            this.chkDiscordRPC = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.ncPort)).BeginInit();
             this.SuspendLayout();
             // 
             // btnSave
             // 
-            this.btnSave.Location = new System.Drawing.Point(227, 298);
+            this.btnSave.Location = new System.Drawing.Point(227, 328);
             this.btnSave.Name = "btnSave";
             this.btnSave.Size = new System.Drawing.Size(75, 23);
             this.btnSave.TabIndex = 19;
@@ -73,29 +63,17 @@
             // ncPort
             // 
             this.ncPort.Location = new System.Drawing.Point(111, 7);
-            this.ncPort.Maximum = new decimal(new int[] {
-            65535,
-            0,
-            0,
-            0});
-            this.ncPort.Minimum = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
+            this.ncPort.Maximum = new decimal(new int[] { 65535, 0, 0, 0 });
+            this.ncPort.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
             this.ncPort.Name = "ncPort";
             this.ncPort.Size = new System.Drawing.Size(75, 22);
             this.ncPort.TabIndex = 1;
-            this.ncPort.Value = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
+            this.ncPort.Value = new decimal(new int[] { 1, 0, 0, 0 });
             // 
             // chkAutoListen
             // 
             this.chkAutoListen.AutoSize = true;
-            this.chkAutoListen.Location = new System.Drawing.Point(12, 81);
+            this.chkAutoListen.Location = new System.Drawing.Point(12, 111);
             this.chkAutoListen.Name = "chkAutoListen";
             this.chkAutoListen.Size = new System.Drawing.Size(222, 17);
             this.chkAutoListen.TabIndex = 6;
@@ -105,7 +83,7 @@
             // chkPopup
             // 
             this.chkPopup.AutoSize = true;
-            this.chkPopup.Location = new System.Drawing.Point(12, 104);
+            this.chkPopup.Location = new System.Drawing.Point(12, 134);
             this.chkPopup.Name = "chkPopup";
             this.chkPopup.Size = new System.Drawing.Size(259, 17);
             this.chkPopup.TabIndex = 7;
@@ -124,7 +102,7 @@
             // 
             // btnCancel
             // 
-            this.btnCancel.Location = new System.Drawing.Point(146, 298);
+            this.btnCancel.Location = new System.Drawing.Point(146, 328);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(75, 23);
             this.btnCancel.TabIndex = 18;
@@ -135,7 +113,7 @@
             // chkUseUpnp
             // 
             this.chkUseUpnp.AutoSize = true;
-            this.chkUseUpnp.Location = new System.Drawing.Point(12, 127);
+            this.chkUseUpnp.Location = new System.Drawing.Point(12, 157);
             this.chkUseUpnp.Name = "chkUseUpnp";
             this.chkUseUpnp.Size = new System.Drawing.Size(250, 17);
             this.chkUseUpnp.TabIndex = 8;
@@ -145,7 +123,7 @@
             // chkShowTooltip
             // 
             this.chkShowTooltip.AutoSize = true;
-            this.chkShowTooltip.Location = new System.Drawing.Point(12, 150);
+            this.chkShowTooltip.Location = new System.Drawing.Point(12, 180);
             this.chkShowTooltip.Name = "chkShowTooltip";
             this.chkShowTooltip.Size = new System.Drawing.Size(268, 17);
             this.chkShowTooltip.TabIndex = 9;
@@ -155,7 +133,7 @@
             // chkNoIPIntegration
             // 
             this.chkNoIPIntegration.AutoSize = true;
-            this.chkNoIPIntegration.Location = new System.Drawing.Point(12, 190);
+            this.chkNoIPIntegration.Location = new System.Drawing.Point(12, 220);
             this.chkNoIPIntegration.Name = "chkNoIPIntegration";
             this.chkNoIPIntegration.Size = new System.Drawing.Size(187, 17);
             this.chkNoIPIntegration.TabIndex = 10;
@@ -167,7 +145,7 @@
             // 
             this.lblHost.AutoSize = true;
             this.lblHost.Enabled = false;
-            this.lblHost.Location = new System.Drawing.Point(30, 216);
+            this.lblHost.Location = new System.Drawing.Point(30, 246);
             this.lblHost.Name = "lblHost";
             this.lblHost.Size = new System.Drawing.Size(34, 13);
             this.lblHost.TabIndex = 11;
@@ -177,7 +155,7 @@
             // 
             this.lblPass.AutoSize = true;
             this.lblPass.Enabled = false;
-            this.lblPass.Location = new System.Drawing.Point(167, 244);
+            this.lblPass.Location = new System.Drawing.Point(167, 274);
             this.lblPass.Name = "lblPass";
             this.lblPass.Size = new System.Drawing.Size(32, 13);
             this.lblPass.TabIndex = 15;
@@ -187,7 +165,7 @@
             // 
             this.lblUser.AutoSize = true;
             this.lblUser.Enabled = false;
-            this.lblUser.Location = new System.Drawing.Point(30, 244);
+            this.lblUser.Location = new System.Drawing.Point(30, 274);
             this.lblUser.Name = "lblUser";
             this.lblUser.Size = new System.Drawing.Size(32, 13);
             this.lblUser.TabIndex = 13;
@@ -196,7 +174,7 @@
             // txtNoIPPass
             // 
             this.txtNoIPPass.Enabled = false;
-            this.txtNoIPPass.Location = new System.Drawing.Point(199, 241);
+            this.txtNoIPPass.Location = new System.Drawing.Point(199, 271);
             this.txtNoIPPass.Name = "txtNoIPPass";
             this.txtNoIPPass.Size = new System.Drawing.Size(100, 22);
             this.txtNoIPPass.TabIndex = 16;
@@ -204,7 +182,7 @@
             // txtNoIPUser
             // 
             this.txtNoIPUser.Enabled = false;
-            this.txtNoIPUser.Location = new System.Drawing.Point(70, 241);
+            this.txtNoIPUser.Location = new System.Drawing.Point(70, 271);
             this.txtNoIPUser.Name = "txtNoIPUser";
             this.txtNoIPUser.Size = new System.Drawing.Size(91, 22);
             this.txtNoIPUser.TabIndex = 14;
@@ -212,7 +190,7 @@
             // txtNoIPHost
             // 
             this.txtNoIPHost.Enabled = false;
-            this.txtNoIPHost.Location = new System.Drawing.Point(70, 213);
+            this.txtNoIPHost.Location = new System.Drawing.Point(70, 243);
             this.txtNoIPHost.Name = "txtNoIPHost";
             this.txtNoIPHost.Size = new System.Drawing.Size(229, 22);
             this.txtNoIPHost.TabIndex = 12;
@@ -221,7 +199,7 @@
             // 
             this.chkShowPassword.AutoSize = true;
             this.chkShowPassword.Enabled = false;
-            this.chkShowPassword.Location = new System.Drawing.Point(192, 269);
+            this.chkShowPassword.Location = new System.Drawing.Point(192, 299);
             this.chkShowPassword.Name = "chkShowPassword";
             this.chkShowPassword.Size = new System.Drawing.Size(107, 17);
             this.chkShowPassword.TabIndex = 17;
@@ -232,7 +210,7 @@
             // chkIPv6Support
             // 
             this.chkIPv6Support.AutoSize = true;
-            this.chkIPv6Support.Location = new System.Drawing.Point(12, 58);
+            this.chkIPv6Support.Location = new System.Drawing.Point(12, 88);
             this.chkIPv6Support.Name = "chkIPv6Support";
             this.chkIPv6Support.Size = new System.Drawing.Size(128, 17);
             this.chkIPv6Support.TabIndex = 5;
@@ -244,18 +222,32 @@
             this.chkDarkMode.AutoSize = true;
             this.chkDarkMode.Checked = true;
             this.chkDarkMode.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkDarkMode.Location = new System.Drawing.Point(12, 35);
+            this.chkDarkMode.Location = new System.Drawing.Point(12, 65);
             this.chkDarkMode.Name = "chkDarkMode";
             this.chkDarkMode.Size = new System.Drawing.Size(83, 17);
             this.chkDarkMode.TabIndex = 20;
             this.chkDarkMode.Text = "Dark Mode";
             this.chkDarkMode.UseVisualStyleBackColor = true;
             // 
+            // chkDiscordRPC
+            // 
+            this.chkDiscordRPC.AutoSize = true;
+            this.chkDiscordRPC.Checked = true;
+            this.chkDiscordRPC.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkDiscordRPC.Location = new System.Drawing.Point(12, 42);
+            this.chkDiscordRPC.Name = "chkDiscordRPC";
+            this.chkDiscordRPC.Size = new System.Drawing.Size(83, 17);
+            this.chkDiscordRPC.TabIndex = 21;
+            this.chkDiscordRPC.Text = "Discord RPC";
+            this.chkDiscordRPC.UseVisualStyleBackColor = true;
+            this.chkDiscordRPC.CheckedChanged += new System.EventHandler(this.chkDiscordRPC_CheckedChanged);
+            // 
             // FrmSettings
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
-            this.ClientSize = new System.Drawing.Size(314, 333);
+            this.ClientSize = new System.Drawing.Size(314, 363);
+            this.Controls.Add(this.chkDiscordRPC);
             this.Controls.Add(this.chkDarkMode);
             this.Controls.Add(this.chkIPv6Support);
             this.Controls.Add(this.chkShowPassword);
@@ -287,7 +279,6 @@
             ((System.ComponentModel.ISupportInitialize)(this.ncPort)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
-
         }
 
         #endregion
@@ -311,5 +302,6 @@
         private System.Windows.Forms.CheckBox chkShowPassword;
         private System.Windows.Forms.CheckBox chkIPv6Support;
         private System.Windows.Forms.CheckBox chkDarkMode;
+        private System.Windows.Forms.CheckBox chkDiscordRPC;
     }
 }
