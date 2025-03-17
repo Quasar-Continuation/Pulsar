@@ -22,6 +22,7 @@ using System.Threading;
 using System.Windows.Forms;
 using Quasar.Common.Messages.QuickCommands;
 using System.IO;
+using System.Drawing;
 
 namespace Quasar.Server.Forms
 {
@@ -197,11 +198,11 @@ namespace Quasar.Server.Forms
         private void FrmMain_Load(object sender, EventArgs e)
         {
             EventLog("Welcome to Quasar Continuation.", "info");
-            //SetEqualColumnWidths();
             InitializeServer();
             AutostartListening();
             EventLogVisability();
             notifyIcon.Visible = false;
+            Favorites.LoadFavorites();
         }
 
         private void FrmMain_FormClosing(object sender, FormClosingEventArgs e)
@@ -417,6 +418,7 @@ namespace Quasar.Server.Forms
                         {
                             _processingClientConnections = false;
                         }
+                        RefreshStarButtons();
                         return;
                     }
 
@@ -438,6 +440,42 @@ namespace Quasar.Server.Forms
                             break;
                     }
                 }
+            }
+        }
+
+        private void RefreshStarButtons()
+        {
+            try
+            {
+                this.Invoke((MethodInvoker)delegate
+                {
+                    lock (_lockClients)
+                    {
+                        foreach (ListViewItem item in lstClients.Items)
+                        {
+                            if (item.Tag is Client client)
+                            {
+                                bool found = false;
+                                foreach (Control control in lstClients.Controls)
+                                {
+                                    if (control is Button button && button.Tag is Client buttonClient && buttonClient.Equals(client))
+                                    {
+                                        found = true;
+                                        break;
+                                    }
+                                }
+                                
+                                if (!found)
+                                {
+                                    AddStarButton(item, client);
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            catch (InvalidOperationException)
+            {
             }
         }
 
@@ -545,6 +583,8 @@ namespace Quasar.Server.Forms
                     lock (_lockClients)
                     {
                         lstClients.Items.Add(lvi);
+                        AddStarButton(lvi, client);
+                        SortClientsByFavoriteStatus();
                     }
                 });
                 EventLog(client.Value.UserAtPc + " Has connected.", "normal");
@@ -553,6 +593,104 @@ namespace Quasar.Server.Forms
             catch (InvalidOperationException)
             {
             }
+        }
+
+        private void AddStarButton(ListViewItem item, Client client)
+        {
+            var starButton = new Button
+            {
+                Size = new System.Drawing.Size(20, 20),
+                FlatStyle = FlatStyle.Flat,
+                Tag = client,
+                BackColor = Color.Transparent,
+                FlatAppearance = { BorderSize = 0 },
+                Cursor = Cursors.Hand
+            };
+
+            starButton.Image = Favorites.IsFavorite(client.EndPoint.Address.ToString()) ? 
+                Properties.Resources.star_filled : Properties.Resources.star_empty;
+            
+            starButton.Click += StarButton_Click;
+            
+            lstClients.Controls.Add(starButton);
+            
+            UpdateStarButtonPosition(starButton, item);
+            starButton.BringToFront();
+        }
+
+        private void UpdateStarButtonPosition(Control starControl, ListViewItem item)
+        {
+            if (item == null || starControl == null) return;
+
+            var bounds = item.Bounds;
+            starControl.Location = new Point(lstClients.Width - 25, bounds.Top + (bounds.Height - starControl.Height) / 2);
+        }
+
+        private void StarButton_Click(object sender, EventArgs e)
+        {
+            if (sender is Control starControl && starControl.Tag is Client client)
+            {
+                Favorites.ToggleFavorite(client.EndPoint.Address.ToString());
+                
+                if (starControl is Button button)
+                {
+                    button.Image = Favorites.IsFavorite(client.EndPoint.Address.ToString()) ? 
+                        Properties.Resources.star_filled : Properties.Resources.star_empty;
+                }
+                
+                SortClientsByFavoriteStatus();
+            }
+        }
+
+        private void SortClientsByFavoriteStatus()
+        {
+            lstClients.BeginUpdate();
+            
+            // Remove all star buttons first
+            var controlsToRemove = lstClients.Controls.Cast<Control>()
+                .Where(c => c is Button && c.Tag is Client)
+                .ToList();
+            
+            foreach (var control in controlsToRemove)
+            {
+                lstClients.Controls.Remove(control);
+            }
+            
+            // Separate favorited and unfavorited clients
+            List<ListViewItem> favoritedItems = new List<ListViewItem>();
+            List<ListViewItem> unfavoritedItems = new List<ListViewItem>();
+            
+            foreach (ListViewItem item in lstClients.Items)
+            {
+                if (item.Tag is Client client)
+                {
+                    if (Favorites.IsFavorite(client.EndPoint.Address.ToString()))
+                        favoritedItems.Add(item);
+                    else
+                        unfavoritedItems.Add(item);
+                }
+            }
+            
+            // Clear the ListView
+            lstClients.Items.Clear();
+            
+            // Add favorited items first, then unfavorited
+            foreach (var item in favoritedItems)
+                lstClients.Items.Add(item);
+            
+            foreach (var item in unfavoritedItems)
+                lstClients.Items.Add(item);
+            
+            // Add star buttons back for each client in the correct order
+            foreach (ListViewItem item in lstClients.Items)
+            {
+                if (item.Tag is Client client)
+                {
+                    AddStarButton(item, client);
+                }
+            }
+            
+            lstClients.EndUpdate();
         }
 
         /// <summary>
@@ -572,6 +710,16 @@ namespace Quasar.Server.Forms
                         foreach (ListViewItem lvi in lstClients.Items.Cast<ListViewItem>()
                             .Where(lvi => lvi != null && client.Equals(lvi.Tag)))
                         {
+                            // Remove star button
+                            var controlsToRemove = lstClients.Controls.Cast<Control>().Where(
+                                c => c.Tag is Client buttonClient && buttonClient.Equals(client)).ToList();
+                            
+                            foreach (var control in controlsToRemove)
+                            {
+                                lstClients.Controls.Remove(control);
+                                control.Dispose();
+                            }
+                            
                             lvi.Remove();
                             break;
                         }
@@ -1130,6 +1278,7 @@ namespace Quasar.Server.Forms
         private void clientsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             MainTabControl.SelectTab(tabPage1);
+            RefreshStarButtons();
         }
 
         private void notificationCentreToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1369,5 +1518,83 @@ namespace Quasar.Server.Forms
         {
           
         }
+
+        private void lstClients_ColumnWidthChanging(object sender, ColumnWidthChangingEventArgs e)
+        {
+            // 9 is the index of the account type column in the listview
+            if (e.ColumnIndex == 9)
+            {
+                e.Cancel = true;
+                e.NewWidth = this.hAccountType.Width;
+            }
+
+        }
+
+        private void MainTabControl_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (MainTabControl.SelectedTab == tabPage1)
+            {
+                RefreshStarButtons();
+                SortClientsByFavoriteStatus();
+            }
+        }
+
+        private void lstClients_DrawItem(object sender, DrawListViewItemEventArgs e)
+        {
+            e.DrawDefault = true;
+        }
+
+        private void lstClients_Resize(object sender, EventArgs e)
+        {
+            UpdateAllStarPositions();
+        }
+
+        private void UpdateAllStarPositions()
+        {
+            this.BeginInvoke(new Action(() =>
+            {
+                // Clean up any star controls that don't have matching clients
+                List<Control> starsToRemove = new List<Control>();
+                foreach (Control control in this.Controls)
+                {
+                    if ((control is PictureBox) && control.Tag is Client starClient)
+                    {
+                        bool found = false;
+                        foreach (ListViewItem item in lstClients.Items)
+                        {
+                            if (item.Tag is Client itemClient && itemClient.Equals(starClient))
+                            {
+                                UpdateStarButtonPosition(control, item);
+                                found = true;
+                                break;
+                            }
+                        }
+
+                        if (!found)
+                        {
+                            starsToRemove.Add(control);
+                        }
+                    }
+                }
+
+                // Remove stars for clients that no longer exist
+                foreach (var control in starsToRemove)
+                {
+                    this.Controls.Remove(control);
+                    control.Dispose();
+                }
+            }));
+        }
+
+        private void lstClients_Scroll(object sender, EventArgs e)
+        {
+            UpdateAllStarPositions();
+        }
+
+        private void lstClients_ColumnWidthChanged(object sender, ColumnWidthChangedEventArgs e)
+        {
+            UpdateAllStarPositions();
+        }
+
     }
 }

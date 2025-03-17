@@ -153,6 +153,11 @@
 		<Compile Update="Forms\FrmRemoteExecution.Designer.cs">
 			<DependentUpon>FrmRemoteExecution.cs</DependentUpon>
 		</Compile>
+		<Compile Update="Properties\Resources.Designer.cs">
+		  <DesignTime>True</DesignTime>
+		  <AutoGen>True</AutoGen>
+		  <DependentUpon>Resources.resx</DependentUpon>
+		</Compile>
 		<EmbeddedResource Update="Forms\FrmAbout.resx">
 			<DependentUpon>FrmAbout.cs</DependentUpon>
 		</EmbeddedResource>
@@ -236,16 +241,6 @@
 			<Generator>SettingsSingleFileGenerator</Generator>
 			<LastGenOutput>Settings.Designer.cs</LastGenOutput>
 		</None>
-		<Compile Update="Properties\Resources.Designer.cs">
-			<AutoGen>True</AutoGen>
-			<DesignTime>True</DesignTime>
-			<DependentUpon>Resources.resx</DependentUpon>
-		</Compile>
-		<Compile Update="Properties\Settings.Designer.cs">
-			<AutoGen>True</AutoGen>
-			<DependentUpon>Settings.settings</DependentUpon>
-			<DesignTimeSharedInput>True</DesignTimeSharedInput>
-		</Compile>
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\Quasar.Common\Quasar.Common.csproj">

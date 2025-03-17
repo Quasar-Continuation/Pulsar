@@ -336,4 +336,10 @@ SOFTWARE.</value>
   <data name="webcam" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\webcam.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="star_empty" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Images\star_empty.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="star_filled" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Images\star_filled.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
 </root>
