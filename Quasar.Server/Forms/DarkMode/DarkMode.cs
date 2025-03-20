@@ -1,4 +1,5 @@
 ﻿using Microsoft.Win32;
+using Quasar.Server.Controls;
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -468,7 +469,14 @@ namespace DarkModeForms
             SetWindowTheme(control.Handle, Mode, null); //<- Attempts to apply Dark Mode using Win32 API if available.
 
             control.GetType().GetProperty("BackColor")?.SetValue(control, OScolors.Control);
-            control.GetType().GetProperty("ForeColor")?.SetValue(control, OScolors.TextActive);
+
+            // check the forecolor for the bs
+            var currentForeColor = (Color)control.GetType().GetProperty("ForeColor")?.GetValue(control);
+            Debug.WriteLine(currentForeColor);
+            if (currentForeColor == Color.Black || currentForeColor == Color.White || currentForeColor == SystemColors.ControlText || currentForeColor == Color.FromArgb(255, 176, 176, 176) || currentForeColor == SystemColors.WindowText)
+            {
+                control.GetType().GetProperty("ForeColor")?.SetValue(control, OScolors.TextActive);
+            }
 
             /* Here we Finetune individual Controls  */
             if (control is Label lbl)
@@ -1494,11 +1502,17 @@ namespace DarkModeForms
         {
             if (e.Item.Enabled)
             {
-                e.TextColor = MyColors.TextActive;
+                if (e.TextColor == Color.Black || e.TextColor == Color.White)
+                {
+                    e.TextColor = MyColors.TextActive;
+                }
             }
             else
             {
-                e.TextColor = MyColors.TextInactive;
+                if (e.TextColor == Color.Black || e.TextColor == Color.White)
+                {
+                    e.TextColor = MyColors.TextInactive;
+                }
             }
             base.OnRenderItemText(e);
         }

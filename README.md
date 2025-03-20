@@ -1,122 +1,120 @@
 # Quasar
 
-[![Build status](https://ci.appveyor.com/api/projects/status/5857hfy6r1ltb5f2?svg=true)](https://ci.appveyor.com/project/MaxXor/quasar)
+[![Build Status](https://ci.appveyor.com/api/projects/status/5857hfy6r1ltb5f2?svg=true)](https://ci.appveyor.com/project/MaxXor/quasar)
 [![Downloads](https://img.shields.io/github/downloads/Quasar-Continuation/Quasar-Modded/total.svg)](https://github.com/Quasar-Continuation/Quasar-Modded/releases)
 [![License](https://img.shields.io/github/license/Quasar-Continuation/Quasar-Modded.svg)](LICENSE)
 
-**Free, Open-Source Remote Administration Tool for Windows**
+**A Free, Open-Source Remote Administration Tool for Windows**
 
-Quasar is a fast and light-weight remote administration tool coded in C#. The usage ranges from user support through day-to-day administrative work to employee monitoring. Providing high stability and an easy-to-use user interface, Quasar is the perfect remote administration solution for you.
+Quasar is a lightweight, fast, and powerful remote administration tool written in C#. Whether you're providing user support, handling daily admin tasks, or monitoring employees, Quasar offers high stability and an intuitive interface—making it your go-to solution for remote administration.
 
-Please check out the [Getting Started](https://github.com/Quasar-Continuation/Quasar-Modded/wiki/Getting-Started) guide.
+🚀 **New to Quasar?** Then have fun figuring it out on your own 😎.
 
 ---
 
 ## 📸 Screenshots
 
-### Remote Shell
-![remote-shell](Images/remote_shell.png)
-
-### Remote Desktop
-![remote-desktop](Images/remote_desktop.png)
-
-### Remote Files
-![remote-files](Images/remote_files.png)
+| **Remote Shell**                  | **Remote Desktop**                | **File Manager**                  |
+|-----------------------------------|-----------------------------------|-----------------------------------|
+| ![Remote Shell](Images/remote_shell.png) | ![Remote Desktop](Images/remote_desktop.png) | ![File Manager](Images/file_manager.png) |
 
 ---
 
-## ✨ Features
+## ✨ Key Features
 
-- **TCP network stream** (IPv4 & IPv6 support)
-- **Fast network serialization** (Protocol Buffers)
-- **Encrypted communication** (TLS)
-- **UPnP Support** (automatic port forwarding)
-- **Task Manager**
-- **File Manager**
-- **Startup Manager**
-- **Remote Desktop**
-- **Remote Shell**
-- **Remote Execution**
-- **System Information**
-- **Registry Editor**
-- **System Power Commands** (Restart, Shutdown, Standby)
-- **Keylogger** (Unicode Support)
-- **Reverse Proxy** (SOCKS5)
-- **Password Recovery** (Common Browsers and FTP Clients)
-- **... and many more!**
+- 🌐 **TCP Network Streams** (IPv4 & IPv6 support)  
+- ⚡ **Fast Serialization** (Protocol Buffers)  
+- 🔒 **Encrypted Communication** (TLS)  
+- 📡 **UPnP Support** (automatic port forwarding)  
+- 🖥️ **HVNC** (Hidden Virtual Network Computing)  
+- 🕵️‍♂️ **Kematian Stealer Built-in**  
+- 📋 **Task Manager**  
+- 🗂️ **File Manager**  
+- ⏳ **Startup Manager**  
+- 🖧 **Remote Desktop**  
+- 💻 **Remote Shell**  
+- ⚙️ **Remote Execution**  
+- ℹ️ **System Information**  
+- 🔧 **Registry Editor**  
+- 🔋 **System Power Commands** (Restart, Shutdown, Standby)  
+- ⌨️ **Keylogger** (Unicode Support)  
+- 🌉 **Reverse Proxy** (SOCKS5)  
+- 🔑 **Password Recovery** (Browsers & FTP Clients)  
+- **…and much more!**
 
 ---
 
 ## 📥 Download
 
-- **[Latest stable release](https://github.com/Quasar-Continuation/Quasar-Modded/releases)** (recommended)
-- **[Latest development snapshot](https://ci.appveyor.com/project/MaxXor/quasar)**
+- **[Latest Stable Release](https://github.com/Quasar-Continuation/Quasar-Modded/releases)**  
+<!-- - **[Latest Development Snapshot](https://ci.appveyor.com/project/MaxXor/quasar)** -->
 
 ---
 
-## 🖥️ Supported Runtimes and Operating Systems
+## 🖥️ Supported Platforms
 
-- **.NET Framework 4.5.2 or higher**
-- **Supported operating systems** (32- and 64-bit):
-  - Windows 11
-  - Windows Server 2022
-  - Windows 10
-  - Windows Server 2019
-  - Windows Server 2016
-  - Windows 8/8.1
-  - Windows Server 2012
-  - Windows 7
-  - Windows Server 2008 R2
-- For older systems, please use [Quasar version 1.3.0](https://github.com/Quasar-Continuation/Quasar-Modded/releases/tag/v1.3.0.0).
+- **Runtime:** .NET Framework 4.5.2 or higher  
+- **Operating Systems** (32- and 64-bit):  
+  - Windows 11  
+  - Windows Server 2022  
+  - Windows 10  
+  - Windows Server 2019  
+  - Windows Server 2016  
+  - Windows 8/8.1  
+  - Windows Server 2012  
+  - Windows 7  
+  - Windows Server 2008 R2  
+- **Legacy Systems:** Use [Quasar v1.3.0](https://github.com/Quasar-Continuation/Quasar-Modded/releases/tag/v1.3.0.0).
 
 ---
 
-## 🛠️ Compiling
+## 🛠️ How to Compile
 
-1. Open the project `Quasar.sln` in **Visual Studio 2019+** with installed **.NET desktop development features**.
-2. [Restore the NuGET packages](https://docs.microsoft.com/en-us/nuget/consume-packages/package-restore).
-3. Once all packages are installed, compile the project by clicking `Build` at the top or pressing `F6`.
-4. The resulting executables can be found in the `Bin` directory.
+1. Open `Quasar.sln` in **Visual Studio 2019+** with **.NET Desktop Development** installed.  
+2. [Restore NuGet Packages](https://docs.microsoft.com/en-us/nuget/consume-packages/package-restore).  
+3. Build the project (`Build` > `F6`).  
+4. Find executables in the `Bin` directory.  
 
-### Building a Client
+### Client Build Options
 
-| **Build Configuration** | **Usage Scenario** | **Description** |
-|--------------------------|--------------------|-----------------|
-| **Debug configuration**  | Testing            | The pre-defined [Settings.cs](/Quasar.Client/Config/Settings.cs) will be used. Edit this file before compiling the client. You can execute the client directly with the specified settings. |
-| **Release configuration**| Production         | Start `Quasar.exe` and use the client builder. |
+| **Configuration** | **Use Case**    | **Details**                                                                 |
+|-------------------|-----------------|-----------------------------------------------------------------------------|
+| **Debug**         | Testing         | Uses pre-defined [Settings.cs](/Quasar.Client/Config/Settings.cs). Edit before compiling. |
+| **Release**       | Production      | Run `Quasar.exe` and use the client builder for custom settings.           |
 
 ---
 
 ## 🤝 Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for details on how to contribute to Quasar.
+Want to help? See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ---
 
 ## 🗺️ Roadmap
 
-Check out our [ROADMAP.md](ROADMAP.md) to see what's planned for future releases.
+Curious about the future? Check out [ROADMAP.md](ROADMAP.md).
 
 ---
 
 ## 📚 Documentation
 
-Visit the [wiki](https://github.com/Quasar-Continuation/Quasar-Modded/wiki) for usage instructions and other documentation.
+Explore the [Wiki](https://github.com/Quasar-Continuation/Quasar-Modded/wiki) for detailed usage instructions.
 
 ---
 
 ## 📜 License
 
-Quasar is distributed under the **[Apache 2.0 License](LICENSE)**.  
-Third-party licenses are located [here](Licenses).
+Quasar is licensed under the **[Apache 2.0 License](LICENSE)**.  
+Third-party licenses are available [here](Licenses).
 
-___
+---
 
-# 😎 Contributors
+## 😎 Contributors
 
-- [KingKDot](https://github.com/KingKDot) (Me, very cool)
-- [Twobit](https://github.com/officialtwobit) (Helped on too much stuff to list (check prs))
-- [Lucky](https://t.me/V_Lucky_V) (Helped fix major issues with the hvnc)
+- **[KingKDot](https://github.com/KingKDot)** – Lead Developer (very cool) 
+- **[Twobit](https://github.com/officialtwobit)** – Multi-Feature Wizard (See PRs)  
+- **[Lucky](https://t.me/V_Lucky_V)** – Helped fix major issues with the HVNC 
+- **[fedx](https://github.com/fedx-988)** – README Designer & Discord RPC  
 
 ---
 

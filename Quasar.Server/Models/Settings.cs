@@ -49,6 +49,12 @@ namespace Quasar.Server.Models
             }
         }
 
+        public static bool DiscordRPC
+        {
+            get { return bool.Parse(ReadValueSafe("DiscordRPC", "False")); } // Changed default from "True" to "False"
+            set { WriteValue("DiscordRPC", value.ToString()); }
+        }
+
         public static ushort ListenPort
         {
             get

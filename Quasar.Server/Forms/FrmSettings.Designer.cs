@@ -49,6 +49,7 @@
             this.chkIPv6Support = new System.Windows.Forms.CheckBox();
             this.chkDarkMode = new System.Windows.Forms.CheckBox();
             this.chkEventLog = new System.Windows.Forms.CheckBox();
+            this.chkDiscordRPC = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.ncPort)).BeginInit();
             this.SuspendLayout();
             // 
@@ -56,7 +57,7 @@
             // 
             this.btnSave.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnSave.Location = new System.Drawing.Point(227, 327);
+            this.btnSave.Location = new System.Drawing.Point(227, 365);
             this.btnSave.Name = "btnSave";
             this.btnSave.Size = new System.Drawing.Size(75, 23);
             this.btnSave.TabIndex = 19;
@@ -104,7 +105,7 @@
             this.chkAutoListen.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.chkAutoListen.AutoSize = true;
-            this.chkAutoListen.Location = new System.Drawing.Point(12, 81);
+            this.chkAutoListen.Location = new System.Drawing.Point(12, 105);
             this.chkAutoListen.Name = "chkAutoListen";
             this.chkAutoListen.Size = new System.Drawing.Size(222, 17);
             this.chkAutoListen.TabIndex = 6;
@@ -116,7 +117,7 @@
             this.chkPopup.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.chkPopup.AutoSize = true;
-            this.chkPopup.Location = new System.Drawing.Point(12, 104);
+            this.chkPopup.Location = new System.Drawing.Point(12, 128);
             this.chkPopup.Name = "chkPopup";
             this.chkPopup.Size = new System.Drawing.Size(259, 17);
             this.chkPopup.TabIndex = 7;
@@ -139,7 +140,7 @@
             // 
             this.btnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnCancel.Location = new System.Drawing.Point(146, 327);
+            this.btnCancel.Location = new System.Drawing.Point(146, 365);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(75, 23);
             this.btnCancel.TabIndex = 18;
@@ -152,9 +153,9 @@
             this.chkUseUpnp.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.chkUseUpnp.AutoSize = true;
-            this.chkUseUpnp.Location = new System.Drawing.Point(12, 127);
+            this.chkUseUpnp.Location = new System.Drawing.Point(12, 151);
             this.chkUseUpnp.Name = "chkUseUpnp";
-            this.chkUseUpnp.Size = new System.Drawing.Size(249, 17);
+            this.chkUseUpnp.Size = new System.Drawing.Size(250, 17);
             this.chkUseUpnp.TabIndex = 8;
             this.chkUseUpnp.Text = "Try to automatically forward the port (UPnP)";
             this.chkUseUpnp.UseVisualStyleBackColor = true;
@@ -164,7 +165,7 @@
             this.chkShowTooltip.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.chkShowTooltip.AutoSize = true;
-            this.chkShowTooltip.Location = new System.Drawing.Point(12, 150);
+            this.chkShowTooltip.Location = new System.Drawing.Point(12, 174);
             this.chkShowTooltip.Name = "chkShowTooltip";
             this.chkShowTooltip.Size = new System.Drawing.Size(268, 17);
             this.chkShowTooltip.TabIndex = 9;
@@ -176,7 +177,7 @@
             this.chkNoIPIntegration.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.chkNoIPIntegration.AutoSize = true;
-            this.chkNoIPIntegration.Location = new System.Drawing.Point(12, 219);
+            this.chkNoIPIntegration.Location = new System.Drawing.Point(12, 257);
             this.chkNoIPIntegration.Name = "chkNoIPIntegration";
             this.chkNoIPIntegration.Size = new System.Drawing.Size(187, 17);
             this.chkNoIPIntegration.TabIndex = 10;
@@ -190,7 +191,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.lblHost.AutoSize = true;
             this.lblHost.Enabled = false;
-            this.lblHost.Location = new System.Drawing.Point(30, 245);
+            this.lblHost.Location = new System.Drawing.Point(30, 283);
             this.lblHost.Name = "lblHost";
             this.lblHost.Size = new System.Drawing.Size(34, 13);
             this.lblHost.TabIndex = 11;
@@ -202,7 +203,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.lblPass.AutoSize = true;
             this.lblPass.Enabled = false;
-            this.lblPass.Location = new System.Drawing.Point(167, 273);
+            this.lblPass.Location = new System.Drawing.Point(167, 311);
             this.lblPass.Name = "lblPass";
             this.lblPass.Size = new System.Drawing.Size(32, 13);
             this.lblPass.TabIndex = 15;
@@ -214,7 +215,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.lblUser.AutoSize = true;
             this.lblUser.Enabled = false;
-            this.lblUser.Location = new System.Drawing.Point(30, 273);
+            this.lblUser.Location = new System.Drawing.Point(30, 311);
             this.lblUser.Name = "lblUser";
             this.lblUser.Size = new System.Drawing.Size(32, 13);
             this.lblUser.TabIndex = 13;
@@ -225,7 +226,7 @@
             this.txtNoIPPass.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.txtNoIPPass.Enabled = false;
-            this.txtNoIPPass.Location = new System.Drawing.Point(199, 270);
+            this.txtNoIPPass.Location = new System.Drawing.Point(199, 308);
             this.txtNoIPPass.Name = "txtNoIPPass";
             this.txtNoIPPass.Size = new System.Drawing.Size(100, 22);
             this.txtNoIPPass.TabIndex = 16;
@@ -235,7 +236,7 @@
             this.txtNoIPUser.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.txtNoIPUser.Enabled = false;
-            this.txtNoIPUser.Location = new System.Drawing.Point(70, 270);
+            this.txtNoIPUser.Location = new System.Drawing.Point(70, 308);
             this.txtNoIPUser.Name = "txtNoIPUser";
             this.txtNoIPUser.Size = new System.Drawing.Size(91, 22);
             this.txtNoIPUser.TabIndex = 14;
@@ -245,7 +246,7 @@
             this.txtNoIPHost.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.txtNoIPHost.Enabled = false;
-            this.txtNoIPHost.Location = new System.Drawing.Point(70, 242);
+            this.txtNoIPHost.Location = new System.Drawing.Point(70, 280);
             this.txtNoIPHost.Name = "txtNoIPHost";
             this.txtNoIPHost.Size = new System.Drawing.Size(229, 22);
             this.txtNoIPHost.TabIndex = 12;
@@ -256,7 +257,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.chkShowPassword.AutoSize = true;
             this.chkShowPassword.Enabled = false;
-            this.chkShowPassword.Location = new System.Drawing.Point(192, 298);
+            this.chkShowPassword.Location = new System.Drawing.Point(192, 336);
             this.chkShowPassword.Name = "chkShowPassword";
             this.chkShowPassword.Size = new System.Drawing.Size(107, 17);
             this.chkShowPassword.TabIndex = 17;
@@ -269,7 +270,7 @@
             this.chkIPv6Support.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.chkIPv6Support.AutoSize = true;
-            this.chkIPv6Support.Location = new System.Drawing.Point(12, 58);
+            this.chkIPv6Support.Location = new System.Drawing.Point(12, 82);
             this.chkIPv6Support.Name = "chkIPv6Support";
             this.chkIPv6Support.Size = new System.Drawing.Size(128, 17);
             this.chkIPv6Support.TabIndex = 5;
@@ -283,7 +284,7 @@
             this.chkDarkMode.AutoSize = true;
             this.chkDarkMode.Checked = true;
             this.chkDarkMode.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkDarkMode.Location = new System.Drawing.Point(12, 35);
+            this.chkDarkMode.Location = new System.Drawing.Point(12, 59);
             this.chkDarkMode.Name = "chkDarkMode";
             this.chkDarkMode.Size = new System.Drawing.Size(83, 17);
             this.chkDarkMode.TabIndex = 20;
@@ -295,18 +296,34 @@
             this.chkEventLog.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.chkEventLog.AutoSize = true;
-            this.chkEventLog.Location = new System.Drawing.Point(12, 173);
+            this.chkEventLog.Location = new System.Drawing.Point(12, 197);
             this.chkEventLog.Name = "chkEventLog";
             this.chkEventLog.Size = new System.Drawing.Size(186, 17);
             this.chkEventLog.TabIndex = 21;
             this.chkEventLog.Text = "Show event log and debug log";
             this.chkEventLog.UseVisualStyleBackColor = true;
             // 
+            // chkDiscordRPC
+            // 
+            this.chkDiscordRPC.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.chkDiscordRPC.AutoSize = true;
+            this.chkDiscordRPC.Checked = true;
+            this.chkDiscordRPC.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkDiscordRPC.Location = new System.Drawing.Point(12, 36);
+            this.chkDiscordRPC.Name = "chkDiscordRPC";
+            this.chkDiscordRPC.Size = new System.Drawing.Size(88, 17);
+            this.chkDiscordRPC.TabIndex = 22;
+            this.chkDiscordRPC.Text = "Discord RPC";
+            this.chkDiscordRPC.UseVisualStyleBackColor = true;
+            this.chkDiscordRPC.CheckedChanged += new System.EventHandler(this.chkDiscordRPC_CheckedChanged);
+            // 
             // FrmSettings
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
-            this.ClientSize = new System.Drawing.Size(314, 362);
+            this.ClientSize = new System.Drawing.Size(314, 400);
+            this.Controls.Add(this.chkDiscordRPC);
             this.Controls.Add(this.chkEventLog);
             this.Controls.Add(this.chkDarkMode);
             this.Controls.Add(this.chkIPv6Support);
@@ -364,5 +381,6 @@
         private System.Windows.Forms.CheckBox chkIPv6Support;
         private System.Windows.Forms.CheckBox chkDarkMode;
         private System.Windows.Forms.CheckBox chkEventLog;
+        private System.Windows.Forms.CheckBox chkDiscordRPC;
     }
 }

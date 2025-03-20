@@ -263,7 +263,7 @@ namespace Quasar.Server.Networking
             FrmMain mainForm = Application.OpenForms.OfType<FrmMain>().FirstOrDefault();
             if (mainForm != null)
             {
-                mainForm.EventLog("Started listening for connections on port: " + port.ToString(), "normal");
+                mainForm.EventLog("Started listening for connections on port: " + port.ToString(), "info");
             }
         }
 

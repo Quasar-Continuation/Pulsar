@@ -7,8 +7,20 @@ $shortcutPath = "$env:USERPROFILE\Desktop\Quasar-Modded.lnk"
 $server = "https://github.com/Quasar-Continuation/Quasar-Modded/releases/download/AutoBuild/DONT_DOWNLOAD_SERVER.exe"
 $client = "https://github.com/Quasar-Continuation/Quasar-Modded/releases/download/AutoBuild/DONT_DOWNLOAD_CLIENT.bin"
 
-Write-Host "Quasar-Modded Installer" -ForegroundColor Cyan
-Write-Host "======================" -ForegroundColor Cyan
+function Print-Center($text, $addEquals = $true) {
+    $toAdd = if ($addEquals) { "=" } else { " " }
+
+    $windowWidth = $Host.UI.RawUI.WindowSize.Width
+    $padding = [math]::Max(0, [math]::Floor(($windowWidth - $text.Length) / 2))
+    $leftPadding = $toAdd * $padding
+    Write-Host $leftPadding -NoNewline -ForegroundColor Cyan
+    Write-Host $text -NoNewline -ForegroundColor Cyan
+    Write-Host ($toAdd * ($windowWidth - $padding - $text.Length)) -ForegroundColor Cyan
+}
+
+Print-Center "="
+Print-Center "Quasar-Modded Installer" $false
+Print-Center "="
 
 function Get-FileSize($url) {
     try {
@@ -55,21 +67,6 @@ function Download-File($url, $destination, $expectedSize) {
         }
     } catch {
         Write-Host "Error downloading: $url" -ForegroundColor Red
-        return $false
-    }
-}
-
-function Create-Shortcut($targetPath, $shortcutPath) {
-    try {
-        $WScriptObj = New-Object -ComObject ("WScript.Shell")
-        $shortcut = $WScriptObj.CreateShortcut($shortcutPath)
-        $shortcut.TargetPath = $targetPath
-        $shortcut.WorkingDirectory = Split-Path -Parent $targetPath
-        $shortcut.Save()
-        Write-Host "Created desktop shortcut" -ForegroundColor Green
-        return $true
-    } catch {
-        Write-Host "Error creating shortcut: $_" -ForegroundColor Red
         return $false
     }
 }
@@ -134,11 +131,6 @@ if ($quasarBytes -and $clientBytes) {
         }
     } else {
         Write-Host "client.bin is up to date" -ForegroundColor Green
-    }
-
-    # Create desktop shortcut if it doesn't exist
-    if (!(Test-Path $shortcutPath) -and (Test-Path $quasarPath)) {
-        Create-Shortcut $quasarPath $shortcutPath
     }
 
     # Start Quasar if installed successfully

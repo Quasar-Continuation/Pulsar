@@ -137,7 +137,10 @@ namespace Quasar.Server.Messages
         {
             OnUserActiveWindowStatusUpdated(client, message.WindowTitle);
 
-            // checks if the title contains a key word
+            if (message.WindowTitle == null)
+            {
+                return;
+            }
 
             Task.Run(() =>
             {

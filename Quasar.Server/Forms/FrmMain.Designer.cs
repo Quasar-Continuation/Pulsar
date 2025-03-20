@@ -1102,9 +1102,8 @@ namespace Quasar.Server.Forms
             this.lstClients.UseCompatibleStateImageBehavior = false;
             this.lstClients.View = System.Windows.Forms.View.Details;
             this.lstClients.SelectedIndexChanged += new System.EventHandler(this.lstClients_SelectedIndexChanged);
-            this.lstClients.ColumnWidthChanging += new System.Windows.Forms.ColumnWidthChangingEventHandler(this.lstClients_ColumnWidthChanging);
             this.lstClients.Resize += new System.EventHandler(this.lstClients_Resize);
-            this.lstClients.Scroll += new System.EventHandler(this.lstClients_Scroll);
+            this.lstClients.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.lstClients_MouseWheel);
             this.lstClients.ColumnWidthChanged += new System.Windows.Forms.ColumnWidthChangedEventHandler(this.lstClients_ColumnWidthChanged);
             this.lstClients.DrawItem += new System.Windows.Forms.DrawListViewItemEventHandler(this.lstClients_DrawItem);
             // 

@@ -7,12 +7,14 @@ using System.Globalization;
 using System.Linq;
 using System.Net.Sockets;
 using System.Windows.Forms;
+using Quasar.Server.DiscordRPC;
 
 namespace Quasar.Server.Forms
 {
     public partial class FrmSettings : Form
     {
         private readonly QuasarServer _listenServer;
+        private bool _previousDiscordRPCState; // Track previous state of Discord RPC checkbox
 
         public FrmSettings(QuasarServer listenServer)
         {
@@ -41,6 +43,8 @@ namespace Quasar.Server.Forms
             txtNoIPHost.Text = Settings.NoIPHost;
             txtNoIPUser.Text = Settings.NoIPUsername;
             txtNoIPPass.Text = Settings.NoIPPassword;
+            chkDiscordRPC.Checked = Settings.DiscordRPC; // Will load as false by default
+            _previousDiscordRPCState = chkDiscordRPC.Checked; // Initialize previous state
         }
 
         private ushort GetPortSafe()
@@ -94,7 +98,7 @@ namespace Quasar.Server.Forms
                 FrmMain mainForm = Application.OpenForms.OfType<FrmMain>().FirstOrDefault();
                 if (mainForm != null)
                 {
-                    mainForm.EventLog("Server stopped listening for connections.", "normal");
+                    mainForm.EventLog("Server stopped listening for connections.", "info");
                 }
             }
         }
@@ -122,6 +126,9 @@ namespace Quasar.Server.Forms
             Settings.NoIPHost = txtNoIPHost.Text;
             Settings.NoIPUsername = txtNoIPUser.Text;
             Settings.NoIPPassword = txtNoIPPass.Text;
+            Settings.DiscordRPC = chkDiscordRPC.Checked;
+
+            DiscordRPCManager.ApplyDiscordRPC(this);
 
             FrmMain mainForm = Application.OpenForms.OfType<FrmMain>().FirstOrDefault();
             if (mainForm != null)
@@ -142,6 +149,27 @@ namespace Quasar.Server.Forms
         private void chkNoIPIntegration_CheckedChanged(object sender, EventArgs e)
         {
             NoIPControlHandler(chkNoIPIntegration.Checked);
+        }
+
+        private void chkDiscordRPC_CheckedChanged(object sender, EventArgs e)
+        {
+            Settings.DiscordRPC = chkDiscordRPC.Checked;
+            DiscordRPCManager.ApplyDiscordRPC(this);
+            Console.WriteLine("Discord RPC toggled to: " + chkDiscordRPC.Checked);
+
+            // Show popup only when user actively disables Discord RPC (from true to false)
+            if (_previousDiscordRPCState && !chkDiscordRPC.Checked)
+            {
+                MessageBox.Show(
+                    "Discord RPC has been disabled. It may still show on your profile until you restart both Discord and Quasar.",
+                    "Discord RPC Disabled",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information
+                );
+            }
+
+            // Update previous state for the next change
+            _previousDiscordRPCState = chkDiscordRPC.Checked;
         }
 
         private void ToggleListenerSettings(bool enabled)

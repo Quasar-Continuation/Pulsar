@@ -1585,7 +1585,7 @@ namespace Quasar.Server.Forms
             }));
         }
 
-        private void lstClients_Scroll(object sender, EventArgs e)
+        private void lstClients_MouseWheel(object sender, MouseEventArgs e)
         {
             UpdateAllStarPositions();
         }
