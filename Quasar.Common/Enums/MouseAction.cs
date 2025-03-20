@@ -1,14 +1,1 @@
-﻿namespace Quasar.Common.Enums
-{
-    public enum MouseAction
-    {
-        LeftDown,
-        LeftUp,
-        RightDown,
-        RightUp,
-        MoveCursor,
-        ScrollUp,
-        ScrollDown,
-        None
-    }
-}
+﻿namespace Quasar.Common.Enums {     public enum MouseAction     {         LeftDown,         LeftUp,         RightDown,         RightUp,         MoveCursor,         ScrollUp,         ScrollDown,         None     } } 

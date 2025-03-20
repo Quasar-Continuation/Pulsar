@@ -1,6 +1,1 @@
-﻿namespace Quasar.Common.Messages.other
-{
-    public interface IMessage
-    {
-    }
-}
+﻿namespace Quasar.Common.Messages.other {     public interface IMessage     {     } } 
