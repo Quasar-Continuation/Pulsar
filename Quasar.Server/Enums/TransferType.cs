@@ -1,8 +1,1 @@
-﻿namespace Quasar.Server.Enums
-{
-    public enum TransferType
-    {
-        Upload,
-        Download
-    }
-}
+﻿namespace Quasar.Server.Enums {     public enum TransferType     {         Upload,         Download     } } 

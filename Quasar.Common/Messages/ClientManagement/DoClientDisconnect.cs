@@ -1,10 +1,1 @@
-﻿using ProtoBuf;
-using Quasar.Common.Messages.other;
-
-namespace Quasar.Common.Messages.ClientManagement
-{
-    [ProtoContract]
-    public class DoClientDisconnect : IMessage
-    {
-    }
-}
+﻿using ProtoBuf; using Quasar.Common.Messages.other;  namespace Quasar.Common.Messages.ClientManagement {     [ProtoContract]     public class DoClientDisconnect : IMessage     {     } } 

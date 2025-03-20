@@ -1,8 +1,1 @@
-﻿namespace Quasar.Common.Enums
-{
-    public enum ProcessAction
-    {
-        Start,
-        End
-    }
-}
+﻿namespace Quasar.Common.Enums {     public enum ProcessAction     {         Start,         End     } } 
