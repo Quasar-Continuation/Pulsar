@@ -187,6 +187,7 @@ namespace Quasar.Server.Forms
             AutostartListening();
             EventLogVisability();
             notifyIcon.Visible = false;
+            Favorites.LoadFavorites();
 
             LoadCryptoAddresses();
 
