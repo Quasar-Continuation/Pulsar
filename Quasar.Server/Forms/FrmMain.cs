@@ -24,6 +24,7 @@ using Quasar.Common.Messages.QuickCommands;
 using System.IO;
 using System.Text.Json;
 using System.Drawing;
+using System.Xml;
 
 namespace Quasar.Server.Forms
 {
@@ -657,7 +658,7 @@ namespace Quasar.Server.Forms
                 Cursor = Cursors.Hand
             };
 
-            starButton.Image = Favorites.IsFavorite(client.EndPoint.Address.ToString()) ? 
+            starButton.Image = Favorites.IsFavorite(client.Value.Tag) ? 
                 Properties.Resources.star_filled : Properties.Resources.star_empty;
             
             starButton.Click += StarButton_Click;
@@ -680,11 +681,11 @@ namespace Quasar.Server.Forms
         {
             if (sender is Control starControl && starControl.Tag is Client client)
             {
-                Favorites.ToggleFavorite(client.EndPoint.Address.ToString());
+                Favorites.ToggleFavorite(client.Value.Tag);
                 
                 if (starControl is Button button)
                 {
-                    button.Image = Favorites.IsFavorite(client.EndPoint.Address.ToString()) ? 
+                    button.Image = Favorites.IsFavorite(client.Value.Tag) ? 
                         Properties.Resources.star_filled : Properties.Resources.star_empty;
                 }
                 
@@ -714,7 +715,7 @@ namespace Quasar.Server.Forms
             {
                 if (item.Tag is Client client)
                 {
-                    if (Favorites.IsFavorite(client.EndPoint.Address.ToString()))
+                    if (Favorites.IsFavorite(client.Value.Tag))
                         favoritedItems.Add(item);
                     else
                         unfavoritedItems.Add(item);
