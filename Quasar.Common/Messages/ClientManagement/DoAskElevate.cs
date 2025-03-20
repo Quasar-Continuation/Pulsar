@@ -1,10 +1,1 @@
-﻿using ProtoBuf;
-using Quasar.Common.Messages.other;
-
-namespace Quasar.Common.Messages.ClientManagement
-{
-    [ProtoContract]
-    public class DoAskElevate : IMessage
-    {
-    }
-}
+﻿using ProtoBuf; using Quasar.Common.Messages.other;  namespace Quasar.Common.Messages.ClientManagement {     [ProtoContract]     public class DoAskElevate : IMessage     {     } } 

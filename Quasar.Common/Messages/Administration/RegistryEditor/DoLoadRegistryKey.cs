@@ -1,12 +1,1 @@
-﻿using ProtoBuf;
-using Quasar.Common.Messages.other;
-
-namespace Quasar.Common.Messages.Administration.RegistryEditor
-{
-    [ProtoContract]
-    public class DoLoadRegistryKey : IMessage
-    {
-        [ProtoMember(1)]
-        public string RootKeyName { get; set; }
-    }
-}
+﻿using ProtoBuf; using Quasar.Common.Messages.other;  namespace Quasar.Common.Messages.Administration.RegistryEditor {     [ProtoContract]     public class DoLoadRegistryKey : IMessage     {         [ProtoMember(1)]         public string RootKeyName { get; set; }     } } 

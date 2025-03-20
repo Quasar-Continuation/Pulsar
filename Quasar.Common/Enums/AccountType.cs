@@ -1,10 +1,1 @@
-﻿namespace Quasar.Common.Enums
-{
-    public enum AccountType
-    {
-        Admin,
-        User,
-        Guest,
-        Unknown
-    }
-}
+﻿namespace Quasar.Common.Enums {     public enum AccountType     {         Admin,         User,         Guest,         Unknown     } } 
