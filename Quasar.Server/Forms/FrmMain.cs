@@ -658,7 +658,7 @@ namespace Quasar.Server.Forms
                 Cursor = Cursors.Hand
             };
 
-            starButton.Image = Favorites.IsFavorite(client.Value.Tag) ? 
+            starButton.Image = Favorites.IsFavorite(client.Value.UserAtPc) ? 
                 Properties.Resources.star_filled : Properties.Resources.star_empty;
             
             starButton.Click += StarButton_Click;
@@ -681,11 +681,11 @@ namespace Quasar.Server.Forms
         {
             if (sender is Control starControl && starControl.Tag is Client client)
             {
-                Favorites.ToggleFavorite(client.Value.Tag);
+                Favorites.ToggleFavorite(client.Value.UserAtPc);
                 
                 if (starControl is Button button)
                 {
-                    button.Image = Favorites.IsFavorite(client.Value.Tag) ? 
+                    button.Image = Favorites.IsFavorite(client.Value.UserAtPc) ? 
                         Properties.Resources.star_filled : Properties.Resources.star_empty;
                 }
                 
@@ -715,7 +715,7 @@ namespace Quasar.Server.Forms
             {
                 if (item.Tag is Client client)
                 {
-                    if (Favorites.IsFavorite(client.Value.Tag))
+                    if (Favorites.IsFavorite(client.Value.UserAtPc))
                         favoritedItems.Add(item);
                     else
                         unfavoritedItems.Add(item);
