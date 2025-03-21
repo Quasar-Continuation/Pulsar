@@ -77,6 +77,9 @@ if (!(Test-Path $installDir)) {
     New-Item -ItemType Directory -Path $installDir -Force | Out-Null
 }
 
+# Set working dir to install dir
+Set-Location $installDir
+
 # Terminate running instance if exists
 Terminate-Process "Quasar"
 

@@ -2,12 +2,15 @@
 <Weavers xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="FodyWeavers.xsd">
   <Costura>
     <IncludeAssemblies>
-			AForge
-			AForge.Video
-			AForge.Video.DirectShow
-			Gma.System.MouseKeyHook
-			protobuf-net
-			Quasar.Common
-		</IncludeAssemblies>
+		AForge
+		AForge.Video
+		AForge.Video.DirectShow
+		Gma.System.MouseKeyHook
+		protobuf-net
+		Quasar.Common
+		SharpDX
+		SharpDX.Direct3D11
+		SharpDX.DXGI
+	</IncludeAssemblies>
   </Costura>
 </Weavers>
