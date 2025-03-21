@@ -477,7 +477,7 @@ namespace Quasar.Client.Messages
                 if (_useGPU)
                     _desktop = ScreenHelperGPU.CaptureScreen(_displayIndex);
                 else
-                    _desktop = ScreenHelperCPU.CaptureScreen(_displayIndex);
+                _desktop = ScreenHelperCPU.CaptureScreen(_displayIndex);
 
                 if (_desktop == null)
                 {
