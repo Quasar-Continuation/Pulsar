@@ -250,6 +250,44 @@ namespace Quasar.Server.Messages
             _client.Send(new DoKeyboardEvent { Key = keyCode, KeyDown = keyDown });
         }
 
+        /// <summary>
+        /// Sends a drawing event to the client.
+        /// </summary>
+        /// <param name="x">The X coordinate.</param>
+        /// <param name="y">The Y coordinate.</param>
+        /// <param name="prevX">The previous X coordinate.</param>
+        /// <param name="prevY">The previous Y coordinate.</param>
+        /// <param name="strokeWidth">The width of the stroke.</param>
+        /// <param name="colorArgb">The color in ARGB format.</param>
+        /// <param name="isEraser">True if using eraser, false for drawing.</param>
+        /// <param name="isClearAll">True to clear all drawings.</param>
+        /// <param name="displayIndex">The display index to draw on.</param>
+        public void SendDrawingEvent(int x, int y, int prevX, int prevY, int strokeWidth, int colorArgb, bool isEraser, bool isClearAll, int displayIndex)
+        {
+            lock (_syncLock)
+            {
+                if (_codec == null || !IsStarted) return;
+
+                int remoteX = x * _codec.Resolution.Width / LocalResolution.Width;
+                int remoteY = y * _codec.Resolution.Height / LocalResolution.Height;
+                int remotePrevX = prevX * _codec.Resolution.Width / LocalResolution.Width;
+                int remotePrevY = prevY * _codec.Resolution.Height / LocalResolution.Height;
+
+                _client.Send(new DoDrawingEvent
+                {
+                    X = remoteX,
+                    Y = remoteY,
+                    PrevX = remotePrevX,
+                    PrevY = remotePrevY,
+                    StrokeWidth = strokeWidth,
+                    ColorArgb = colorArgb,
+                    IsEraser = isEraser,
+                    IsClearAll = isClearAll,
+                    MonitorIndex = displayIndex
+                });
+            }
+        }
+
         private async void Execute(ISender client, GetDesktopResponse message)
         {
             _framesReceived++;

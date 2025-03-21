@@ -39,6 +39,13 @@ namespace Quasar.Server.Forms
             this.lblQualityShow = new System.Windows.Forms.Label();
             this.btnMouse = new System.Windows.Forms.Button();
             this.panelTop = new System.Windows.Forms.Panel();
+            this.btnShowDrawingTools = new System.Windows.Forms.Button();
+            this.panelDrawingTools = new System.Windows.Forms.Panel();
+            this.colorPicker = new System.Windows.Forms.Button();
+            this.strokeWidthTrackBar = new System.Windows.Forms.TrackBar();
+            this.btnDrawing = new System.Windows.Forms.Button();
+            this.btnEraser = new System.Windows.Forms.Button();
+            this.btnClearDrawing = new System.Windows.Forms.Button();
             this.sizeLabelCounter = new System.Windows.Forms.Label();
             this.enableGPU = new System.Windows.Forms.Button();
             this.btnKeyboard = new System.Windows.Forms.Button();
@@ -123,6 +130,7 @@ namespace Quasar.Server.Forms
             // panelTop
             // 
             this.panelTop.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panelTop.Controls.Add(this.btnShowDrawingTools);
             this.panelTop.Controls.Add(this.sizeLabelCounter);
             this.panelTop.Controls.Add(this.enableGPU);
             this.panelTop.Controls.Add(this.btnKeyboard);
@@ -139,6 +147,97 @@ namespace Quasar.Server.Forms
             this.panelTop.Name = "panelTop";
             this.panelTop.Size = new System.Drawing.Size(784, 36);
             this.panelTop.TabIndex = 7;
+            // 
+            // btnShowDrawingTools
+            // 
+            this.btnShowDrawingTools.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnShowDrawingTools.Image = global::Quasar.Server.Properties.Resources.arrow_up;
+            this.btnShowDrawingTools.Location = new System.Drawing.Point(694, 3);
+            this.btnShowDrawingTools.Name = "btnShowDrawingTools";
+            this.btnShowDrawingTools.Size = new System.Drawing.Size(28, 28);
+            this.btnShowDrawingTools.TabIndex = 17;
+            this.btnShowDrawingTools.TabStop = false;
+            this.toolTipButtons.SetToolTip(this.btnShowDrawingTools, "Show drawing tools");
+            this.btnShowDrawingTools.UseVisualStyleBackColor = true;
+            this.btnShowDrawingTools.Click += new System.EventHandler(this.btnShowDrawingTools_Click);
+            // 
+            // panelDrawingTools
+            // 
+            this.panelDrawingTools.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panelDrawingTools.Controls.Add(this.colorPicker);
+            this.panelDrawingTools.Controls.Add(this.strokeWidthTrackBar);
+            this.panelDrawingTools.Controls.Add(this.btnDrawing);
+            this.panelDrawingTools.Controls.Add(this.btnEraser);
+            this.panelDrawingTools.Controls.Add(this.btnClearDrawing);
+            this.panelDrawingTools.Dock = System.Windows.Forms.DockStyle.Top;
+            this.panelDrawingTools.Location = new System.Drawing.Point(0, 36);
+            this.panelDrawingTools.Name = "panelDrawingTools";
+            this.panelDrawingTools.Size = new System.Drawing.Size(784, 36);
+            this.panelDrawingTools.TabIndex = 8;
+            this.panelDrawingTools.Visible = false;
+            // 
+            // colorPicker
+            // 
+            this.colorPicker.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)));
+            this.colorPicker.Location = new System.Drawing.Point(11, 3);
+            this.colorPicker.Name = "colorPicker";
+            this.colorPicker.Size = new System.Drawing.Size(60, 28);
+            this.colorPicker.TabIndex = 12;
+            this.colorPicker.TabStop = false;
+            this.toolTipButtons.SetToolTip(this.colorPicker, "Select drawing color");
+            this.colorPicker.UseVisualStyleBackColor = true;
+            // 
+            // strokeWidthTrackBar
+            // 
+            this.strokeWidthTrackBar.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left))));
+            this.strokeWidthTrackBar.Location = new System.Drawing.Point(177, 3);
+            this.strokeWidthTrackBar.Maximum = 10;
+            this.strokeWidthTrackBar.Minimum = 1;
+            this.strokeWidthTrackBar.Name = "strokeWidthTrackBar";
+            this.strokeWidthTrackBar.Size = new System.Drawing.Size(100, 45);
+            this.strokeWidthTrackBar.TabIndex = 13;
+            this.strokeWidthTrackBar.TabStop = false;
+            this.strokeWidthTrackBar.Value = 5;
+            this.toolTipButtons.SetToolTip(this.strokeWidthTrackBar, "Adjust stroke width");
+            // 
+            // btnDrawing
+            // 
+            this.btnDrawing.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)));
+            this.btnDrawing.Image = global::Quasar.Server.Properties.Resources.pencil;
+            this.btnDrawing.Location = new System.Drawing.Point(77, 3);
+            this.btnDrawing.Name = "btnDrawing";
+            this.btnDrawing.Size = new System.Drawing.Size(60, 28);
+            this.btnDrawing.TabIndex = 14;
+            this.btnDrawing.TabStop = false;
+            this.toolTipButtons.SetToolTip(this.btnDrawing, "Enable drawing");
+            this.btnDrawing.UseVisualStyleBackColor = false;
+            this.btnDrawing.Click += new System.EventHandler(this.btnDrawing_Click);
+            // 
+            // btnEraser
+            // 
+            this.btnEraser.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)));
+            this.btnEraser.Image = global::Quasar.Server.Properties.Resources.eraser;
+            this.btnEraser.Location = new System.Drawing.Point(107, 3);
+            this.btnEraser.Name = "btnEraser";
+            this.btnEraser.Size = new System.Drawing.Size(60, 28);
+            this.btnEraser.TabIndex = 15;
+            this.btnEraser.TabStop = false;
+            this.toolTipButtons.SetToolTip(this.btnEraser, "Enable eraser");
+            this.btnEraser.UseVisualStyleBackColor = false;
+            this.btnEraser.Click += new System.EventHandler(this.btnEraser_Click);
+            // 
+            // btnClearDrawing
+            // 
+            this.btnClearDrawing.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)));
+            this.btnClearDrawing.Image = global::Quasar.Server.Properties.Resources.clear;
+            this.btnClearDrawing.Location = new System.Drawing.Point(137, 3);
+            this.btnClearDrawing.Name = "btnClearDrawing";
+            this.btnClearDrawing.Size = new System.Drawing.Size(60, 28);
+            this.btnClearDrawing.TabIndex = 16;
+            this.btnClearDrawing.TabStop = false;
+            this.toolTipButtons.SetToolTip(this.btnClearDrawing, "Clear drawing");
+            this.btnClearDrawing.UseVisualStyleBackColor = false;
+            this.btnClearDrawing.Click += new System.EventHandler(this.btnClearDrawing_Click);
             // 
             // sizeLabelCounter
             // 
@@ -233,6 +332,7 @@ namespace Quasar.Server.Forms
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.ClientSize = new System.Drawing.Size(784, 562);
             this.Controls.Add(this.btnShow);
+            this.Controls.Add(this.panelDrawingTools);
             this.Controls.Add(this.panelTop);
             this.Controls.Add(this.picDesktop);
             this.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -270,5 +370,12 @@ namespace Quasar.Server.Forms
         private Controls.RapidPictureBox picDesktop;
         private System.Windows.Forms.Button enableGPU;
         private System.Windows.Forms.Label sizeLabelCounter;
+        private System.Windows.Forms.Button colorPicker;
+        private System.Windows.Forms.TrackBar strokeWidthTrackBar;
+        private System.Windows.Forms.Button btnDrawing;
+        private System.Windows.Forms.Button btnEraser;
+        private System.Windows.Forms.Button btnClearDrawing;
+        private System.Windows.Forms.Button btnShowDrawingTools;
+        private System.Windows.Forms.Panel panelDrawingTools;
     }
 }

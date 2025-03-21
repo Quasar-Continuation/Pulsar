@@ -29,6 +29,31 @@ namespace Quasar.Server.Forms
         private bool _enableKeyboardInput;
 
         /// <summary>
+        /// States whether drawing mode is enabled.
+        /// </summary>
+        private bool _enableDrawingMode;
+
+        /// <summary>
+        /// States whether eraser mode is enabled.
+        /// </summary>
+        private bool _enableEraserMode;
+
+        /// <summary>
+        /// The current stroke width for drawing.
+        /// </summary>
+        private int _strokeWidth = 5;
+
+        /// <summary>
+        /// The current drawing color.
+        /// </summary>
+        private Color _drawingColor = Color.Red;
+
+        /// <summary>
+        /// Keeps track of the previous mouse position for drawing.
+        /// </summary>
+        private Point _previousMousePosition = Point.Empty;
+
+        /// <summary>
         /// Holds the state of the local keyboard hooks.
         /// </summary>
         private IKeyboardMouseEvents _keyboardHook;
@@ -94,6 +119,59 @@ namespace Quasar.Server.Forms
             InitializeComponent();
 
             DarkModeManager.ApplyDarkMode(this);
+            
+            colorPicker.BackColor = _drawingColor;
+            colorPicker.FlatStyle = FlatStyle.Flat;
+            colorPicker.FlatAppearance.BorderColor = Color.White;
+            colorPicker.Text = "Color";
+            colorPicker.ForeColor = Color.White;
+            
+            ConfigureDrawingButtons();
+            
+            btnShowDrawingTools.Enabled = false;
+            
+            strokeWidthTrackBar.Value = _strokeWidth;
+            strokeWidthTrackBar.ValueChanged += strokeWidthTrackBar_ValueChanged;
+            colorPicker.Click += colorPicker_Click;
+        }
+
+        /// <summary>
+        /// Configures the drawing tool buttons with the correct styling and icons
+        /// </summary>
+        private void ConfigureDrawingButtons()
+        {
+            // pencil
+            btnDrawing.Size = new Size(28, 28);
+            btnDrawing.FlatStyle = FlatStyle.Flat;
+            btnDrawing.FlatAppearance.BorderSize = 1;
+            btnDrawing.Image = Properties.Resources.pencil;
+            btnDrawing.Text = string.Empty;
+            btnDrawing.ImageAlign = ContentAlignment.MiddleCenter;
+            btnDrawing.BackColor = SystemColors.Control;
+            btnDrawing.UseVisualStyleBackColor = false;
+            toolTipButtons.SetToolTip(btnDrawing, "Enable drawing");
+            
+            // eraser
+            btnEraser.Size = new Size(28, 28);
+            btnEraser.FlatStyle = FlatStyle.Flat;
+            btnEraser.FlatAppearance.BorderSize = 1;
+            btnEraser.Image = Properties.Resources.eraser;  
+            btnEraser.Text = string.Empty;
+            btnEraser.ImageAlign = ContentAlignment.MiddleCenter;
+            btnEraser.BackColor = SystemColors.Control;
+            btnEraser.UseVisualStyleBackColor = false;
+            toolTipButtons.SetToolTip(btnEraser, "Enable eraser");
+            
+            // clear
+            btnClearDrawing.Size = new Size(28, 28);
+            btnClearDrawing.FlatStyle = FlatStyle.Flat;
+            btnClearDrawing.FlatAppearance.BorderSize = 1;
+            btnClearDrawing.Image = Properties.Resources.clear;
+            btnClearDrawing.Text = string.Empty;
+            btnClearDrawing.ImageAlign = ContentAlignment.MiddleCenter;
+            btnClearDrawing.BackColor = SystemColors.Control;
+            btnClearDrawing.UseVisualStyleBackColor = false;
+            toolTipButtons.SetToolTip(btnClearDrawing, "Clear drawing");
         }
 
         /// <summary>
@@ -183,7 +261,7 @@ namespace Quasar.Server.Forms
         /// <summary>
         /// Starts the remote desktop stream and begin to receive desktop frames.
         /// </summary>
-        private void StartStream(bool useGPU)
+        private void StartStream(bool useGpu)
         {
             ToggleConfigurationControls(true);
 
@@ -193,7 +271,9 @@ namespace Quasar.Server.Forms
 
             this.ActiveControl = picDesktop;
 
-            _remoteDesktopHandler.BeginReceiveFrames(barQuality.Value, cbMonitors.SelectedIndex, useGPU);
+            _remoteDesktopHandler.BeginReceiveFrames(barQuality.Value, cbMonitors.SelectedIndex, useGpu);
+            
+            btnShowDrawingTools.Enabled = true;
         }
 
         /// <summary>
@@ -210,6 +290,22 @@ namespace Quasar.Server.Forms
             this.ActiveControl = picDesktop;
 
             _remoteDesktopHandler.EndReceiveFrames();
+            
+            btnShowDrawingTools.Enabled = false;
+            
+            if (panelDrawingTools.Visible)
+            {
+                panelDrawingTools.Visible = false;
+                btnShowDrawingTools.Image = Properties.Resources.arrow_up;
+                toolTipButtons.SetToolTip(btnShowDrawingTools, "Show drawing tools");
+            }
+            
+            _enableDrawingMode = false;
+            _enableEraserMode = false;
+            
+            ConfigureDrawingButtons();
+            
+            picDesktop.Cursor = Cursors.Default;
         }
 
         /// <summary>
@@ -302,6 +398,15 @@ namespace Quasar.Server.Forms
 
             OnResize(EventArgs.Empty); // trigger resize event to align controls 
 
+            panelDrawingTools.Visible = false;
+            btnShowDrawingTools.Image = Properties.Resources.arrow_up;
+            toolTipButtons.SetToolTip(btnShowDrawingTools, "Show drawing tools");
+
+            _enableDrawingMode = false;
+            _enableEraserMode = false;
+            
+            ConfigureDrawingButtons();
+
             _remoteDesktopHandler.RefreshDisplays();
         }
 
@@ -357,45 +462,83 @@ namespace Quasar.Server.Forms
 
         private void picDesktop_MouseDown(object sender, MouseEventArgs e)
         {
-            if (picDesktop.Image != null && _enableMouseInput && this.ContainsFocus)
+            if (picDesktop.Image != null && this.ContainsFocus)
             {
-                MouseAction action = MouseAction.None;
+                if ((_enableDrawingMode || _enableEraserMode) && e.Button == MouseButtons.Left)
+                {
+                    _previousMousePosition = e.Location;
+                }
+                else if (_enableMouseInput && !(_enableDrawingMode || _enableEraserMode))
+                {
+                    MouseAction action = MouseAction.None;
 
-                if (e.Button == MouseButtons.Left)
-                    action = MouseAction.LeftDown;
-                if (e.Button == MouseButtons.Right)
-                    action = MouseAction.RightDown;
+                    if (e.Button == MouseButtons.Left)
+                        action = MouseAction.LeftDown;
+                    if (e.Button == MouseButtons.Right)
+                        action = MouseAction.RightDown;
 
-                int selectedDisplayIndex = cbMonitors.SelectedIndex;
+                    int selectedDisplayIndex = cbMonitors.SelectedIndex;
 
-                _remoteDesktopHandler.SendMouseEvent(action, true, e.X, e.Y, selectedDisplayIndex);
-            }
-        }
-
-        private void picDesktop_MouseUp(object sender, MouseEventArgs e)
-        {
-            if (picDesktop.Image != null && _enableMouseInput && this.ContainsFocus)
-            {
-                MouseAction action = MouseAction.None;
-
-                if (e.Button == MouseButtons.Left)
-                    action = MouseAction.LeftUp;
-                if (e.Button == MouseButtons.Right)
-                    action = MouseAction.RightUp;
-
-                int selectedDisplayIndex = cbMonitors.SelectedIndex;
-
-                _remoteDesktopHandler.SendMouseEvent(action, false, e.X, e.Y, selectedDisplayIndex);
+                    _remoteDesktopHandler.SendMouseEvent(action, true, e.X, e.Y, selectedDisplayIndex);
+                }
             }
         }
 
         private void picDesktop_MouseMove(object sender, MouseEventArgs e)
         {
-            if (picDesktop.Image != null && _enableMouseInput && this.ContainsFocus)
+            if (picDesktop.Image != null && this.ContainsFocus)
             {
-                int selectedDisplayIndex = cbMonitors.SelectedIndex;
+                if ((_enableDrawingMode || _enableEraserMode) && e.Button == MouseButtons.Left)
+                {
+                    if (_previousMousePosition != Point.Empty && 
+                        (_previousMousePosition.X != e.X || _previousMousePosition.Y != e.Y))
+                    {
+                        int selectedDisplayIndex = cbMonitors.SelectedIndex;
+                        
+                        bool useEraser = _enableEraserMode;
+                        
+                        _remoteDesktopHandler.SendDrawingEvent(
+                            e.X, e.Y,
+                            _previousMousePosition.X, _previousMousePosition.Y,
+                            _strokeWidth, 
+                            _drawingColor.ToArgb(),
+                            useEraser,
+                            false,
+                            selectedDisplayIndex);
+                        
+                        _previousMousePosition = e.Location;
+                    }
+                }
+                else if (_enableMouseInput && !(_enableDrawingMode || _enableEraserMode))
+                {
+                    int selectedDisplayIndex = cbMonitors.SelectedIndex;
 
-                _remoteDesktopHandler.SendMouseEvent(MouseAction.MoveCursor, false, e.X, e.Y, selectedDisplayIndex);
+                    _remoteDesktopHandler.SendMouseEvent(MouseAction.MoveCursor, false, e.X, e.Y, selectedDisplayIndex);
+                }
+            }
+        }
+
+        private void picDesktop_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (picDesktop.Image != null && this.ContainsFocus)
+            {
+                if ((_enableDrawingMode || _enableEraserMode) && e.Button == MouseButtons.Left)
+                {
+                    _previousMousePosition = Point.Empty;
+                }
+                else if (_enableMouseInput && !(_enableDrawingMode || _enableEraserMode))
+                {
+                    MouseAction action = MouseAction.None;
+
+                    if (e.Button == MouseButtons.Left)
+                        action = MouseAction.LeftUp;
+                    if (e.Button == MouseButtons.Right)
+                        action = MouseAction.RightUp;
+
+                    int selectedDisplayIndex = cbMonitors.SelectedIndex;
+
+                    _remoteDesktopHandler.SendMouseEvent(action, false, e.X, e.Y, selectedDisplayIndex);
+                }
             }
         }
 
@@ -518,6 +661,144 @@ namespace Quasar.Server.Forms
                 enableGPU.Image = Properties.Resources.computer_error; // disable GPU
                 toolTipButtons.SetToolTip(enableGPU, "Enable GPU.");
             }
+        }
+
+        private void btnDrawing_Click(object sender, EventArgs e)
+        {
+            if (!_remoteDesktopHandler.IsStarted)
+            {
+                MessageBox.Show("Drawing is only available when Remote Desktop is started", 
+                    "Drawing unavailable", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+            
+            _enableDrawingMode = !_enableDrawingMode;
+            
+            if (_enableDrawingMode)
+            {
+                _enableEraserMode = false;
+                
+                btnEraser.BackColor = SystemColors.Control;
+                toolTipButtons.SetToolTip(btnEraser, "Enable eraser");
+                
+                btnDrawing.BackColor = Color.FromArgb(120, 170, 120);
+                toolTipButtons.SetToolTip(btnDrawing, "Disable drawing");
+                picDesktop.Cursor = Cursors.Cross;
+            }
+            else
+            {
+                btnDrawing.BackColor = SystemColors.Control;
+                toolTipButtons.SetToolTip(btnDrawing, "Enable drawing");
+                picDesktop.Cursor = Cursors.Default;
+            }
+            
+            this.ActiveControl = picDesktop;
+        }
+
+        private void btnEraser_Click(object sender, EventArgs e)
+        {
+            if (!_remoteDesktopHandler.IsStarted)
+            {
+                MessageBox.Show("Eraser is only available when Remote Desktop is started", 
+                    "Eraser unavailable", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+            
+            _enableEraserMode = !_enableEraserMode;
+            
+            if (_enableEraserMode)
+            {
+                _enableDrawingMode = false;
+                
+                btnDrawing.BackColor = SystemColors.Control;
+                toolTipButtons.SetToolTip(btnDrawing, "Enable drawing");
+                
+                btnEraser.BackColor = Color.FromArgb(120, 170, 120);
+                toolTipButtons.SetToolTip(btnEraser, "Disable eraser");
+                picDesktop.Cursor = Cursors.Hand;
+            }
+            else
+            {
+                btnEraser.BackColor = SystemColors.Control;
+                toolTipButtons.SetToolTip(btnEraser, "Enable eraser");
+                picDesktop.Cursor = Cursors.Default;
+            }
+            
+            this.ActiveControl = picDesktop;
+        }
+
+        private void btnShowDrawingTools_Click(object sender, EventArgs e)
+        {
+            ToggleDrawingPanelVisibility(!panelDrawingTools.Visible);
+        }
+
+        private void ToggleDrawingPanelVisibility(bool visible)
+        {
+            if (visible && !_remoteDesktopHandler.IsStarted)
+            {
+                MessageBox.Show("Drawing tools are only available when Remote Desktop is started", 
+                    "Drawing unavailable", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+            
+            panelDrawingTools.Visible = visible;
+            btnShowDrawingTools.Image = visible ? 
+                Properties.Resources.arrow_down : 
+                Properties.Resources.arrow_up;
+            toolTipButtons.SetToolTip(btnShowDrawingTools, 
+                visible ? "Hide drawing tools" : "Show drawing tools");
+            this.ActiveControl = picDesktop;
+        }
+
+        private void btnClearDrawing_Click(object sender, EventArgs e)
+        {
+            if (!_remoteDesktopHandler.IsStarted)
+            {
+                MessageBox.Show("Clear drawing is only available when Remote Desktop is started", 
+                    "Clear unavailable", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+            
+            int displayIndex = cbMonitors.SelectedIndex;
+            _remoteDesktopHandler.SendDrawingEvent(0, 0, 0, 0, 0, 0, false, true, displayIndex);
+        }
+        
+        private void colorPicker_Click(object sender, EventArgs e)
+        {
+            if (!_remoteDesktopHandler.IsStarted)
+            {
+                MessageBox.Show("Color selection is only available when Remote Desktop is started", 
+                    "Color selection unavailable", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+            
+            ColorDialog colorDialog = new ColorDialog();
+            colorDialog.Color = _drawingColor;
+            colorDialog.AllowFullOpen = true;
+            colorDialog.AnyColor = true;
+            
+            if (colorDialog.ShowDialog() == DialogResult.OK)
+            {
+                _drawingColor = colorDialog.Color;
+                colorPicker.BackColor = _drawingColor;
+                
+                colorPicker.ForeColor = GetContrastColor(_drawingColor);
+            }
+        }
+        
+        private void strokeWidthTrackBar_ValueChanged(object sender, EventArgs e)
+        {
+            _strokeWidth = strokeWidthTrackBar.Value;
+        }
+        
+        private Color GetContrastColor(Color color)
+        {
+            int brightness = (int)Math.Sqrt(
+                color.R * color.R * 0.299 +
+                color.G * color.G * 0.587 +
+                color.B * color.B * 0.114);
+                
+            return brightness > 130 ? Color.Black : Color.White;
         }
 
         #endregion

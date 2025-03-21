@@ -72,13 +72,16 @@
 		<PackageReference Include="protobuf-net">
 			<Version>2.4.9</Version>
 		</PackageReference>
+		<PackageReference Include="SharpDX" Version="4.2.0" />
+		<PackageReference Include="SharpDX.Direct3D9" Version="4.2.0" />
+		<PackageReference Include="SharpDX.Mathematics" Version="4.2.0" />
 		<PackageReference Include="System.IO.Compression" Version="4.3.0" />
 	</ItemGroup>
 	<ItemGroup>
 		<Folder Include="Kematian\Wallets\" />
 	</ItemGroup>
 	<Target Name="CopyWindows" AfterTargets="Build" Condition="'$(OS)' == 'Windows_NT'">
-		<Exec Command='copy "$(TargetPath)" "$(TargetDir)client.bin" /Y' />
+		<Exec Command="copy &quot;$(TargetPath)&quot; &quot;$(TargetDir)client.bin&quot; /Y" />
 	</Target>
 
 </Project>

