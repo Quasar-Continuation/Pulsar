@@ -6,6 +6,7 @@ using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
 
+//copy pasted / slightly edited from https://github.com/AdvDebug/AntiCrack-DotNet
 
 namespace Quasar.Client.Anti
 {

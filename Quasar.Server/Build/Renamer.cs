@@ -9,12 +9,10 @@ namespace Quasar.Server.Build
 {
     public class Renamer
     {
-        /// <summary>
-        /// Contains the assembly definition.
-        /// </summary>
         public AssemblyDefinition AsmDef { get; set; }
 
-        private int Length { get; set; }
+        private int MinLength { get; set; }
+        private int MaxLength { get; set; }
         private MemberOverloader _typeOverloader;
         private Dictionary<TypeDefinition, MemberOverloader> _methodOverloaders;
         private Dictionary<TypeDefinition, MemberOverloader> _fieldOverloaders;
@@ -24,25 +22,22 @@ namespace Quasar.Server.Build
         private readonly SafeRandom _random = new SafeRandom();
 
         public Renamer(AssemblyDefinition asmDef)
-            : this(asmDef, 20)
+            : this(asmDef, 10, 30)
         {
         }
 
-        public Renamer(AssemblyDefinition asmDef, int length)
+        public Renamer(AssemblyDefinition asmDef, int minLength, int maxLength)
         {
             this.AsmDef = asmDef;
-            this.Length = length;
-            _typeOverloader = new MemberOverloader(this.Length);
+            this.MinLength = minLength;
+            this.MaxLength = maxLength;
+            _typeOverloader = new MemberOverloader(this.MinLength, this.MaxLength);
             _methodOverloaders = new Dictionary<TypeDefinition, MemberOverloader>();
             _fieldOverloaders = new Dictionary<TypeDefinition, MemberOverloader>();
             _eventOverloaders = new Dictionary<TypeDefinition, MemberOverloader>();
             _namespaceRenames = new Dictionary<string, string>();
         }
 
-        /// <summary>
-        /// Attempts to modify the assembly definition data.
-        /// </summary>
-        /// <returns>True if the operation succeeded; False if the operation failed.</returns>
         public bool Perform()
         {
             try
@@ -61,7 +56,7 @@ namespace Quasar.Server.Build
 
         private void RenameInType(TypeDefinition typeDef)
         {
-            if (!typeDef.Namespace.StartsWith("Quasar") || typeDef.Namespace.StartsWith("Quasar.Common.Messages") || typeDef.IsEnum /* || typeDef.HasInterfaces */)
+            if (!typeDef.Namespace.StartsWith("Quasar") || typeDef.Namespace.StartsWith("Quasar.Common.Messages") || typeDef.IsEnum)
                 return;
 
             _typeOverloader.GiveName(typeDef);
@@ -109,7 +104,8 @@ namespace Quasar.Server.Build
         private string GenerateRandomNamespace()
         {
             StringBuilder builder = new StringBuilder();
-            for (int i = 0; i < Length; i++)
+            int length = _random.Next(MinLength, MaxLength);
+            for (int i = 0; i < length; i++)
             {
                 builder.Append((char)_random.Next('a', 'z' + 1));
             }
@@ -134,10 +130,9 @@ namespace Quasar.Server.Build
         private MemberOverloader GetOverloader(Dictionary<TypeDefinition, MemberOverloader> overloaderDictionary,
             TypeDefinition targetTypeDef)
         {
-            MemberOverloader overloader;
-            if (!overloaderDictionary.TryGetValue(targetTypeDef, out overloader))
+            if (!overloaderDictionary.TryGetValue(targetTypeDef, out MemberOverloader overloader))
             {
-                overloader = new MemberOverloader(this.Length);
+                overloader = new MemberOverloader(this.MinLength, this.MaxLength);
                 overloaderDictionary.Add(targetTypeDef, overloader);
             }
             return overloader;
@@ -146,23 +141,25 @@ namespace Quasar.Server.Build
         private class MemberOverloader
         {
             private bool DoRandom { get; set; }
-            private int StartingLength { get; set; }
+            private int MinLength { get; set; }
+            private int MaxLength { get; set; }
             private readonly Dictionary<string, string> _renamedMembers = new Dictionary<string, string>();
             private readonly char[] _charMap;
             private readonly SafeRandom _random = new SafeRandom();
             private int[] _indices;
 
-            public MemberOverloader(int startingLength, bool doRandom = true)
-                : this(startingLength, doRandom, "ABCDEFGHIJKLMNOPQRSTUVWXYZ".ToLower().ToCharArray())
+            public MemberOverloader(int minLength, int maxLength, bool doRandom = true)
+                : this(minLength, maxLength, doRandom, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789".ToCharArray())
             {
             }
 
-            private MemberOverloader(int startingLength, bool doRandom, char[] chars)
+            private MemberOverloader(int minLength, int maxLength, bool doRandom, char[] chars)
             {
                 this._charMap = chars;
                 this.DoRandom = doRandom;
-                this.StartingLength = startingLength;
-                this._indices = new int[startingLength];
+                this.MinLength = minLength;
+                this.MaxLength = maxLength;
+                this._indices = new int[minLength];
             }
 
             public void GiveName(MemberReference member)
@@ -185,10 +182,11 @@ namespace Quasar.Server.Build
             private string GetRandomName()
             {
                 StringBuilder builder = new StringBuilder();
+                int length = _random.Next(MinLength, MaxLength);
 
-                for (int i = 0; i < StartingLength; i++)
+                for (int i = 0; i < length; i++)
                 {
-                    builder.Append((char)_random.Next(int.MinValue, int.MaxValue));
+                    builder.Append(_charMap[_random.Next(_charMap.Length)]);
                 }
 
                 return builder.ToString();

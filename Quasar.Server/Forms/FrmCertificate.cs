@@ -4,6 +4,7 @@ using Quasar.Server.Models;
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Windows.Forms;
 
@@ -26,9 +27,21 @@ namespace Quasar.Server.Forms
             btnSave.Enabled = true;
         }
 
+        private string GenerateRandomStringPair()
+        {
+            const string letters = "abcdefghijklmnopqrstuvwxyz";
+            Random random = new Random();
+            string GenerateRandomString(int length) => new string(Enumerable.Repeat(letters, length).Select(s => s[random.Next(s.Length)]).ToArray());
+
+            string randomString1 = GenerateRandomString(random.Next(4, 7));
+            string randomString2 = GenerateRandomString(random.Next(4, 7));
+
+            return $"{randomString1} {randomString2}";
+        }
+
         private void btnCreate_Click(object sender, EventArgs e)
         {
-            SetCertificate(CertificateHelper.CreateCertificateAuthority("Mod Server", 4096));
+            SetCertificate(CertificateHelper.CreateCertificateAuthority(GenerateRandomStringPair(), 4096));
         }
 
         private void btnImport_Click(object sender, EventArgs e)

