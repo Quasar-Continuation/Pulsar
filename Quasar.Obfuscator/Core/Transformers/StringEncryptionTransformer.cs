@@ -19,7 +19,7 @@ namespace Quasar.Obfuscator.Core.Transformers
         public MethodDef InjectDecryptionMethod(ModuleDefMD module)
         {
             // create our type holding our string decryption method
-            TypeDef stringType = new TypeDefUser("", "DecryptionUtils", module.CorLibTypes.Object.TypeDefOrRef);
+            TypeDef stringType = new TypeDefUser("", RandomUTFString(10), module.CorLibTypes.Object.TypeDefOrRef);
             module.Types.Add(stringType);
             
             // inject the methods we want to it
@@ -28,7 +28,7 @@ namespace Quasar.Obfuscator.Core.Transformers
             TypeDef typeDef = typeModule.ResolveTypeDef(MDToken.ToRID(typeof(StringEncryption).MetadataToken));
             IEnumerable<IDnlibDef> members = InjectHelper.Inject(typeDef, stringType, module);
             MethodDef decryptMethod = (MethodDef)members.Single(method => method.Name == "Decrypt");
-            decryptMethod.Name = "fun";
+            decryptMethod.Name = RandomUTFString(10);
 
 
             // remove the Encrypt method
