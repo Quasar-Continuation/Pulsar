@@ -31,7 +31,7 @@ namespace Quasar.Server.Forms
     public partial class FrmMain : Form
     {
         public QuasarServer ListenServer { get; set; }
-        private Server.DiscordRPC.DiscordRPC _discordRpc;  // Added Discord RPC
+        private DiscordRPC.DiscordRPC _discordRpc;  // Added Discord RPC
 
         private const int STATUS_ID = 4;
         private const int CURRENTWINDOW_ID = 5;

