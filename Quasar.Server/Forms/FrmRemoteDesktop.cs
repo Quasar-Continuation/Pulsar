@@ -141,34 +141,34 @@ namespace Quasar.Server.Forms
         private void ConfigureDrawingButtons()
         {
             // pencil
-            btnDrawing.Size = new Size(28, 28);
+            btnDrawing.Size = new Size(60, 28);
             btnDrawing.FlatStyle = FlatStyle.Flat;
             btnDrawing.FlatAppearance.BorderSize = 1;
-            btnDrawing.Image = Properties.Resources.pencil;
+            btnDrawing.BackgroundImage = Properties.Resources.pencil;
+            btnDrawing.BackgroundImageLayout = ImageLayout.Zoom;
             btnDrawing.Text = string.Empty;
-            btnDrawing.ImageAlign = ContentAlignment.MiddleCenter;
             btnDrawing.BackColor = SystemColors.Control;
             btnDrawing.UseVisualStyleBackColor = false;
             toolTipButtons.SetToolTip(btnDrawing, "Enable drawing");
-            
+
             // eraser
-            btnEraser.Size = new Size(28, 28);
+            btnEraser.Size = new Size(60, 28);
             btnEraser.FlatStyle = FlatStyle.Flat;
             btnEraser.FlatAppearance.BorderSize = 1;
-            btnEraser.Image = Properties.Resources.eraser;  
+            btnEraser.BackgroundImage = Properties.Resources.eraser;
+            btnEraser.BackgroundImageLayout = ImageLayout.Zoom;
             btnEraser.Text = string.Empty;
-            btnEraser.ImageAlign = ContentAlignment.MiddleCenter;
             btnEraser.BackColor = SystemColors.Control;
             btnEraser.UseVisualStyleBackColor = false;
             toolTipButtons.SetToolTip(btnEraser, "Enable eraser");
-            
+
             // clear
-            btnClearDrawing.Size = new Size(28, 28);
+            btnClearDrawing.Size = new Size(60, 28);
             btnClearDrawing.FlatStyle = FlatStyle.Flat;
             btnClearDrawing.FlatAppearance.BorderSize = 1;
-            btnClearDrawing.Image = Properties.Resources.clear;
+            btnClearDrawing.BackgroundImage = Properties.Resources.clear;
+            btnClearDrawing.BackgroundImageLayout = ImageLayout.Zoom;
             btnClearDrawing.Text = string.Empty;
-            btnClearDrawing.ImageAlign = ContentAlignment.MiddleCenter;
             btnClearDrawing.BackColor = SystemColors.Control;
             btnClearDrawing.UseVisualStyleBackColor = false;
             toolTipButtons.SetToolTip(btnClearDrawing, "Clear drawing");

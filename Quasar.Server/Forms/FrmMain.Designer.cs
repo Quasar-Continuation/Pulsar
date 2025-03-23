@@ -79,6 +79,8 @@ namespace Quasar.Server.Forms
             this.hideTaskBarToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.connectionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.elevateClientPermissionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.elevateToSystemToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.deElevateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.updateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.reconnectToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.disconnectToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -507,6 +509,8 @@ namespace Quasar.Server.Forms
             // 
             this.connectionToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.elevateClientPermissionsToolStripMenuItem,
+            this.elevateToSystemToolStripMenuItem,
+            this.deElevateToolStripMenuItem,
             this.updateToolStripMenuItem,
             this.reconnectToolStripMenuItem,
             this.disconnectToolStripMenuItem,
@@ -523,6 +527,22 @@ namespace Quasar.Server.Forms
             this.elevateClientPermissionsToolStripMenuItem.Size = new System.Drawing.Size(211, 22);
             this.elevateClientPermissionsToolStripMenuItem.Text = "Elevate Client Permissions";
             this.elevateClientPermissionsToolStripMenuItem.Click += new System.EventHandler(this.elevateClientPermissionsToolStripMenuItem_Click);
+            // 
+            // elevateToSystemToolStripMenuItem
+            // 
+            this.elevateToSystemToolStripMenuItem.Image = global::Quasar.Server.Properties.Resources.uac_shield;
+            this.elevateToSystemToolStripMenuItem.Name = "elevateToSystemToolStripMenuItem";
+            this.elevateToSystemToolStripMenuItem.Size = new System.Drawing.Size(211, 22);
+            this.elevateToSystemToolStripMenuItem.Text = "Elevate To System";
+            this.elevateToSystemToolStripMenuItem.Click += new System.EventHandler(this.elevateToSystemToolStripMenuItem_Click);
+            // 
+            // deElevateToolStripMenuItem
+            // 
+            this.deElevateToolStripMenuItem.Image = global::Quasar.Server.Properties.Resources.uac_shield;
+            this.deElevateToolStripMenuItem.Name = "deElevateToolStripMenuItem";
+            this.deElevateToolStripMenuItem.Size = new System.Drawing.Size(211, 22);
+            this.deElevateToolStripMenuItem.Text = "DeElevate From System";
+            this.deElevateToolStripMenuItem.Click += new System.EventHandler(this.deElevateToolStripMenuItem_Click);
             // 
             // updateToolStripMenuItem
             // 
@@ -1101,11 +1121,11 @@ namespace Quasar.Server.Forms
             this.lstClients.TabIndex = 1;
             this.lstClients.UseCompatibleStateImageBehavior = false;
             this.lstClients.View = System.Windows.Forms.View.Details;
-            this.lstClients.SelectedIndexChanged += new System.EventHandler(this.lstClients_SelectedIndexChanged);
-            this.lstClients.Resize += new System.EventHandler(this.lstClients_Resize);
-            this.lstClients.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.lstClients_MouseWheel);
             this.lstClients.ColumnWidthChanged += new System.Windows.Forms.ColumnWidthChangedEventHandler(this.lstClients_ColumnWidthChanged);
             this.lstClients.DrawItem += new System.Windows.Forms.DrawListViewItemEventHandler(this.lstClients_DrawItem);
+            this.lstClients.SelectedIndexChanged += new System.EventHandler(this.lstClients_SelectedIndexChanged);
+            this.lstClients.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.lstClients_MouseWheel);
+            this.lstClients.Resize += new System.EventHandler(this.lstClients_Resize);
             // 
             // hIP
             // 
@@ -1913,5 +1933,7 @@ namespace Quasar.Server.Forms
         private ToolStripMenuItem saveSlectedToolStripMenuItem;
         private ToolStripSeparator toolStripSeparator1;
         private ToolStripMenuItem clearLogsToolStripMenuItem;
+        private ToolStripMenuItem elevateToSystemToolStripMenuItem;
+        private ToolStripMenuItem deElevateToolStripMenuItem;
     }
 }

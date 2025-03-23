@@ -1,4 +1,5 @@
 ﻿using Quasar.Server.Controls;
+using Quasar.Server.Images.Helpers;
 
 namespace Quasar.Server.Forms
 {
@@ -40,22 +41,24 @@ namespace Quasar.Server.Forms
             this.btnMouse = new System.Windows.Forms.Button();
             this.panelTop = new System.Windows.Forms.Panel();
             this.btnShowDrawingTools = new System.Windows.Forms.Button();
+            this.sizeLabelCounter = new System.Windows.Forms.Label();
+            this.enableGPU = new System.Windows.Forms.Button();
+            this.btnKeyboard = new System.Windows.Forms.Button();
+            this.cbMonitors = new System.Windows.Forms.ComboBox();
+            this.btnHide = new System.Windows.Forms.Button();
             this.panelDrawingTools = new System.Windows.Forms.Panel();
             this.colorPicker = new System.Windows.Forms.Button();
             this.strokeWidthTrackBar = new System.Windows.Forms.TrackBar();
             this.btnDrawing = new System.Windows.Forms.Button();
             this.btnEraser = new System.Windows.Forms.Button();
             this.btnClearDrawing = new System.Windows.Forms.Button();
-            this.sizeLabelCounter = new System.Windows.Forms.Label();
-            this.enableGPU = new System.Windows.Forms.Button();
-            this.btnKeyboard = new System.Windows.Forms.Button();
-            this.cbMonitors = new System.Windows.Forms.ComboBox();
-            this.btnHide = new System.Windows.Forms.Button();
             this.btnShow = new System.Windows.Forms.Button();
             this.toolTipButtons = new System.Windows.Forms.ToolTip(this.components);
             this.picDesktop = new Quasar.Server.Controls.RapidPictureBox();
             ((System.ComponentModel.ISupportInitialize)(this.barQuality)).BeginInit();
             this.panelTop.SuspendLayout();
+            this.panelDrawingTools.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.strokeWidthTrackBar)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picDesktop)).BeginInit();
             this.SuspendLayout();
             // 
@@ -161,84 +164,6 @@ namespace Quasar.Server.Forms
             this.btnShowDrawingTools.UseVisualStyleBackColor = true;
             this.btnShowDrawingTools.Click += new System.EventHandler(this.btnShowDrawingTools_Click);
             // 
-            // panelDrawingTools
-            // 
-            this.panelDrawingTools.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.panelDrawingTools.Controls.Add(this.colorPicker);
-            this.panelDrawingTools.Controls.Add(this.strokeWidthTrackBar);
-            this.panelDrawingTools.Controls.Add(this.btnDrawing);
-            this.panelDrawingTools.Controls.Add(this.btnEraser);
-            this.panelDrawingTools.Controls.Add(this.btnClearDrawing);
-            this.panelDrawingTools.Dock = System.Windows.Forms.DockStyle.Top;
-            this.panelDrawingTools.Location = new System.Drawing.Point(0, 36);
-            this.panelDrawingTools.Name = "panelDrawingTools";
-            this.panelDrawingTools.Size = new System.Drawing.Size(784, 36);
-            this.panelDrawingTools.TabIndex = 8;
-            this.panelDrawingTools.Visible = false;
-            // 
-            // colorPicker
-            // 
-            this.colorPicker.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)));
-            this.colorPicker.Location = new System.Drawing.Point(11, 3);
-            this.colorPicker.Name = "colorPicker";
-            this.colorPicker.Size = new System.Drawing.Size(60, 28);
-            this.colorPicker.TabIndex = 12;
-            this.colorPicker.TabStop = false;
-            this.toolTipButtons.SetToolTip(this.colorPicker, "Select drawing color");
-            this.colorPicker.UseVisualStyleBackColor = true;
-            // 
-            // strokeWidthTrackBar
-            // 
-            this.strokeWidthTrackBar.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left))));
-            this.strokeWidthTrackBar.Location = new System.Drawing.Point(177, 3);
-            this.strokeWidthTrackBar.Maximum = 10;
-            this.strokeWidthTrackBar.Minimum = 1;
-            this.strokeWidthTrackBar.Name = "strokeWidthTrackBar";
-            this.strokeWidthTrackBar.Size = new System.Drawing.Size(100, 45);
-            this.strokeWidthTrackBar.TabIndex = 13;
-            this.strokeWidthTrackBar.TabStop = false;
-            this.strokeWidthTrackBar.Value = 5;
-            this.toolTipButtons.SetToolTip(this.strokeWidthTrackBar, "Adjust stroke width");
-            // 
-            // btnDrawing
-            // 
-            this.btnDrawing.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnDrawing.Image = global::Quasar.Server.Properties.Resources.pencil;
-            this.btnDrawing.Location = new System.Drawing.Point(77, 3);
-            this.btnDrawing.Name = "btnDrawing";
-            this.btnDrawing.Size = new System.Drawing.Size(60, 28);
-            this.btnDrawing.TabIndex = 14;
-            this.btnDrawing.TabStop = false;
-            this.toolTipButtons.SetToolTip(this.btnDrawing, "Enable drawing");
-            this.btnDrawing.UseVisualStyleBackColor = false;
-            this.btnDrawing.Click += new System.EventHandler(this.btnDrawing_Click);
-            // 
-            // btnEraser
-            // 
-            this.btnEraser.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnEraser.Image = global::Quasar.Server.Properties.Resources.eraser;
-            this.btnEraser.Location = new System.Drawing.Point(107, 3);
-            this.btnEraser.Name = "btnEraser";
-            this.btnEraser.Size = new System.Drawing.Size(60, 28);
-            this.btnEraser.TabIndex = 15;
-            this.btnEraser.TabStop = false;
-            this.toolTipButtons.SetToolTip(this.btnEraser, "Enable eraser");
-            this.btnEraser.UseVisualStyleBackColor = false;
-            this.btnEraser.Click += new System.EventHandler(this.btnEraser_Click);
-            // 
-            // btnClearDrawing
-            // 
-            this.btnClearDrawing.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnClearDrawing.Image = global::Quasar.Server.Properties.Resources.clear;
-            this.btnClearDrawing.Location = new System.Drawing.Point(137, 3);
-            this.btnClearDrawing.Name = "btnClearDrawing";
-            this.btnClearDrawing.Size = new System.Drawing.Size(60, 28);
-            this.btnClearDrawing.TabIndex = 16;
-            this.btnClearDrawing.TabStop = false;
-            this.toolTipButtons.SetToolTip(this.btnClearDrawing, "Clear drawing");
-            this.btnClearDrawing.UseVisualStyleBackColor = false;
-            this.btnClearDrawing.Click += new System.EventHandler(this.btnClearDrawing_Click);
-            // 
             // sizeLabelCounter
             // 
             this.sizeLabelCounter.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
@@ -295,6 +220,82 @@ namespace Quasar.Server.Forms
             this.btnHide.UseVisualStyleBackColor = true;
             this.btnHide.Click += new System.EventHandler(this.btnHide_Click);
             // 
+            // panelDrawingTools
+            // 
+            this.panelDrawingTools.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panelDrawingTools.Controls.Add(this.colorPicker);
+            this.panelDrawingTools.Controls.Add(this.strokeWidthTrackBar);
+            this.panelDrawingTools.Controls.Add(this.btnDrawing);
+            this.panelDrawingTools.Controls.Add(this.btnEraser);
+            this.panelDrawingTools.Controls.Add(this.btnClearDrawing);
+            this.panelDrawingTools.Dock = System.Windows.Forms.DockStyle.Top;
+            this.panelDrawingTools.Location = new System.Drawing.Point(0, 36);
+            this.panelDrawingTools.Name = "panelDrawingTools";
+            this.panelDrawingTools.Size = new System.Drawing.Size(784, 36);
+            this.panelDrawingTools.TabIndex = 8;
+            this.panelDrawingTools.Visible = false;
+            // 
+            // colorPicker
+            // 
+            this.colorPicker.Location = new System.Drawing.Point(11, 3);
+            this.colorPicker.Name = "colorPicker";
+            this.colorPicker.Size = new System.Drawing.Size(60, 28);
+            this.colorPicker.TabIndex = 12;
+            this.colorPicker.TabStop = false;
+            this.colorPicker.Text = "Color";
+            this.toolTipButtons.SetToolTip(this.colorPicker, "Select drawing color");
+            this.colorPicker.UseVisualStyleBackColor = true;
+            // 
+            // strokeWidthTrackBar
+            // 
+            this.strokeWidthTrackBar.Location = new System.Drawing.Point(275, 3);
+            this.strokeWidthTrackBar.Minimum = 1;
+            this.strokeWidthTrackBar.Name = "strokeWidthTrackBar";
+            this.strokeWidthTrackBar.Size = new System.Drawing.Size(100, 45);
+            this.strokeWidthTrackBar.TabIndex = 13;
+            this.strokeWidthTrackBar.TabStop = false;
+            this.toolTipButtons.SetToolTip(this.strokeWidthTrackBar, "Adjust stroke width");
+            this.strokeWidthTrackBar.Value = 5;
+            // 
+            // btnDrawing
+            // 
+            this.btnDrawing.BackgroundImage = global::Quasar.Server.Properties.Resources.pencil;
+            this.btnDrawing.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.btnDrawing.Location = new System.Drawing.Point(77, 3);
+            this.btnDrawing.Name = "btnDrawing";
+            this.btnDrawing.Size = new System.Drawing.Size(60, 28);
+            this.btnDrawing.TabIndex = 14;
+            this.btnDrawing.TabStop = false;
+            this.toolTipButtons.SetToolTip(this.btnDrawing, "Enable drawing");
+            this.btnDrawing.UseVisualStyleBackColor = false;
+            this.btnDrawing.Click += new System.EventHandler(this.btnDrawing_Click);
+            // 
+            // btnEraser
+            // 
+            this.btnEraser.BackgroundImage = global::Quasar.Server.Properties.Resources.eraser;
+            this.btnEraser.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.btnEraser.Location = new System.Drawing.Point(143, 3);
+            this.btnEraser.Name = "btnEraser";
+            this.btnEraser.Size = new System.Drawing.Size(60, 28);
+            this.btnEraser.TabIndex = 15;
+            this.btnEraser.TabStop = false;
+            this.toolTipButtons.SetToolTip(this.btnEraser, "Enable eraser");
+            this.btnEraser.UseVisualStyleBackColor = false;
+            this.btnEraser.Click += new System.EventHandler(this.btnEraser_Click);
+            // 
+            // btnClearDrawing
+            // 
+            this.btnClearDrawing.BackgroundImage = global::Quasar.Server.Properties.Resources.clear;
+            this.btnClearDrawing.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.btnClearDrawing.Location = new System.Drawing.Point(209, 3);
+            this.btnClearDrawing.Name = "btnClearDrawing";
+            this.btnClearDrawing.Size = new System.Drawing.Size(60, 28);
+            this.btnClearDrawing.TabIndex = 16;
+            this.btnClearDrawing.TabStop = false;
+            this.toolTipButtons.SetToolTip(this.btnClearDrawing, "Clear drawing");
+            this.btnClearDrawing.UseVisualStyleBackColor = false;
+            this.btnClearDrawing.Click += new System.EventHandler(this.btnClearDrawing_Click);
+            // 
             // btnShow
             // 
             this.btnShow.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
@@ -348,6 +349,9 @@ namespace Quasar.Server.Forms
             ((System.ComponentModel.ISupportInitialize)(this.barQuality)).EndInit();
             this.panelTop.ResumeLayout(false);
             this.panelTop.PerformLayout();
+            this.panelDrawingTools.ResumeLayout(false);
+            this.panelDrawingTools.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.strokeWidthTrackBar)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.picDesktop)).EndInit();
             this.ResumeLayout(false);
 

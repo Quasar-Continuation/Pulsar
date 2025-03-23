@@ -412,7 +412,7 @@ namespace Quasar.Server.Properties {
         ///copies of the Software, and to permit persons to whom the Software is
         ///furnished to do so, subject to the following conditions:
         ///
-        ///The above copyright notice and this pe [rest of string was truncated]&quot;;.
+        ///The above copyright notice  [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string License {
             get {

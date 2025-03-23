@@ -173,6 +173,14 @@ namespace Quasar.Client.Helper
                     }
 
                     Rectangle bounds = GetBounds(screenNumber);
+
+                    // do cpu if screen is in landscape mode
+                    if (bounds.Height > bounds.Width)
+                    {
+                        //Debug.WriteLine("Screen is in landscape mode, using CPU capture");
+                        return ScreenHelperCPU.CaptureScreen(screenNumber, false);
+                    }
+
                     Bitmap resultBitmap = new Bitmap(bounds.Width, bounds.Height, PixelFormat.Format32bppArgb);
 
                     OutputDuplication outputDuplication = _duplicatedOutputs[screenNumber];
