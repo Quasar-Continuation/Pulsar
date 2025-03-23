@@ -1322,7 +1322,7 @@ namespace Quasar.Server.Forms
             // 
             // cryptoGroupBox
             // 
-            this.cryptoGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.cryptoGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.cryptoGroupBox.Controls.Add(this.BCHTextBox);
             this.cryptoGroupBox.Controls.Add(this.label10);
@@ -1352,7 +1352,7 @@ namespace Quasar.Server.Forms
             // 
             // BCHTextBox
             // 
-            this.BCHTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.BCHTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.BCHTextBox.Location = new System.Drawing.Point(50, 245);
             this.BCHTextBox.Name = "BCHTextBox";
@@ -1370,7 +1370,7 @@ namespace Quasar.Server.Forms
             // 
             // TRXTextBox
             // 
-            this.TRXTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.TRXTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.TRXTextBox.Location = new System.Drawing.Point(50, 217);
             this.TRXTextBox.Name = "TRXTextBox";
@@ -1388,7 +1388,7 @@ namespace Quasar.Server.Forms
             // 
             // XRPTextBox
             // 
-            this.XRPTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.XRPTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.XRPTextBox.Location = new System.Drawing.Point(50, 189);
             this.XRPTextBox.Name = "XRPTextBox";
@@ -1406,7 +1406,7 @@ namespace Quasar.Server.Forms
             // 
             // DASHTextBox
             // 
-            this.DASHTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.DASHTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.DASHTextBox.Location = new System.Drawing.Point(50, 161);
             this.DASHTextBox.Name = "DASHTextBox";
@@ -1424,7 +1424,7 @@ namespace Quasar.Server.Forms
             // 
             // SOLTextBox
             // 
-            this.SOLTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.SOLTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.SOLTextBox.Location = new System.Drawing.Point(50, 133);
             this.SOLTextBox.Name = "SOLTextBox";
@@ -1442,7 +1442,7 @@ namespace Quasar.Server.Forms
             // 
             // XMRTextBox
             // 
-            this.XMRTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.XMRTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.XMRTextBox.Location = new System.Drawing.Point(50, 105);
             this.XMRTextBox.Name = "XMRTextBox";
@@ -1460,7 +1460,7 @@ namespace Quasar.Server.Forms
             // 
             // LTCTextBox
             // 
-            this.LTCTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.LTCTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.LTCTextBox.Location = new System.Drawing.Point(50, 77);
             this.LTCTextBox.Name = "LTCTextBox";
@@ -1478,7 +1478,7 @@ namespace Quasar.Server.Forms
             // 
             // ETHTextBox
             // 
-            this.ETHTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.ETHTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.ETHTextBox.Location = new System.Drawing.Point(50, 49);
             this.ETHTextBox.Name = "ETHTextBox";
@@ -1496,7 +1496,7 @@ namespace Quasar.Server.Forms
             // 
             // BTCTextBox
             // 
-            this.BTCTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.BTCTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.BTCTextBox.Location = new System.Drawing.Point(50, 21);
             this.BTCTextBox.Name = "BTCTextBox";
