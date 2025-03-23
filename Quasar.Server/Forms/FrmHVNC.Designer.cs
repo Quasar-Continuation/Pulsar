@@ -43,8 +43,11 @@ namespace Quasar.Server.Forms
             this.menuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.menuItem2 = new System.Windows.Forms.ToolStripMenuItem();
             this.startEdgeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+<<<<<<< HEAD
+=======
             this.startBraveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.startOperaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+>>>>>>> d1562c487ffbb93b7d062a71485785771a87ce11
             this.startFirefoxToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.startCmdToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.sizeLabelCounter = new System.Windows.Forms.Label();
@@ -86,7 +89,11 @@ namespace Quasar.Server.Forms
             // 
             // barQuality
             // 
+<<<<<<< HEAD
+            this.barQuality.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+=======
             this.barQuality.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+>>>>>>> d1562c487ffbb93b7d062a71485785771a87ce11
             | System.Windows.Forms.AnchorStyles.Right)));
             this.barQuality.Location = new System.Drawing.Point(456, 3);
             this.barQuality.Maximum = 100;
@@ -157,8 +164,11 @@ namespace Quasar.Server.Forms
             this.menuItem1,
             this.menuItem2,
             this.startEdgeToolStripMenuItem,
+<<<<<<< HEAD
+=======
             this.startBraveToolStripMenuItem,
             this.startOperaToolStripMenuItem,
+>>>>>>> d1562c487ffbb93b7d062a71485785771a87ce11
             this.startFirefoxToolStripMenuItem,
             this.startCmdToolStripMenuItem});
             this.contextMenuStrip.Name = "contextMenuStrip";
@@ -189,6 +199,8 @@ namespace Quasar.Server.Forms
             this.startEdgeToolStripMenuItem.Text = "Start Edge";
             this.startEdgeToolStripMenuItem.Click += new System.EventHandler(this.startEdgeToolStripMenuItem_Click);
             // 
+<<<<<<< HEAD
+=======
             // startBraveToolStripMenuItem
             // 
             this.startBraveToolStripMenuItem.ForeColor = System.Drawing.SystemColors.Control;
@@ -205,6 +217,7 @@ namespace Quasar.Server.Forms
             this.startOperaToolStripMenuItem.Text = "Start Opera";
             this.startOperaToolStripMenuItem.Click += new System.EventHandler(this.startOperaToolStripMenuItem_Click);
             // 
+>>>>>>> d1562c487ffbb93b7d062a71485785771a87ce11
             // startFirefoxToolStripMenuItem
             // 
             this.startFirefoxToolStripMenuItem.ForeColor = System.Drawing.SystemColors.Control;
@@ -354,8 +367,11 @@ namespace Quasar.Server.Forms
         private System.Windows.Forms.ToolStripMenuItem menuItem1;
         private System.Windows.Forms.ToolStripMenuItem menuItem2;
         private System.Windows.Forms.ToolStripMenuItem startEdgeToolStripMenuItem;
+<<<<<<< HEAD
+=======
         private System.Windows.Forms.ToolStripMenuItem startBraveToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem startOperaToolStripMenuItem;
+>>>>>>> d1562c487ffbb93b7d062a71485785771a87ce11
         private System.Windows.Forms.ToolStripMenuItem startFirefoxToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem startCmdToolStripMenuItem;
     }

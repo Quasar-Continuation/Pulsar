@@ -28,7 +28,11 @@ namespace Quasar.Server.Forms.DarkMode
             };
 
             // Change border color based on mode
+<<<<<<< HEAD
+            Color borderColor = isDarkModeChecked ? Color.DimGray : Color.DimGray;
+=======
             Color borderColor = isDarkModeChecked ? Color.White : Color.Black;
+>>>>>>> d1562c487ffbb93b7d062a71485785771a87ce11
             SetBorderColor(form, borderColor);
         }
 
