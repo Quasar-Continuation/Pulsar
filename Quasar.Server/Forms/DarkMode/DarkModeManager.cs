@@ -27,8 +27,7 @@ namespace Quasar.Server.Forms.DarkMode
                 ColorizeIcons = false,
             };
 
-            // Change border color based on mode
-            Color borderColor = isDarkModeChecked ? Color.White : Color.Black;
+            Color borderColor = isDarkModeChecked ? Color.DimGray : Color.DimGray;
             SetBorderColor(form, borderColor);
         }
 

