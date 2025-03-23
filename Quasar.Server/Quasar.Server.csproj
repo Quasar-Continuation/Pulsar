@@ -246,6 +246,7 @@
 		<ProjectReference Include="..\Quasar.Common\Quasar.Common.csproj">
 			<Private>False</Private>
 		</ProjectReference>
+		<ProjectReference Include="..\Quasar.Obfuscator\Quasar.Obfuscator.csproj" />
 	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="Costura.Fody" Version="6.0.0">

