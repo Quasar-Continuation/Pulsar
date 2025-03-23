@@ -67,6 +67,7 @@
             this.TestBtn.TabIndex = 2;
             this.TestBtn.Text = "Test";
             this.TestBtn.UseVisualStyleBackColor = true;
+            this.TestBtn.Click += new System.EventHandler(this.TestBtn_Click);
             // 
             // dotNetBarTabControl1
             // 

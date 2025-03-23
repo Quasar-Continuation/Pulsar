@@ -4,8 +4,11 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Linq;
+using System.ServiceModel.Channels;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -64,6 +67,85 @@ namespace Quasar.Server.Forms
         private void FrmRemoteScripting_Load(object sender, EventArgs e)
         {
             this.Text = WindowHelper.GetWindowTitle("Remote Scripting", _selectedClients);
+        }
+
+        private void TestBtn_Click(object sender, EventArgs e)
+        {
+            string tempFile = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+            if (dotNetBarTabControl1.SelectedTab == tabPage1)
+            {
+                tempFile += ".ps1";
+                File.WriteAllText(tempFile, PSEdit.Text);
+                ProcessStartInfo psi = new ProcessStartInfo("powershell", "-ExecutionPolicy Bypass -File " + tempFile)
+                {
+                    WindowStyle = ProcessWindowStyle.Hidden,
+                    CreateNoWindow = HidCheckBox.Checked,
+                    UseShellExecute = false
+                };
+                Process process = Process.Start(psi);
+                process.WaitForExit();
+                File.Delete(tempFile);
+            }
+            else if (dotNetBarTabControl1.SelectedTab == tabPage2)
+            {
+                tempFile += ".bat";
+                File.WriteAllText(tempFile, BATEdit.Text);
+                ProcessStartInfo psi = new ProcessStartInfo("cmd", "/c " + tempFile)
+                {
+                    WindowStyle = ProcessWindowStyle.Hidden,
+                    CreateNoWindow = HidCheckBox.Checked,
+                    UseShellExecute = false
+                };
+                Process process = Process.Start(psi);
+                process.WaitForExit();
+                File.Delete(tempFile);
+            }
+            else if (dotNetBarTabControl1.SelectedTab == tabPage3)
+            {
+                tempFile += ".vbs";
+                File.WriteAllText(tempFile, VBSEdit.Text);
+                ProcessStartInfo psi = new ProcessStartInfo("cscript", tempFile)
+                {
+                    WindowStyle = ProcessWindowStyle.Hidden,
+                    CreateNoWindow = HidCheckBox.Checked,
+                    UseShellExecute = false
+                };
+                Process process = Process.Start(psi);
+                process.WaitForExit();
+                File.Delete(tempFile);
+            }
+            else if (dotNetBarTabControl1.SelectedTab == tabPage4)
+            {
+                if (JSEdit.Text.Contains("WScript.") || JSEdit.Text.Contains("ActiveXObject"))
+                {
+                    tempFile += ".js";
+                    File.WriteAllText(tempFile, JSEdit.Text);
+                    ProcessStartInfo psi = new ProcessStartInfo("cscript", "//Nologo " + tempFile)
+                    {
+                        WindowStyle = ProcessWindowStyle.Hidden,
+                        CreateNoWindow = HidCheckBox.Checked,
+                        UseShellExecute = false
+                    };
+                    Process process = Process.Start(psi);
+                    process.WaitForExit();
+                    File.Delete(tempFile);
+                }
+                else
+                {
+                    tempFile += ".hta";
+                    string scriptContent = "<script>" + JSEdit.Text + "</script>";
+                    File.WriteAllText(tempFile, scriptContent);
+                    ProcessStartInfo psi = new ProcessStartInfo("mshta", tempFile)
+                    {
+                        WindowStyle = ProcessWindowStyle.Hidden,
+                        CreateNoWindow = HidCheckBox.Checked,
+                        UseShellExecute = true
+                    };
+                    Process process = Process.Start(psi);
+                    process.WaitForExit();
+                    File.Delete(tempFile);
+                }
+            }
         }
     }
 }
