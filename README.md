@@ -114,7 +114,8 @@ Third-party licenses are available [here](Licenses).
 - **[KingKDot](https://github.com/KingKDot)** – Lead Developer (very cool) 
 - **[Twobit](https://github.com/officialtwobit)** – Multi-Feature Wizard (See PRs)  
 - **[Lucky](https://t.me/V_Lucky_V)** – Helped fix major issues with the HVNC 
-- **[fedx](https://github.com/fedx-988)** – README Designer & Discord RPC  
+- **[fedx](https://github.com/fedx-988)** – README Designer & Discord RPC
+- **[Ace](https://github.com/Knakiri)** – Fixed minor HVNC issues & adding features (i play piano btw)
 
 ---
 
