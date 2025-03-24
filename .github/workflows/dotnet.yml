@@ -37,7 +37,7 @@ jobs:
         shell: cmd
 
       - name: Zip Build Output
-        run: Compress-Archive -Path "D:\a\Quasar-Modded\Quasar-Modded\bin\Release\net48\*" -DestinationPath "build_output.zip"
+        run: Compress-Archive -Path "D:\a\Quasar-Modded\Quasar-Modded\bin\Release\net472\*" -DestinationPath "build_output.zip"
         shell: pwsh
 
       - name: Upload Build Artifact
@@ -86,7 +86,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: D:\a\Quasar-Modded\Quasar-Modded\bin\Release\net48\Quasar.exe
+          asset_path: D:\a\Quasar-Modded\Quasar-Modded\bin\Release\net472\Quasar.exe
           asset_name: DONT_DOWNLOAD_SERVER.exe
           asset_content_type: application/octet-stream
 
@@ -97,7 +97,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: D:\a\Quasar-Modded\Quasar-Modded\bin\Release\net48\client.bin
+          asset_path: D:\a\Quasar-Modded\Quasar-Modded\bin\Release\net472\client.bin
           asset_name: DONT_DOWNLOAD_CLIENT.bin
           asset_content_type: application/octet-stream
 

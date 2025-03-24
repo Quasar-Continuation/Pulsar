@@ -11,6 +11,12 @@ namespace Quasar.Client
 {
     internal static class Program
     {
+        [DllImport("user32.dll", SetLastError = true)]
+        private static extern IntPtr GetThreadDesktop(uint dwThreadId);
+
+        [DllImport("kernel32.dll")]
+        private static extern uint GetCurrentThreadId();
+
         [STAThread]
         private static void Main(string[] args)
         {
@@ -24,13 +30,6 @@ namespace Quasar.Client
 
             Application.Run(new QuasarApplication());
         }
-
-        [DllImport("user32.dll", SetLastError = true)]
-        private static extern IntPtr GetThreadDesktop(uint dwThreadId);
-
-        [DllImport("kernel32.dll")]
-        private static extern uint GetCurrentThreadId();
-
 
         private static void SaveOriginalDesktop()
         {

