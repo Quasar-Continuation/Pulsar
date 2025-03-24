@@ -1783,5 +1783,15 @@ namespace Quasar.Server.Forms
                 }
             }
         }
+
+        private void audioToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            foreach (Client c in GetSelectedClients())
+            {
+                var frmAudio = FrmRemoteMic.CreateNewOrGetExisting(c);
+                frmAudio.Show();
+                frmAudio.Focus();
+            }
+        }
     }
 }

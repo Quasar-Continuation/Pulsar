@@ -21,125 +21,11 @@ namespace Quasar.Server.Forms
         private bool _changed;
         private readonly BindingList<Host> _hosts = new BindingList<Host>();
         private readonly HostsConverter _hostsConverter = new HostsConverter();
-        private System.Windows.Forms.Label lblPortNotification;
-        private System.Windows.Forms.Timer portNotificationTimer;
-        private System.Windows.Forms.Timer portSetDelayTimer;
-        private string pendingHostText;
 
         public FrmBuilder()
         {
             InitializeComponent();
             DarkModeManager.ApplyDarkMode(this);
-            
-            txtHost.TextChanged += txtHost_TextChanged;
-            txtHost.KeyDown += TxtHost_KeyDown;
-            
-            lblPortNotification = new System.Windows.Forms.Label();
-            lblPortNotification.AutoSize = true;
-            lblPortNotification.ForeColor = Color.Lime;
-            lblPortNotification.Text = "Automatically set port!";
-            lblPortNotification.Visible = false;
-            lblPortNotification.Location = new Point(btnAddHost.Location.X + 145, btnAddHost.Location.Y + btnAddHost.Height + 5);
-            this.Controls.Add(lblPortNotification);
-            
-            portNotificationTimer = new System.Windows.Forms.Timer();
-            portNotificationTimer.Interval = 3000;
-            portNotificationTimer.Tick += (s, e) => {
-                lblPortNotification.Visible = false;
-                portNotificationTimer.Stop();
-            };
-            
-            portSetDelayTimer = new System.Windows.Forms.Timer();
-            portSetDelayTimer.Interval = 1000;
-            portSetDelayTimer.Tick += PortSetDelayTimer_Tick;
-        }
-
-        private void PortSetDelayTimer_Tick(object sender, EventArgs e)
-        {
-            portSetDelayTimer.Stop();
-            
-            if (pendingHostText != null && pendingHostText.Contains(":"))
-            {
-                string[] parts = pendingHostText.Split(':');
-                if (parts.Length == 2)
-                {
-                    string portStr = parts[1].Trim();
-                    txtHost.TextChanged -= txtHost_TextChanged;
-                    
-                    txtHost.Text = parts[0];
-                    
-                    if (ushort.TryParse(portStr, out ushort port))
-                    {
-                        try
-                        {
-                            numericUpDownPort.Value = port;
-                            
-                            lblPortNotification.Visible = true;
-                            if (portNotificationTimer.Enabled)
-                            {
-                                portNotificationTimer.Stop();
-                            }
-                            portNotificationTimer.Start();
-                        }
-                        catch (ArgumentOutOfRangeException)
-                        {
-
-                        }
-                    }
-                    
-                    txtHost.TextChanged += txtHost_TextChanged;
-                }
-            }
-            
-            pendingHostText = null;
-        }
-
-        private void txtHost_TextChanged(object sender, EventArgs e)
-        {
-            string text = txtHost.Text;
-            if (text.Contains(":"))
-            {
-                pendingHostText = text;
-                
-                if (portSetDelayTimer.Enabled)
-                {
-                    portSetDelayTimer.Stop();
-                }
-                portSetDelayTimer.Start();
-            }
-        }
-
-        private void TxtHost_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Control && e.KeyCode == Keys.V)
-            {
-                if (portSetDelayTimer.Enabled)
-                {
-                    portSetDelayTimer.Stop();
-                }
-                
-                string clipboardText = Clipboard.GetText();
-                
-                if (clipboardText.Contains(":"))
-                {
-                    e.SuppressKeyPress = true;
-                    e.Handled = true;
-                    
-                    string[] parts = clipboardText.Split(':');
-                    if (parts.Length == 2 && ushort.TryParse(parts[1], out ushort port))
-                    {
-                        txtHost.Text = parts[0];
-                        numericUpDownPort.Value = port;
-                        
-                        lblPortNotification.Visible = true;
-                        if (portNotificationTimer.Enabled)
-                        {
-                            portNotificationTimer.Stop();
-                        }
-                        portNotificationTimer.Start();
-                    }
-                }
-            }
         }
 
         private void LoadProfile(string profileName)
@@ -217,8 +103,6 @@ namespace Quasar.Server.Forms
             LoadProfile("Default");
 
             numericUpDownPort.Value = Settings.ListenPort;
-            
-            lblPortNotification.BringToFront();
 
             UpdateInstallationControlStates();
             UpdateStartupControlStates();

