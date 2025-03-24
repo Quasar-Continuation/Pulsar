@@ -264,6 +264,7 @@ namespace Quasar.Server.Networking
             if (mainForm != null)
             {
                 mainForm.EventLog("Started listening for connections on port: " + port.ToString(), "info");
+                mainForm.statusStrip.Items["listenToolStripStatusLabel"].Image = Quasar.Server.Properties.Resources.bullet_green;
             }
         }
 
@@ -423,6 +424,11 @@ namespace Quasar.Server.Networking
 
             ProcessingDisconnect = false;
             OnServerState(false);
+            FrmMain mainForm = Application.OpenForms.OfType<FrmMain>().FirstOrDefault();
+            if (mainForm != null)
+            {
+                mainForm.statusStrip.Items["listenToolStripStatusLabel"].Image = Quasar.Server.Properties.Resources.bullet_red;
+            }
         }
     }
 }

@@ -29,6 +29,14 @@
 		<CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
 	</PropertyGroup>
 	<ItemGroup>
+	  <None Include="Naudio\NAudio.Asio\NAudio.Asio.csproj" />
+	  <None Include="Naudio\NAudio.Core\NAudio.Core.csproj" />
+	  <None Include="Naudio\NAudio.Midi\NAudio.Midi.csproj" />
+	  <None Include="Naudio\NAudio.Wasapi\NAudio.Wasapi.csproj" />
+	  <None Include="Naudio\NAudio.WinForms\NAudio.WinForms.csproj" />
+	  <None Include="Naudio\NAudio.WinMM\NAudio.WinMM.csproj" />
+	</ItemGroup>
+	<ItemGroup>
 		<Reference Include="System.Configuration">
 			<Private>False</Private>
 		</Reference>
