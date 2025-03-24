@@ -366,7 +366,4 @@ SOFTWARE.</value>
   <data name="uac_shield" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Images\uac_shield.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="star_filled1" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\star_filled.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
 </root>
