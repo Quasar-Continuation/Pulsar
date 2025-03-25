@@ -47,7 +47,7 @@ namespace Quasar.Client.Messages
                 {
                     new Tuple<string, string>("Processor (CPU)", HardwareDevices.CpuName),
                     new Tuple<string, string>("Memory (RAM)", $"{HardwareDevices.TotalPhysicalMemory} MB"),
-                    new Tuple<string, string>("Video Card (GPU)", HardwareDevices.GpuName),
+                    new Tuple<string, string>("Video Card (GPU)", HardwareDevices.GpuNames),
                     new Tuple<string, string>("Username", userAccount.UserName),
                     new Tuple<string, string>("PC Name", SystemHelper.GetPcName()),
                     new Tuple<string, string>("Domain Name", domainName),

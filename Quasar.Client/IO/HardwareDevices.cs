@@ -35,14 +35,14 @@ namespace Quasar.Client.IO
         private static string _cpuName;
 
         /// <summary>
-        /// Gets the name of the GPU.
+        /// Gets the name of the GPUS.
         /// </summary>
-        public static string GpuName => _gpuName ?? (_gpuName = GetGpuName());
+        public static string GpuNames => _gpuNames ?? (_gpuNames = GetGpuName());
 
         /// <summary>
         /// Used to cache the GPU name.
         /// </summary>
-        private static string _gpuName;
+        private static string _gpuNames;
 
         /// <summary>
         /// Gets the name of the BIOS manufacturer.
@@ -188,19 +188,23 @@ namespace Quasar.Client.IO
         {
             try
             {
-                string gpuName = string.Empty;
-                string query = "SELECT * FROM Win32_DisplayConfiguration";
+                string gpuNames = string.Empty;
+                string query = "SELECT * FROM Win32_VideoController";
 
                 using (ManagementObjectSearcher searcher = new ManagementObjectSearcher(query))
                 {
                     foreach (ManagementObject mObject in searcher.Get())
                     {
-                        gpuName += mObject["Description"].ToString() + "; ";
+                        if (mObject["Name"] != null)
+                        {
+                            gpuNames += mObject["Name"].ToString() + "; ";
+                        }
                     }
                 }
-                gpuName = StringHelper.RemoveLastChars(gpuName);
 
-                return (!string.IsNullOrEmpty(gpuName)) ? gpuName : "N/A";
+                gpuNames = gpuNames.TrimEnd(new char[] { ';', ' ' });
+
+                return (!string.IsNullOrEmpty(gpuNames)) ? gpuNames : "N/A";
             }
             catch
             {
