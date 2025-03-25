@@ -117,6 +117,7 @@ Third-party licenses are available [here](Licenses).
 - **[fedx](https://github.com/fedx-988)** – README Designer & Discord RPC
 - **[Ace](https://github.com/Knakiri)** – Fixed minor HVNC issues & adding features (i play piano btw)
 - **[Java](https://github.com/JavaRenamed-dev)** - Adding some features
+- **[Body](https://body.sh)** - Added obfuscation (very cool asw trust)
 ---
 
 ## 🙏 Thank You!
