@@ -11,6 +11,7 @@ using Quasar.Server.Networking;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Windows.Forms;
 using Process = System.Diagnostics.Process;
 
@@ -554,6 +555,27 @@ namespace Quasar.Server.Forms
         {
             _fileManagerHandler.GetDirectoryContents(remotePath);
             SetStatusMessage(this, "Loading directory content...");
+        }
+
+        private void zipFolderToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (lstDirectory.SelectedItems.Count != 1) return;
+
+            var selectedItem = lstDirectory.SelectedItems[0];
+            var fileTag = (FileManagerListTag)selectedItem.Tag;
+
+            if (fileTag.Type != FileType.Directory)
+            {
+                MessageBox.Show("Please select a directory to zip.", "Zip Folder",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            string folderPath = GetAbsolutePath(selectedItem.SubItems[0].Text);
+            string zipFileName = $"{Path.GetFileName(folderPath)}.zip";
+            string destinationPath = Path.Combine(Path.GetDirectoryName(folderPath), zipFileName);
+
+            _fileManagerHandler.ZipFolder(folderPath, destinationPath, (int)CompressionLevel.Optimal);
         }
     }
 }

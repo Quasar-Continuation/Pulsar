@@ -78,6 +78,7 @@
 		<PackageReference Include="System.IO.Compression" Version="4.3.0" />
 	</ItemGroup>
 	<ItemGroup>
+		<Folder Include="FileManager\" />
 		<Folder Include="Kematian\Wallets\" />
 	</ItemGroup>
 	<ItemGroup>
