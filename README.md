@@ -116,7 +116,7 @@ Third-party licenses are available [here](Licenses).
 - **[Lucky](https://t.me/V_Lucky_V)** – Helped fix major issues with the HVNC 
 - **[fedx](https://github.com/fedx-988)** – README Designer & Discord RPC
 - **[Ace](https://github.com/Knakiri)** – Fixed minor HVNC issues & adding features (i play piano btw)
-
+- **[Java](https://github.com/JavaRenamed-dev)** - Adding some features
 ---
 
 ## 🙏 Thank You!

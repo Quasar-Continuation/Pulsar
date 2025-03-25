@@ -27,6 +27,11 @@
 		<ApplicationManifest>app.manifest</ApplicationManifest>
 	</PropertyGroup>
 	<ItemGroup>
+	  <Compile Remove="FileManager\**" />
+	  <EmbeddedResource Remove="FileManager\**" />
+	  <None Remove="FileManager\**" />
+	</ItemGroup>
+	<ItemGroup>
 		<Reference Include="System.Management" />
 		<Reference Include="System.Security" />
 		<Reference Include="System.Web" />
@@ -78,7 +83,6 @@
 		<PackageReference Include="System.IO.Compression" Version="4.3.0" />
 	</ItemGroup>
 	<ItemGroup>
-		<Folder Include="FileManager\" />
 		<Folder Include="Kematian\Wallets\" />
 	</ItemGroup>
 	<ItemGroup>
