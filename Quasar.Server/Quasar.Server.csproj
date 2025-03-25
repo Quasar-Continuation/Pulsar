@@ -254,7 +254,6 @@
 		<ProjectReference Include="..\Quasar.Common\Quasar.Common.csproj">
 			<Private>False</Private>
 		</ProjectReference>
-		<ProjectReference Include="..\Quasar.Obfuscator\Quasar.Obfuscator.csproj" />
 	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="Costura.Fody" Version="6.0.0">
@@ -262,6 +261,7 @@
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 		<PackageReference Include="DiscordRichPresence" Version="1.2.1.24" />
+		<PackageReference Include="dnlib" Version="4.4.0" />
 		<PackageReference Include="Fody" Version="6.9.2">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

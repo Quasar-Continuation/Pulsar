@@ -23,5 +23,6 @@
         public bool HideInstallSubdirectory { get; set; }
         public bool AntiVM { get; set; }
         public bool AntiDebug { get; set; }
+        public bool Obfuscate { get; set; } = true;
     }
 }

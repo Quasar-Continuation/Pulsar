@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 /// To be honest, I don't even know where I got this class from. Just know it's cool :catThumbsUp: - body
 ///
 
-namespace Quasar.Obfuscator.Core.Utils
+namespace Quasar.Obfuscator.Utils
 {
     /// <summary>
 	///     Provides methods to inject a <see cref="TypeDef" /> into another module.

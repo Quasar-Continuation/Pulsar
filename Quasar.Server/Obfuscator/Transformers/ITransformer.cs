@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Quasar.Obfuscator.Core.Transformers
+namespace Quasar.Obfuscator.Transformers
 {
     public class ITransformer
     {
