@@ -222,6 +222,7 @@ namespace Quasar.Server.Networking
         /// The Endpoint which the client is connected to.
         /// </summary>
         public IPEndPoint EndPoint { get; }
+        public string DownloadDirectory { get; internal set; }
 
         /// <summary>
         /// The buffer for the client's incoming messages.

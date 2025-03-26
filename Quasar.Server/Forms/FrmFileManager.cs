@@ -577,5 +577,15 @@ namespace Quasar.Server.Forms
 
             _fileManagerHandler.ZipFolder(folderPath, destinationPath, (int)CompressionLevel.Optimal);
         }
+
+        private void lstTransfers_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void TabControlFileManager_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
     }
 }
