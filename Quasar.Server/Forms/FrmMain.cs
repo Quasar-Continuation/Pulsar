@@ -26,6 +26,7 @@ using System.Text.Json;
 using System.Drawing;
 using System.Xml;
 using Quasar.Common.Messages.Monitoring.VirtualMonitor;
+using Newtonsoft.Json;
 
 namespace Quasar.Server.Forms
 {
@@ -795,15 +796,17 @@ namespace Quasar.Server.Forms
         private void AddClientToListview(Client client)
         {
             if (client == null) return;
+            string nickname = GetClientNickname(client);
 
             try
             {
                 ListViewItem lvi = new ListViewItem(new string[]
                 {
-                    " " + client.EndPoint.Address, client.Value.Tag,
+                    " " + client.EndPoint.Address, nickname, client.Value.Tag,
                     client.Value.UserAtPc, client.Value.Version, "Connected", "", "Active", client.Value.CountryWithCode,
                     client.Value.OperatingSystem, client.Value.AccountType
                 })
+
                 { Tag = client, ImageIndex = client.Value.ImageIndex };
 
                 lstClients.Invoke((MethodInvoker)delegate
@@ -823,6 +826,30 @@ namespace Quasar.Server.Forms
             catch (InvalidOperationException)
             {
             }
+        }
+
+        private string GetClientNickname(Client client)
+        {
+            string jsonFilePath = Path.Combine(client.Value.DownloadDirectory, "client_info.json");
+
+            try
+            {
+                ClientInfo clientInfo = LoadClientInfo(jsonFilePath);
+                return clientInfo.Nickname;
+            }
+            catch
+            {
+                return string.Empty;
+            }
+        }
+
+        private ClientInfo LoadClientInfo(string filePath)
+        {
+            if (!File.Exists(filePath))
+                return null; 
+
+            string json = File.ReadAllText(filePath);
+            return JsonConvert.DeserializeObject<ClientInfo>(json);
         }
 
         private void RemoveClientFromListview(Client client)
@@ -970,6 +997,34 @@ namespace Quasar.Server.Forms
             foreach (Client c in GetSelectedClients())
             {
                 c.Send(new DoDeElevate());
+            }
+        }
+
+        private void nicknameToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            foreach (Client c in GetSelectedClients())
+            {
+                FrmNickname frmSi = new FrmNickname(c);
+                frmSi.NicknameSaved += FrmSi_NicknameSaved;
+                frmSi.Show();
+                frmSi.Focus();
+            }
+        }
+
+        private void FrmSi_NicknameSaved(object sender, EventArgs e)
+        {
+            if (sender is FrmNickname frmNickname)
+            {
+                UpdateClientNickname(frmNickname.GetClient());
+            }
+        }
+
+        private void UpdateClientNickname(Client client)
+        {
+            var item = GetListViewItemByClient(client);
+            if (item != null)
+            {
+                item.SubItems[1].Text = GetClientNickname(client); 
             }
         }
 
