@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Windows.Forms;
 using System.Xml;
@@ -19,6 +19,17 @@ namespace Quasar.Server.Models
             set
             {
                 WriteValue("Hosts", value);
+            }
+        }
+        public string Pastebin
+        {
+            get
+            {
+                return ReadValueSafe("Pastebin");
+            }
+            set
+            {
+                WriteValue("Pastebin", value);
             }
         }
 
