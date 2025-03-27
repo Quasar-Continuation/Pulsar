@@ -112,7 +112,6 @@ namespace Quasar.Server.Forms
             }
             catch (Exception ex)
             {
-                // Log exception details for debugging purposes  
                 ShowErrorMessage($"An error occurred while saving the nickname: {ex.Message}");
             }
         }
@@ -140,19 +139,6 @@ namespace Quasar.Server.Forms
             }
 
             return downloadDir;
-        }
-
-        private void SetHiddenAttribute(string directoryPath)
-        {
-            try
-            {
-                File.SetAttributes(directoryPath, FileAttributes.Hidden);
-            }
-            catch (Exception ex)
-            {
-                // Log the failure to set hidden attribute
-                ShowErrorMessage($"Failed to set hidden attribute: {ex.Message}");
-            }
         }
 
         public Client GetClient()
