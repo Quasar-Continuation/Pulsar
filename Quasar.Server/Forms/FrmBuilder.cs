@@ -1,4 +1,4 @@
-﻿using Quasar.Common.DNS;
+using Quasar.Common.DNS;
 using Quasar.Common.Helpers;
 using Quasar.Server.Build;
 using Quasar.Server.Forms.DarkMode;
@@ -20,8 +20,9 @@ namespace Quasar.Server.Forms
         private bool _profileLoaded;
         private bool _changed;
         private readonly BindingList<Host> _hosts = new BindingList<Host>();
+
         private readonly HostsConverter _hostsConverter = new HostsConverter();
-        private System.Windows.Forms.Label lblPortNotification;
+        private Label lblPortNotification;
         private System.Windows.Forms.Timer portNotificationTimer;
         private System.Windows.Forms.Timer portSetDelayTimer;
         private string pendingHostText;
@@ -30,50 +31,64 @@ namespace Quasar.Server.Forms
         {
             InitializeComponent();
             DarkModeManager.ApplyDarkMode(this);
-            
+
             txtHost.TextChanged += txtHost_TextChanged;
             txtHost.KeyDown += TxtHost_KeyDown;
-            
-            lblPortNotification = new System.Windows.Forms.Label();
+
+            lblPortNotification = new Label();
             lblPortNotification.AutoSize = true;
             lblPortNotification.ForeColor = Color.Lime;
             lblPortNotification.Text = "Automatically set port!";
             lblPortNotification.Visible = false;
             lblPortNotification.Location = new Point(btnAddHost.Location.X + 145, btnAddHost.Location.Y + btnAddHost.Height + 5);
             this.Controls.Add(lblPortNotification);
-            
+
             portNotificationTimer = new System.Windows.Forms.Timer();
             portNotificationTimer.Interval = 3000;
             portNotificationTimer.Tick += (s, e) => {
                 lblPortNotification.Visible = false;
                 portNotificationTimer.Stop();
             };
-            
+
             portSetDelayTimer = new System.Windows.Forms.Timer();
             portSetDelayTimer.Interval = 1000;
             portSetDelayTimer.Tick += PortSetDelayTimer_Tick;
         }
 
+        private bool IsValidHostPortFormat(string text)
+        {
+            string[] protocolPrefixes = { "http://", "https://", "ftp://", "sftp://" };
+            if (protocolPrefixes.Any(p => text.Trim().StartsWith(p, StringComparison.OrdinalIgnoreCase)))
+            {
+                return false;
+            }
+
+            string[] parts = text.Split(':');
+            return parts.Length == 2 &&
+                   !string.IsNullOrWhiteSpace(parts[0]) &&
+                   ushort.TryParse(parts[1].Trim(), out _);
+        }
+
         private void PortSetDelayTimer_Tick(object sender, EventArgs e)
         {
             portSetDelayTimer.Stop();
-            
-            if (pendingHostText != null && pendingHostText.Contains(":"))
+
+            if (pendingHostText != null && IsValidHostPortFormat(pendingHostText))
             {
                 string[] parts = pendingHostText.Split(':');
                 if (parts.Length == 2)
                 {
                     string portStr = parts[1].Trim();
                     txtHost.TextChanged -= txtHost_TextChanged;
-                    
+
                     txtHost.Text = parts[0];
-                    
+
                     if (ushort.TryParse(portStr, out ushort port))
                     {
                         try
                         {
                             numericUpDownPort.Value = port;
-                            
+
                             lblPortNotification.Visible = true;
                             if (portNotificationTimer.Enabled)
                             {
@@ -83,14 +98,14 @@ namespace Quasar.Server.Forms
                         }
                         catch (ArgumentOutOfRangeException)
                         {
-
+                            // Silently handle out of range port
                         }
                     }
-                    
+
                     txtHost.TextChanged += txtHost_TextChanged;
                 }
             }
-            
+
             pendingHostText = null;
         }
 
@@ -100,7 +115,7 @@ namespace Quasar.Server.Forms
             if (text.Contains(":"))
             {
                 pendingHostText = text;
-                
+
                 if (portSetDelayTimer.Enabled)
                 {
                     portSetDelayTimer.Stop();
@@ -117,26 +132,30 @@ namespace Quasar.Server.Forms
                 {
                     portSetDelayTimer.Stop();
                 }
-                
+
                 string clipboardText = Clipboard.GetText();
-                
+
                 if (clipboardText.Contains(":"))
                 {
-                    e.SuppressKeyPress = true;
-                    e.Handled = true;
-                    
-                    string[] parts = clipboardText.Split(':');
-                    if (parts.Length == 2 && ushort.TryParse(parts[1], out ushort port))
+                    // Check if the clipboard text is a valid host:port format
+                    if (IsValidHostPortFormat(clipboardText))
                     {
-                        txtHost.Text = parts[0];
-                        numericUpDownPort.Value = port;
-                        
-                        lblPortNotification.Visible = true;
-                        if (portNotificationTimer.Enabled)
+                        e.SuppressKeyPress = true;
+                        e.Handled = true;
+
+                        string[] parts = clipboardText.Split(':');
+                        if (ushort.TryParse(parts[1], out ushort port))
                         {
-                            portNotificationTimer.Stop();
+                            txtHost.Text = parts[0];
+                            numericUpDownPort.Value = port;
+
+                            lblPortNotification.Visible = true;
+                            if (portNotificationTimer.Enabled)
+                            {
+                                portNotificationTimer.Stop();
+                            }
+                            portNotificationTimer.Start();
                         }
-                        portNotificationTimer.Start();
                     }
                 }
             }
@@ -187,6 +206,7 @@ namespace Quasar.Server.Forms
             profile.Hosts = _hostsConverter.ListToRawHosts(_hosts);
             profile.Delay = (int)numericUpDownDelay.Value;
             profile.Mutex = txtMutex.Text;
+            profile.Pastebin = txtPastebin.Text;
             profile.InstallClient = chkInstall.Checked;
             profile.InstallName = txtInstallName.Text;
             profile.InstallPath = GetInstallPath();
@@ -217,7 +237,7 @@ namespace Quasar.Server.Forms
             LoadProfile("Default");
 
             numericUpDownPort.Value = Settings.ListenPort;
-            
+
             lblPortNotification.BringToFront();
 
             UpdateInstallationControlStates();
@@ -376,14 +396,27 @@ namespace Quasar.Server.Forms
         private BuildOptions GetBuildOptions()
         {
             BuildOptions options = new BuildOptions();
-            if (!CheckForEmptyInput())
+            if (!CheckForEmptyInput() && !checkBox1.Checked)
             {
                 throw new Exception("Please fill out all required fields!");
             }
 
             options.Tag = txtTag.Text;
             options.Mutex = txtMutex.Text;
-            options.RawHosts = _hostsConverter.ListToRawHosts(_hosts);
+            if (checkBox1.Checked)
+            {
+                options.RawHosts = txtPastebin.Text;
+                options.Pastebin = txtPastebin.Text;
+            }
+            else
+            {
+                options.Pastebin = "";
+                options.RawHosts = _hostsConverter.ListToRawHosts(_hosts);
+            }
+                
+                
+
+            
             options.Delay = (int)numericUpDownDelay.Value;
             options.IconPath = txtIconPath.Text;
             options.Version = Application.ProductVersion;
@@ -406,7 +439,7 @@ namespace Quasar.Server.Forms
                 throw new Exception("Could not locate \"client.bin\" file. It should be in the same directory as Quasar.");
             }
 
-            if (options.RawHosts.Length < 2)
+            if (options.RawHosts.Length < 2 && !checkBox1.Checked)
             {
                 throw new Exception("Please enter a valid host to connect to.");
             }
@@ -653,6 +686,26 @@ namespace Quasar.Server.Forms
             HasChanged();
 
             RefreshPreviewPath();
+        }
+
+        private void txtHost_TextChanged_1(object sender, EventArgs e)
+        {
+
+        }
+
+        private void builderTabs_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void connectionPage_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void txtPastebin_TextChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }

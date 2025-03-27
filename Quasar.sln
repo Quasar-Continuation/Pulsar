@@ -1,10 +1,9 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.12.35527.113 d17.12
+VisualStudioVersion = 17.12.35527.113
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Quasar.Server", "Quasar.Server\Quasar.Server.csproj", "{14CA405B-8BAC-48AB-9FBA-8FB5DF88FD0D}"
 	ProjectSection(ProjectDependencies) = postProject
-		{626B2932-150C-44D2-8453-42BE1B8C78BC} = {626B2932-150C-44D2-8453-42BE1B8C78BC}
 		{9F5CF56A-DDB2-4F40-AB99-2A1DC47588E1} = {9F5CF56A-DDB2-4F40-AB99-2A1DC47588E1}
 	EndProjectSection
 EndProject
@@ -13,8 +12,6 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Quasar.Common", "Quasar.Common\Quasar.Common.csproj", "{C7C363BA-E5B6-4E18-9224-39BC8DA73172}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Quasar.Common.Tests", "Quasar.Common.Tests\Quasar.Common.Tests.csproj", "{32A2A734-7429-47E6-A362-E344A19C0D85}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Quasar.Obfuscator", "Quasar.Obfuscator\Quasar.Obfuscator.csproj", "{626B2932-150C-44D2-8453-42BE1B8C78BC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -38,10 +35,6 @@ Global
 		{32A2A734-7429-47E6-A362-E344A19C0D85}.Debug|AnyCPU.Build.0 = Debug|Any CPU
 		{32A2A734-7429-47E6-A362-E344A19C0D85}.Release|AnyCPU.ActiveCfg = Release|Any CPU
 		{32A2A734-7429-47E6-A362-E344A19C0D85}.Release|AnyCPU.Build.0 = Release|Any CPU
-		{626B2932-150C-44D2-8453-42BE1B8C78BC}.Debug|AnyCPU.ActiveCfg = Debug|Any CPU
-		{626B2932-150C-44D2-8453-42BE1B8C78BC}.Debug|AnyCPU.Build.0 = Debug|Any CPU
-		{626B2932-150C-44D2-8453-42BE1B8C78BC}.Release|AnyCPU.ActiveCfg = Release|Any CPU
-		{626B2932-150C-44D2-8453-42BE1B8C78BC}.Release|AnyCPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

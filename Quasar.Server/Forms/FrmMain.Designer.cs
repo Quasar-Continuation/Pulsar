@@ -19,9 +19,18 @@ namespace Quasar.Server.Forms
         {
             if (disposing && (components != null))
             {
-                components.Dispose();
+                if (this.IsHandleCreated)
+                {
+                    components.Dispose();
+                }
             }
-            base.Dispose(disposing);
+            try
+            {
+                base.Dispose(disposing);
+            } catch
+            {
+            }
+            
         }
 
         #region Vom Windows Form-Designer generierter Code
@@ -34,13 +43,14 @@ namespace Quasar.Server.Forms
         {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FrmMain));
+            Quasar.Server.Utilities.ListViewColumnSorter listViewColumnSorter1 = new Quasar.Server.Utilities.ListViewColumnSorter();
             System.Windows.Forms.ListViewItem listViewItem1 = new System.Windows.Forms.ListViewItem("CPU");
             System.Windows.Forms.ListViewItem listViewItem2 = new System.Windows.Forms.ListViewItem("GPU");
             System.Windows.Forms.ListViewItem listViewItem3 = new System.Windows.Forms.ListViewItem("RAM");
             System.Windows.Forms.ListViewItem listViewItem4 = new System.Windows.Forms.ListViewItem("Uptime");
             System.Windows.Forms.ListViewItem listViewItem5 = new System.Windows.Forms.ListViewItem("Antivirus");
+            System.Windows.Forms.ListViewItem listViewItem6 = new System.Windows.Forms.ListViewItem("Default Browser");
             Quasar.Server.Utilities.ListViewColumnSorter listViewColumnSorter2 = new Quasar.Server.Utilities.ListViewColumnSorter();
-            Quasar.Server.Utilities.ListViewColumnSorter listViewColumnSorter1 = new Quasar.Server.Utilities.ListViewColumnSorter();
             Quasar.Server.Utilities.ListViewColumnSorter listViewColumnSorter3 = new Quasar.Server.Utilities.ListViewColumnSorter();
             Quasar.Server.Utilities.ListViewColumnSorter listViewColumnSorter4 = new Quasar.Server.Utilities.ListViewColumnSorter();
             this.contextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
@@ -62,12 +72,14 @@ namespace Quasar.Server.Forms
             this.restartToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.standbyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.surveillanceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.passwordRecoveryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.keyloggerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.remoteDesktopToolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
             this.webcamToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.audioToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.hVNCToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.keyloggerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.passwordRecoveryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.kematianGrabbingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.installVirtualMonitorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.userSupportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.remoteScriptingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.showMessageboxToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -97,20 +109,6 @@ namespace Quasar.Server.Forms
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.splitter1 = new System.Windows.Forms.Splitter();
             this.panel1 = new System.Windows.Forms.Panel();
-            this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
-            this.label1 = new System.Windows.Forms.Label();
-            this.pictureBoxMain = new System.Windows.Forms.PictureBox();
-            this.gBoxClientInfo = new System.Windows.Forms.GroupBox();
-            this.listView1 = new Quasar.Server.Controls.AeroListView();
-            this.Names = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.Stats = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
-            this.btnQuickKeylogger = new System.Windows.Forms.Button();
-            this.btnQuickFileTransfer = new System.Windows.Forms.Button();
-            this.btnQuickRemoteShell = new System.Windows.Forms.Button();
-            this.btnQuickFileExplorer = new System.Windows.Forms.Button();
-            this.btnQuickRemoteDesktop = new System.Windows.Forms.Button();
-            this.btnQuickWebcam = new System.Windows.Forms.Button();
             this.lstClients = new Quasar.Server.Controls.AeroListView();
             this.hIP = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.hTag = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -122,6 +120,20 @@ namespace Quasar.Server.Forms
             this.hCountry = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.hOS = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.hAccountType = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
+            this.label1 = new System.Windows.Forms.Label();
+            this.pictureBoxMain = new System.Windows.Forms.PictureBox();
+            this.gBoxClientInfo = new System.Windows.Forms.GroupBox();
+            this.clientInfoListView = new Quasar.Server.Controls.AeroListView();
+            this.Names = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.Stats = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
+            this.btnQuickKeylogger = new System.Windows.Forms.Button();
+            this.btnQuickFileTransfer = new System.Windows.Forms.Button();
+            this.btnQuickRemoteShell = new System.Windows.Forms.Button();
+            this.btnQuickFileExplorer = new System.Windows.Forms.Button();
+            this.btnQuickRemoteDesktop = new System.Windows.Forms.Button();
+            this.btnQuickWebcam = new System.Windows.Forms.Button();
             this.DebugLogRichBox = new System.Windows.Forms.RichTextBox();
             this.DebugContextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.saveLogsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -182,7 +194,6 @@ namespace Quasar.Server.Forms
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.settingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.builderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStrip.SuspendLayout();
             this.tableLayoutPanel.SuspendLayout();
             this.MainTabControl.SuspendLayout();
@@ -371,38 +382,24 @@ namespace Quasar.Server.Forms
             // surveillanceToolStripMenuItem
             // 
             this.surveillanceToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.passwordRecoveryToolStripMenuItem,
-            this.keyloggerToolStripMenuItem,
             this.remoteDesktopToolStripMenuItem2,
             this.webcamToolStripMenuItem,
+            this.audioToolStripMenuItem,
             this.hVNCToolStripMenuItem,
-            this.kematianGrabbingToolStripMenuItem});
+            this.keyloggerToolStripMenuItem,
+            this.passwordRecoveryToolStripMenuItem,
+            this.kematianGrabbingToolStripMenuItem,
+            this.installVirtualMonitorToolStripMenuItem});
             this.surveillanceToolStripMenuItem.Image = global::Quasar.Server.Properties.Resources.monitoring;
             this.surveillanceToolStripMenuItem.Name = "surveillanceToolStripMenuItem";
             this.surveillanceToolStripMenuItem.Size = new System.Drawing.Size(179, 22);
             this.surveillanceToolStripMenuItem.Text = "Monitoring";
             // 
-            // passwordRecoveryToolStripMenuItem
-            // 
-            this.passwordRecoveryToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("passwordRecoveryToolStripMenuItem.Image")));
-            this.passwordRecoveryToolStripMenuItem.Name = "passwordRecoveryToolStripMenuItem";
-            this.passwordRecoveryToolStripMenuItem.Size = new System.Drawing.Size(176, 22);
-            this.passwordRecoveryToolStripMenuItem.Text = "Password Recovery";
-            this.passwordRecoveryToolStripMenuItem.Click += new System.EventHandler(this.passwordRecoveryToolStripMenuItem_Click);
-            // 
-            // keyloggerToolStripMenuItem
-            // 
-            this.keyloggerToolStripMenuItem.Image = global::Quasar.Server.Properties.Resources.keyboard_magnify;
-            this.keyloggerToolStripMenuItem.Name = "keyloggerToolStripMenuItem";
-            this.keyloggerToolStripMenuItem.Size = new System.Drawing.Size(176, 22);
-            this.keyloggerToolStripMenuItem.Text = "Keylogger";
-            this.keyloggerToolStripMenuItem.Click += new System.EventHandler(this.keyloggerToolStripMenuItem_Click);
-            // 
             // remoteDesktopToolStripMenuItem2
             // 
             this.remoteDesktopToolStripMenuItem2.Image = ((System.Drawing.Image)(resources.GetObject("remoteDesktopToolStripMenuItem2.Image")));
             this.remoteDesktopToolStripMenuItem2.Name = "remoteDesktopToolStripMenuItem2";
-            this.remoteDesktopToolStripMenuItem2.Size = new System.Drawing.Size(176, 22);
+            this.remoteDesktopToolStripMenuItem2.Size = new System.Drawing.Size(188, 22);
             this.remoteDesktopToolStripMenuItem2.Text = "Remote Desktop";
             this.remoteDesktopToolStripMenuItem2.Click += new System.EventHandler(this.remoteDesktopToolStripMenuItem_Click);
             // 
@@ -410,25 +407,57 @@ namespace Quasar.Server.Forms
             // 
             this.webcamToolStripMenuItem.Image = global::Quasar.Server.Properties.Resources.webcam;
             this.webcamToolStripMenuItem.Name = "webcamToolStripMenuItem";
-            this.webcamToolStripMenuItem.Size = new System.Drawing.Size(176, 22);
+            this.webcamToolStripMenuItem.Size = new System.Drawing.Size(188, 22);
             this.webcamToolStripMenuItem.Text = "Webcam";
             this.webcamToolStripMenuItem.Click += new System.EventHandler(this.webcamToolStripMenuItem_Click);
+            // 
+            // audioToolStripMenuItem
+            // 
+            this.audioToolStripMenuItem.Image = global::Quasar.Server.Properties.Resources.sound;
+            this.audioToolStripMenuItem.Name = "audioToolStripMenuItem";
+            this.audioToolStripMenuItem.Size = new System.Drawing.Size(188, 22);
+            this.audioToolStripMenuItem.Text = "Remote Microphone";
+            this.audioToolStripMenuItem.Click += new System.EventHandler(this.audioToolStripMenuItem_Click);
             // 
             // hVNCToolStripMenuItem
             // 
             this.hVNCToolStripMenuItem.Image = global::Quasar.Server.Properties.Resources.ruby;
             this.hVNCToolStripMenuItem.Name = "hVNCToolStripMenuItem";
-            this.hVNCToolStripMenuItem.Size = new System.Drawing.Size(176, 22);
+            this.hVNCToolStripMenuItem.Size = new System.Drawing.Size(188, 22);
             this.hVNCToolStripMenuItem.Text = "HVNC";
             this.hVNCToolStripMenuItem.Click += new System.EventHandler(this.hVNCToolStripMenuItem_Click);
+            // 
+            // keyloggerToolStripMenuItem
+            // 
+            this.keyloggerToolStripMenuItem.Image = global::Quasar.Server.Properties.Resources.keyboard_magnify;
+            this.keyloggerToolStripMenuItem.Name = "keyloggerToolStripMenuItem";
+            this.keyloggerToolStripMenuItem.Size = new System.Drawing.Size(188, 22);
+            this.keyloggerToolStripMenuItem.Text = "Keylogger";
+            this.keyloggerToolStripMenuItem.Click += new System.EventHandler(this.keyloggerToolStripMenuItem_Click);
+            // 
+            // passwordRecoveryToolStripMenuItem
+            // 
+            this.passwordRecoveryToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("passwordRecoveryToolStripMenuItem.Image")));
+            this.passwordRecoveryToolStripMenuItem.Name = "passwordRecoveryToolStripMenuItem";
+            this.passwordRecoveryToolStripMenuItem.Size = new System.Drawing.Size(188, 22);
+            this.passwordRecoveryToolStripMenuItem.Text = "Password Recovery";
+            this.passwordRecoveryToolStripMenuItem.Click += new System.EventHandler(this.passwordRecoveryToolStripMenuItem_Click);
             // 
             // kematianGrabbingToolStripMenuItem
             // 
             this.kematianGrabbingToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("kematianGrabbingToolStripMenuItem.Image")));
             this.kematianGrabbingToolStripMenuItem.Name = "kematianGrabbingToolStripMenuItem";
-            this.kematianGrabbingToolStripMenuItem.Size = new System.Drawing.Size(176, 22);
+            this.kematianGrabbingToolStripMenuItem.Size = new System.Drawing.Size(188, 22);
             this.kematianGrabbingToolStripMenuItem.Text = "Kematian Grabbing";
             this.kematianGrabbingToolStripMenuItem.Click += new System.EventHandler(this.kematianGrabbingToolStripMenuItem_Click);
+            // 
+            // installVirtualMonitorToolStripMenuItem
+            // 
+            this.installVirtualMonitorToolStripMenuItem.Image = global::Quasar.Server.Properties.Resources.monitor;
+            this.installVirtualMonitorToolStripMenuItem.Name = "installVirtualMonitorToolStripMenuItem";
+            this.installVirtualMonitorToolStripMenuItem.Size = new System.Drawing.Size(188, 22);
+            this.installVirtualMonitorToolStripMenuItem.Text = "Install Virtual Monitor";
+            this.installVirtualMonitorToolStripMenuItem.Click += new System.EventHandler(this.installVirtualMonitorToolStripMenuItem_Click);
             // 
             // userSupportToolStripMenuItem
             // 
@@ -946,6 +975,91 @@ namespace Quasar.Server.Forms
             this.panel1.Size = new System.Drawing.Size(1222, 378);
             this.panel1.TabIndex = 33;
             // 
+            // lstClients
+            // 
+            this.lstClients.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.hIP,
+            this.hTag,
+            this.hUserPC,
+            this.hVersion,
+            this.hStatus,
+            this.hCurrentWindow,
+            this.hUserStatus,
+            this.hCountry,
+            this.hOS,
+            this.hAccountType});
+            this.lstClients.ContextMenuStrip = this.contextMenuStrip;
+            this.lstClients.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lstClients.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lstClients.FullRowSelect = true;
+            this.lstClients.HideSelection = false;
+            this.lstClients.Location = new System.Drawing.Point(0, 0);
+            listViewColumnSorter1.NeedNumberCompare = false;
+            listViewColumnSorter1.Order = System.Windows.Forms.SortOrder.None;
+            listViewColumnSorter1.SortColumn = 0;
+            this.lstClients.LvwColumnSorter = listViewColumnSorter1;
+            this.lstClients.Name = "lstClients";
+            this.lstClients.ShowItemToolTips = true;
+            this.lstClients.Size = new System.Drawing.Size(945, 378);
+            this.lstClients.SmallImageList = this.imgFlags;
+            this.lstClients.TabIndex = 1;
+            this.lstClients.UseCompatibleStateImageBehavior = false;
+            this.lstClients.View = System.Windows.Forms.View.Details;
+            this.lstClients.ColumnWidthChanged += new System.Windows.Forms.ColumnWidthChangedEventHandler(this.lstClients_ColumnWidthChanged);
+            this.lstClients.DrawItem += new System.Windows.Forms.DrawListViewItemEventHandler(this.lstClients_DrawItem);
+            this.lstClients.SelectedIndexChanged += new System.EventHandler(this.lstClients_SelectedIndexChanged);
+            this.lstClients.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.lstClients_MouseWheel);
+            this.lstClients.Resize += new System.EventHandler(this.lstClients_Resize);
+            // 
+            // hIP
+            // 
+            this.hIP.Text = "IP Address";
+            this.hIP.Width = 112;
+            // 
+            // hTag
+            // 
+            this.hTag.Text = "Tag";
+            // 
+            // hUserPC
+            // 
+            this.hUserPC.Text = "User@PC";
+            this.hUserPC.Width = 175;
+            // 
+            // hVersion
+            // 
+            this.hVersion.Text = "Version";
+            this.hVersion.Width = 66;
+            // 
+            // hStatus
+            // 
+            this.hStatus.Text = "Status";
+            this.hStatus.Width = 78;
+            // 
+            // hCurrentWindow
+            // 
+            this.hCurrentWindow.Text = "Current Window";
+            this.hCurrentWindow.Width = 200;
+            // 
+            // hUserStatus
+            // 
+            this.hUserStatus.Text = "User Status";
+            this.hUserStatus.Width = 72;
+            // 
+            // hCountry
+            // 
+            this.hCountry.Text = "Country";
+            this.hCountry.Width = 117;
+            // 
+            // hOS
+            // 
+            this.hOS.Text = "Operating System";
+            this.hOS.Width = 222;
+            // 
+            // hAccountType
+            // 
+            this.hAccountType.Text = "Account Type";
+            this.hAccountType.Width = 116;
+            // 
             // tableLayoutPanel1
             // 
             this.tableLayoutPanel1.ColumnCount = 1;
@@ -991,7 +1105,7 @@ namespace Quasar.Server.Forms
             // 
             // gBoxClientInfo
             // 
-            this.gBoxClientInfo.Controls.Add(this.listView1);
+            this.gBoxClientInfo.Controls.Add(this.clientInfoListView);
             this.gBoxClientInfo.Dock = System.Windows.Forms.DockStyle.Fill;
             this.gBoxClientInfo.Location = new System.Drawing.Point(2, 212);
             this.gBoxClientInfo.Margin = new System.Windows.Forms.Padding(2);
@@ -1001,31 +1115,32 @@ namespace Quasar.Server.Forms
             this.gBoxClientInfo.TabStop = false;
             this.gBoxClientInfo.Text = "Client Info";
             // 
-            // listView1
+            // clientInfoListView
             // 
-            this.listView1.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.clientInfoListView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.Names,
             this.Stats});
-            this.listView1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.listView1.FullRowSelect = true;
-            this.listView1.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.None;
-            this.listView1.HideSelection = false;
-            this.listView1.Items.AddRange(new System.Windows.Forms.ListViewItem[] {
+            this.clientInfoListView.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.clientInfoListView.FullRowSelect = true;
+            this.clientInfoListView.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.None;
+            this.clientInfoListView.HideSelection = false;
+            this.clientInfoListView.Items.AddRange(new System.Windows.Forms.ListViewItem[] {
             listViewItem1,
             listViewItem2,
             listViewItem3,
             listViewItem4,
-            listViewItem5});
-            this.listView1.Location = new System.Drawing.Point(3, 18);
+            listViewItem5,
+            listViewItem6});
+            this.clientInfoListView.Location = new System.Drawing.Point(3, 18);
             listViewColumnSorter2.NeedNumberCompare = false;
             listViewColumnSorter2.Order = System.Windows.Forms.SortOrder.None;
             listViewColumnSorter2.SortColumn = 0;
-            this.listView1.LvwColumnSorter = listViewColumnSorter2;
-            this.listView1.Name = "listView1";
-            this.listView1.Size = new System.Drawing.Size(267, 143);
-            this.listView1.TabIndex = 0;
-            this.listView1.UseCompatibleStateImageBehavior = false;
-            this.listView1.View = System.Windows.Forms.View.Details;
+            this.clientInfoListView.LvwColumnSorter = listViewColumnSorter2;
+            this.clientInfoListView.Name = "clientInfoListView";
+            this.clientInfoListView.Size = new System.Drawing.Size(267, 143);
+            this.clientInfoListView.TabIndex = 0;
+            this.clientInfoListView.UseCompatibleStateImageBehavior = false;
+            this.clientInfoListView.View = System.Windows.Forms.View.Details;
             // 
             // Names
             // 
@@ -1121,91 +1236,6 @@ namespace Quasar.Server.Forms
             this.btnQuickWebcam.TabIndex = 3;
             this.btnQuickWebcam.UseVisualStyleBackColor = true;
             this.btnQuickWebcam.Click += new System.EventHandler(this.button1_Click);
-            // 
-            // lstClients
-            // 
-            this.lstClients.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.hIP,
-            this.hTag,
-            this.hUserPC,
-            this.hVersion,
-            this.hStatus,
-            this.hCurrentWindow,
-            this.hUserStatus,
-            this.hCountry,
-            this.hOS,
-            this.hAccountType});
-            this.lstClients.ContextMenuStrip = this.contextMenuStrip;
-            this.lstClients.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lstClients.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lstClients.FullRowSelect = true;
-            this.lstClients.HideSelection = false;
-            this.lstClients.Location = new System.Drawing.Point(0, 0);
-            listViewColumnSorter1.NeedNumberCompare = false;
-            listViewColumnSorter1.Order = System.Windows.Forms.SortOrder.None;
-            listViewColumnSorter1.SortColumn = 0;
-            this.lstClients.LvwColumnSorter = listViewColumnSorter1;
-            this.lstClients.Name = "lstClients";
-            this.lstClients.ShowItemToolTips = true;
-            this.lstClients.Size = new System.Drawing.Size(945, 378);
-            this.lstClients.SmallImageList = this.imgFlags;
-            this.lstClients.TabIndex = 1;
-            this.lstClients.UseCompatibleStateImageBehavior = false;
-            this.lstClients.View = System.Windows.Forms.View.Details;
-            this.lstClients.ColumnWidthChanged += new System.Windows.Forms.ColumnWidthChangedEventHandler(this.lstClients_ColumnWidthChanged);
-            this.lstClients.DrawItem += new System.Windows.Forms.DrawListViewItemEventHandler(this.lstClients_DrawItem);
-            this.lstClients.SelectedIndexChanged += new System.EventHandler(this.lstClients_SelectedIndexChanged);
-            this.lstClients.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.lstClients_MouseWheel);
-            this.lstClients.Resize += new System.EventHandler(this.lstClients_Resize);
-            // 
-            // hIP
-            // 
-            this.hIP.Text = "IP Address";
-            this.hIP.Width = 112;
-            // 
-            // hTag
-            // 
-            this.hTag.Text = "Tag";
-            // 
-            // hUserPC
-            // 
-            this.hUserPC.Text = "User@PC";
-            this.hUserPC.Width = 175;
-            // 
-            // hVersion
-            // 
-            this.hVersion.Text = "Version";
-            this.hVersion.Width = 66;
-            // 
-            // hStatus
-            // 
-            this.hStatus.Text = "Status";
-            this.hStatus.Width = 78;
-            // 
-            // hCurrentWindow
-            // 
-            this.hCurrentWindow.Text = "Current Window";
-            this.hCurrentWindow.Width = 200;
-            // 
-            // hUserStatus
-            // 
-            this.hUserStatus.Text = "User Status";
-            this.hUserStatus.Width = 72;
-            // 
-            // hCountry
-            // 
-            this.hCountry.Text = "Country";
-            this.hCountry.Width = 117;
-            // 
-            // hOS
-            // 
-            this.hOS.Text = "Operating System";
-            this.hOS.Width = 222;
-            // 
-            // hAccountType
-            // 
-            this.hAccountType.Text = "Account Type";
-            this.hAccountType.Width = 116;
             // 
             // DebugLogRichBox
             // 
@@ -1686,17 +1716,21 @@ namespace Quasar.Server.Forms
             // 
             // listenToolStripStatusLabel
             // 
+            this.listenToolStripStatusLabel.Image = global::Quasar.Server.Properties.Resources.bullet_red;
+            this.listenToolStripStatusLabel.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.listenToolStripStatusLabel.ImageTransparentColor = System.Drawing.Color.White;
             this.listenToolStripStatusLabel.Name = "listenToolStripStatusLabel";
-            this.listenToolStripStatusLabel.Size = new System.Drawing.Size(87, 17);
+            this.listenToolStripStatusLabel.Size = new System.Drawing.Size(103, 17);
             this.listenToolStripStatusLabel.Text = "Listening: False";
             // 
             // connectedToolStripStatusLabel
             // 
             this.connectedToolStripStatusLabel.ForeColor = System.Drawing.Color.Black;
+            this.connectedToolStripStatusLabel.Image = global::Quasar.Server.Properties.Resources.status_online;
+            this.connectedToolStripStatusLabel.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.connectedToolStripStatusLabel.ImageTransparentColor = System.Drawing.Color.White;
             this.connectedToolStripStatusLabel.Name = "connectedToolStripStatusLabel";
-            this.connectedToolStripStatusLabel.Size = new System.Drawing.Size(77, 17);
+            this.connectedToolStripStatusLabel.Size = new System.Drawing.Size(93, 17);
             this.connectedToolStripStatusLabel.Text = "Connected: 0";
             // 
             // menuStrip
@@ -1712,8 +1746,7 @@ namespace Quasar.Server.Forms
             this.notificationCentreToolStripMenuItem,
             this.aboutToolStripMenuItem,
             this.settingsToolStripMenuItem,
-            this.builderToolStripMenuItem,
-            this.toolStripMenuItem1});
+            this.builderToolStripMenuItem});
             this.menuStrip.Location = new System.Drawing.Point(0, 0);
             this.menuStrip.Name = "menuStrip";
             this.menuStrip.Size = new System.Drawing.Size(1230, 25);
@@ -1721,33 +1754,37 @@ namespace Quasar.Server.Forms
             // 
             // clientsToolStripMenuItem
             // 
+            this.clientsToolStripMenuItem.Image = global::Quasar.Server.Properties.Resources.user;
             this.clientsToolStripMenuItem.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.clientsToolStripMenuItem.Name = "clientsToolStripMenuItem";
-            this.clientsToolStripMenuItem.Size = new System.Drawing.Size(55, 21);
+            this.clientsToolStripMenuItem.Size = new System.Drawing.Size(71, 21);
             this.clientsToolStripMenuItem.Text = "Clients";
             this.clientsToolStripMenuItem.Click += new System.EventHandler(this.clientsToolStripMenuItem_Click);
             // 
             // autoTasksToolStripMenuItem
             // 
+            this.autoTasksToolStripMenuItem.Image = global::Quasar.Server.Properties.Resources.server;
             this.autoTasksToolStripMenuItem.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.autoTasksToolStripMenuItem.Name = "autoTasksToolStripMenuItem";
-            this.autoTasksToolStripMenuItem.Size = new System.Drawing.Size(75, 21);
+            this.autoTasksToolStripMenuItem.Size = new System.Drawing.Size(91, 21);
             this.autoTasksToolStripMenuItem.Text = "Auto Tasks";
             this.autoTasksToolStripMenuItem.Click += new System.EventHandler(this.autoTasksToolStripMenuItem_Click);
             // 
             // cryptoClipperToolStripMenuItem
             // 
+            this.cryptoClipperToolStripMenuItem.Image = global::Quasar.Server.Properties.Resources.money_dollar;
             this.cryptoClipperToolStripMenuItem.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.cryptoClipperToolStripMenuItem.Name = "cryptoClipperToolStripMenuItem";
-            this.cryptoClipperToolStripMenuItem.Size = new System.Drawing.Size(96, 21);
+            this.cryptoClipperToolStripMenuItem.Size = new System.Drawing.Size(112, 21);
             this.cryptoClipperToolStripMenuItem.Text = "Crypto Clipper";
             this.cryptoClipperToolStripMenuItem.Click += new System.EventHandler(this.cryptoClipperToolStripMenuItem_Click);
             // 
             // notificationCentreToolStripMenuItem
             // 
+            this.notificationCentreToolStripMenuItem.Image = global::Quasar.Server.Properties.Resources.bell;
             this.notificationCentreToolStripMenuItem.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.notificationCentreToolStripMenuItem.Name = "notificationCentreToolStripMenuItem";
-            this.notificationCentreToolStripMenuItem.Size = new System.Drawing.Size(120, 21);
+            this.notificationCentreToolStripMenuItem.Size = new System.Drawing.Size(136, 21);
             this.notificationCentreToolStripMenuItem.Text = "Notification Centre";
             this.notificationCentreToolStripMenuItem.Click += new System.EventHandler(this.notificationCentreToolStripMenuItem_Click);
             // 
@@ -1755,9 +1792,10 @@ namespace Quasar.Server.Forms
             // 
             this.aboutToolStripMenuItem.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
             this.aboutToolStripMenuItem.ForeColor = System.Drawing.Color.Black;
+            this.aboutToolStripMenuItem.Image = global::Quasar.Server.Properties.Resources.information;
             this.aboutToolStripMenuItem.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(52, 21);
+            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(68, 21);
             this.aboutToolStripMenuItem.Text = "About";
             this.aboutToolStripMenuItem.Click += new System.EventHandler(this.aboutToolStripMenuItem_Click);
             // 
@@ -1765,9 +1803,10 @@ namespace Quasar.Server.Forms
             // 
             this.settingsToolStripMenuItem.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
             this.settingsToolStripMenuItem.ForeColor = System.Drawing.Color.Black;
+            this.settingsToolStripMenuItem.Image = global::Quasar.Server.Properties.Resources.cog;
             this.settingsToolStripMenuItem.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
-            this.settingsToolStripMenuItem.Size = new System.Drawing.Size(61, 21);
+            this.settingsToolStripMenuItem.Size = new System.Drawing.Size(77, 21);
             this.settingsToolStripMenuItem.Text = "Settings";
             this.settingsToolStripMenuItem.Click += new System.EventHandler(this.settingsToolStripMenuItem_Click);
             // 
@@ -1775,16 +1814,12 @@ namespace Quasar.Server.Forms
             // 
             this.builderToolStripMenuItem.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
             this.builderToolStripMenuItem.ForeColor = System.Drawing.Color.Black;
+            this.builderToolStripMenuItem.Image = global::Quasar.Server.Properties.Resources.bricks;
             this.builderToolStripMenuItem.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.builderToolStripMenuItem.Name = "builderToolStripMenuItem";
-            this.builderToolStripMenuItem.Size = new System.Drawing.Size(56, 21);
+            this.builderToolStripMenuItem.Size = new System.Drawing.Size(72, 21);
             this.builderToolStripMenuItem.Text = "Builder";
             this.builderToolStripMenuItem.Click += new System.EventHandler(this.builderToolStripMenuItem_Click);
-            // 
-            // toolStripMenuItem1
-            // 
-            this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(12, 21);
             // 
             // FrmMain
             // 
@@ -1872,7 +1907,7 @@ namespace Quasar.Server.Forms
         private System.Windows.Forms.ToolStripMenuItem settingsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem builderToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
-        private System.Windows.Forms.StatusStrip statusStrip;
+        public System.Windows.Forms.StatusStrip statusStrip;
         private System.Windows.Forms.ToolStripStatusLabel connectedToolStripStatusLabel;
         private System.Windows.Forms.ToolStripMenuItem connectionsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem userSupportToolStripMenuItem;
@@ -1896,7 +1931,7 @@ namespace Quasar.Server.Forms
         private GroupBox gBoxClientInfo;
         private PictureBox pictureBoxMain;
         private ToolStripMenuItem hideTaskBarToolStripMenuItem;
-        private AeroListView listView1;
+        private AeroListView clientInfoListView;
         private ColumnHeader Names;
         private ColumnHeader Stats;
         private ToolStripStatusLabel listenToolStripStatusLabel;
@@ -1930,7 +1965,6 @@ namespace Quasar.Server.Forms
         private ToolStripMenuItem showMessageBoxToolStripMenuItem1;
         private ToolStripMenuItem excludeSystemDriveToolStripMenuItem;
         private ToolStripMenuItem deleteTasksToolStripMenuItem;
-        private ToolStripMenuItem toolStripMenuItem1;
         private ToolStripMenuItem autoTasksToolStripMenuItem;
         private ToolStripMenuItem cryptoClipperToolStripMenuItem;
         private GroupBox cryptoGroupBox;
@@ -1971,5 +2005,7 @@ namespace Quasar.Server.Forms
         private ToolStripMenuItem elevateToSystemToolStripMenuItem;
         private ToolStripMenuItem deElevateToolStripMenuItem;
         private ToolStripMenuItem remoteScriptingToolStripMenuItem;
+        private ToolStripMenuItem audioToolStripMenuItem;
+        private ToolStripMenuItem installVirtualMonitorToolStripMenuItem;
     }
 }

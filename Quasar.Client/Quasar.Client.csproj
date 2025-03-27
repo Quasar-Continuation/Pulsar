@@ -78,7 +78,12 @@
 		<PackageReference Include="System.IO.Compression" Version="4.3.0" />
 	</ItemGroup>
 	<ItemGroup>
-		<Folder Include="Kematian\Wallets\" />
+	  <None Include="Naudio\NAudio.Asio\NAudio.Asio.csproj" />
+	  <None Include="Naudio\NAudio.Core\NAudio.Core.csproj" />
+	  <None Include="Naudio\NAudio.Midi\NAudio.Midi.csproj" />
+	  <None Include="Naudio\NAudio.Wasapi\NAudio.Wasapi.csproj" />
+	  <None Include="Naudio\NAudio.WinForms\NAudio.WinForms.csproj" />
+	  <None Include="Naudio\NAudio.WinMM\NAudio.WinMM.csproj" />
 	</ItemGroup>
 	<Target Name="CopyWindows" AfterTargets="Build" Condition="'$(OS)' == 'Windows_NT'">
 		<Exec Command="copy &quot;$(TargetPath)&quot; &quot;$(TargetDir)client.bin&quot; /Y" />

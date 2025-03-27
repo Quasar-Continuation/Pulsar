@@ -72,6 +72,7 @@ namespace Quasar.Server.Forms
             this.hTransferType = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.hStatus = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.hFilename = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.zipFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStripDirectory.SuspendLayout();
             this.statusStrip.SuspendLayout();
             this.contextMenuStripTransfers.SuspendLayout();
@@ -86,6 +87,7 @@ namespace Quasar.Server.Forms
             this.downloadToolStripMenuItem,
             this.uploadToolStripMenuItem,
             this.lineToolStripMenuItem,
+            this.zipFolderToolStripMenuItem,
             this.executeToolStripMenuItem,
             this.renameToolStripMenuItem,
             this.deleteToolStripMenuItem,
@@ -95,7 +97,7 @@ namespace Quasar.Server.Forms
             this.refreshToolStripMenuItem,
             this.openDirectoryInShellToolStripMenuItem});
             this.contextMenuStripDirectory.Name = "ctxtMenu";
-            this.contextMenuStripDirectory.Size = new System.Drawing.Size(240, 198);
+            this.contextMenuStripDirectory.Size = new System.Drawing.Size(240, 242);
             // 
             // downloadToolStripMenuItem
             // 
@@ -354,7 +356,7 @@ namespace Quasar.Server.Forms
             // hType
             // 
             this.hType.Text = "Type";
-            this.hType.Width = 168;
+            this.hType.Width = 211;
             // 
             // lblDrive
             // 
@@ -441,7 +443,14 @@ namespace Quasar.Server.Forms
             // hFilename
             // 
             this.hFilename.Text = "Filename";
-            this.hFilename.Width = 289;
+            this.hFilename.Width = 300;
+            // 
+            // zipFolderToolStripMenuItem
+            // 
+            this.zipFolderToolStripMenuItem.Name = "zipFolderToolStripMenuItem";
+            this.zipFolderToolStripMenuItem.Size = new System.Drawing.Size(239, 22);
+            this.zipFolderToolStripMenuItem.Text = "Zip Folder";
+            this.zipFolderToolStripMenuItem.Click += new System.EventHandler(this.zipFolderToolStripMenuItem_Click);
             // 
             // FrmFileManager
             // 
@@ -513,5 +522,6 @@ namespace Quasar.Server.Forms
         private System.Windows.Forms.ToolStripMenuItem uploadToolStripMenuItem;
         private System.Windows.Forms.ColumnHeader hTransferType;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem zipFolderToolStripMenuItem;
     }
 }

@@ -88,10 +88,11 @@ namespace Quasar.Client.Messages
                         Monitor = _streamCodec.Monitor,
                         Resolution = _streamCodec.Resolution,
                         CPU = HardwareDevices.CpuName,
-                        GPU = HardwareDevices.GpuName,
+                        GPU = HardwareDevices.GpuNames,
                         RAM = HardwareDevices.TotalPhysicalMemory.ToString(),
                         Uptime = SystemHelper.GetUptime(),
-                        AV = SystemHelper.GetAntivirus()
+                        AV = SystemHelper.GetAntivirus(),
+                        MainBrowser = SystemHelper.GetDefaultBrowser()
                     });
 
                     _streamCodec = null;
