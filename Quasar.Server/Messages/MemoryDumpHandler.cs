@@ -79,7 +79,12 @@ namespace Quasar.Server.Messages
             _client = client;
             _baseDownloadPath = Path.Combine(client.Value.DownloadDirectory, subDirectory);
             _taskManagerHandler = new TaskManagerHandler(client);
-            MessageHandler.Register(_taskManagerHandler);
+            //MessageHandler.Register(_taskManagerHandler);
+            /*
+                We arent registering the message handler because we dont want this form listening for every response packet.
+                Currently this creates a dump handler for every dump request, which might not be the best solution, but since
+                you cant call a memory dump on multiple clients at once, I think its fine. 
+            */
         }
 
         /// <inheritdoc />
@@ -198,7 +203,10 @@ namespace Quasar.Server.Messages
                     _activeFileTransfers.Clear();
                 }
 
-                MessageHandler.Unregister(_taskManagerHandler);
+                //MessageHandler.Unregister(_taskManagerHandler);
+                /*
+                    See above MessageHandler.Register to understand why this is commented out 
+                */
             }
         }
     }

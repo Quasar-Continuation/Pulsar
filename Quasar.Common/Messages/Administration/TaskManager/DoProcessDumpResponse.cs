@@ -13,7 +13,7 @@ namespace Quasar.Common.Messages.Administration.TaskManager
         public string DumpPath { get; set; }
 
         [ProtoMember(3)]
-        public int Length { get; set; }
+        public long Length { get; set; }
 
         [ProtoMember(4)]
         public int Pid { get; set; }

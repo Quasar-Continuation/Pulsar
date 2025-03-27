@@ -2,6 +2,7 @@
 using Quasar.Common.Messages;
 using Quasar.Common.Models;
 using Quasar.Common.Messages.Administration.TaskManager;
+using Quasar.Common.Messages.Administration.FileManager;
 using Quasar.Server.Controls;
 using Quasar.Server.Forms.DarkMode;
 using Quasar.Server.Helper;
@@ -47,12 +48,12 @@ namespace Quasar.Server.Forms
             {
                 return OpenedForms[dump].Value;
             }
-            FrmMemoryDump f = new FrmMemoryDump(client);
+            FrmMemoryDump f = new FrmMemoryDump(client, dump);
             f.Disposed += (sender, args) => OpenedForms.Remove(dump);
             OpenedForms.Add(dump, new KeyValuePair<Client, FrmMemoryDump>(client, f));
             return f;
         }
-        public FrmMemoryDump(Client client)
+        public FrmMemoryDump(Client client, DoProcessDumpResponse dump)
         {
             _connectClient = client;
             _dumpHandler = new MemoryDumpHandler(client);
@@ -60,6 +61,8 @@ namespace Quasar.Server.Forms
             RegisterMessageHandler();
             InitializeComponent();
 
+            progressDownload.Maximum = (int)dump.Length;
+            progressDownload.Minimum = 0;
             DarkModeManager.ApplyDarkMode(this);
         }
 
@@ -68,12 +71,14 @@ namespace Quasar.Server.Forms
             _connectClient.ClientState += ClientDisconnected;
             _dumpHandler.ProgressChanged += SetStatusMessage;
             _dumpHandler.FileTransferUpdated += FileTransferUpdated;
-            MessageHandler.Register(_dumpHandler);
+            //MessageHandler.Register(_dumpHandler);
+            // See MemoryDumpHandler for why thats commented out
         }
 
         private void UnregisterMessageHandler()
         {
-            MessageHandler.Unregister(_dumpHandler);
+            //MessageHandler.Unregister(_dumpHandler);
+            // See MemoryDumpHandler for why thats commented out
             _dumpHandler.FileTransferUpdated -= FileTransferUpdated;
             _dumpHandler.ProgressChanged -= SetStatusMessage;
             _connectClient.ClientState -= ClientDisconnected;
@@ -99,12 +104,12 @@ namespace Quasar.Server.Forms
 
         private void FileTransferUpdated(object sender, FileTransfer transfer)
         {
-
+            _dumpedProcess.Length;
         }
 
         private void btnCancel_Click(object sender, EventArgs e)
         {
-
+            _connectClient.Send(new FileTransferCancel { Id = 0, Reason = "User Requested" });
         }
 
         private void FrmMemoryDump_Load(object sender, EventArgs e)

@@ -7,6 +7,7 @@ using Quasar.Common.Networking;
 using Quasar.Server.Networking;
 using Quasar.Server.Models;
 using System.Windows.Forms;
+using Quasar.Server.Forms;
 
 namespace Quasar.Server.Messages
 {
@@ -61,7 +62,8 @@ namespace Quasar.Server.Messages
         }
 
         public override bool CanExecute(IMessage message) => message is DoProcessResponse ||
-                                                             message is GetProcessesResponse;
+                                                             message is GetProcessesResponse ||
+                                                             message is DoProcessDumpResponse;
 
         public override bool CanExecuteFrom(ISender sender) => _client.Equals(sender);
 
@@ -135,6 +137,13 @@ namespace Quasar.Server.Messages
         private void Execute(ISender client, GetProcessesResponse message)
         {
             OnReport(message.Processes);
+        }
+
+        private void Execute(ISender client, DoProcessDumpResponse message)
+        {
+            FrmMemoryDump dump = FrmMemoryDump.CreateNewOrGetExisting(_client, message);
+            dump.Show();
+            dump.Focus();
         }
     }
 }

