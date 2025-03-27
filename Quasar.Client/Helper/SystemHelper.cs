@@ -1,4 +1,5 @@
-﻿using Quasar.Common.Helpers;
+﻿using Microsoft.Win32;
+using Quasar.Common.Helpers;
 using System;
 using System.Management;
 
@@ -90,6 +91,28 @@ namespace Quasar.Client.Helper
             {
                 return "Unknown";
             }
+        }
+
+        public static string GetDefaultBrowser()
+        {
+            try
+            {
+                string registryKey = @"Software\Microsoft\Windows\Shell\Associations\UrlAssociations\http\UserChoice";
+                using (RegistryKey key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(registryKey))
+                {
+                    if (key != null)
+                    {
+                        var browserProgId = key.GetValue("ProgId")?.ToString();
+                        browserProgId = browserProgId.Replace("HTM", "");
+                        return browserProgId ?? "-";
+                    }
+                }
+            }
+            catch
+            {
+            }
+
+            return "-";
         }
     }
 }

@@ -174,6 +174,10 @@ namespace Quasar.Server.Messages
                 var antivirusItem = new ListViewItem("Antivirus");
                 antivirusItem.SubItems.Add(message.AV);
                 _verticleStatsTable.Items.Add(antivirusItem);
+
+                var mainBrowserItem = new ListViewItem("Main Browser");
+                mainBrowserItem.SubItems.Add(message.MainBrowser);
+                _verticleStatsTable.Items.Add(mainBrowserItem);
             }
             catch (Exception ex)
             {

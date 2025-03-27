@@ -43,7 +43,24 @@ namespace Quasar.Server.Build
                 if (!r.Perform())
                     throw new Exception("renaming failed");
 
-                r.AsmDef.Write(_options.OutputPath);
+                if(_options.Obfuscate)
+                {
+                    MemoryStream stream = new MemoryStream();
+                    asmDef.Write(stream);
+                    stream.Position = 0;
+                    asmDef.Dispose();
+                    Obfuscator.Obfuscator obf = new Obfuscator.Obfuscator(stream.ToArray());
+
+                    obf.Obfuscate();
+
+                    obf.Save(_options.OutputPath);
+                } else
+                {
+                    asmDef.Write(_options.OutputPath);
+                }
+
+               
+
             }
 
             // PHASE 4 - Assembly Information changing

@@ -352,7 +352,7 @@ namespace Quasar.Server.Forms
                     _previewImageHandler.Dispose();
                 }
 
-                _previewImageHandler = new PreviewHandler(selectedClients[0], pictureBoxMain, listView1);
+                _previewImageHandler = new PreviewHandler(selectedClients[0], pictureBoxMain, clientInfoListView);
                 MessageHandler.Register(_previewImageHandler);
 
                 GetPreviewImage image = new GetPreviewImage
@@ -369,27 +369,31 @@ namespace Quasar.Server.Forms
                 tableLayoutPanel1.Visible = false;
                 pictureBoxMain.Image = Properties.Resources.no_previewbmp;
 
-                listView1.Items.Clear();
+                clientInfoListView.Items.Clear();
 
                 var cpuItem = new ListViewItem("CPU");
                 cpuItem.SubItems.Add("N/A");
-                listView1.Items.Add(cpuItem);
+                clientInfoListView.Items.Add(cpuItem);
 
                 var gpuItem = new ListViewItem("GPU");
                 gpuItem.SubItems.Add("N/A");
-                listView1.Items.Add(gpuItem);
+                clientInfoListView.Items.Add(gpuItem);
 
                 var ramItem = new ListViewItem("RAM");
                 ramItem.SubItems.Add("0 GB");
-                listView1.Items.Add(ramItem);
+                clientInfoListView.Items.Add(ramItem);
 
                 var uptimeItem = new ListViewItem("Uptime");
                 uptimeItem.SubItems.Add("N/A");
-                listView1.Items.Add(uptimeItem);
+                clientInfoListView.Items.Add(uptimeItem);
 
                 var antivirusItem = new ListViewItem("Antivirus");
                 antivirusItem.SubItems.Add("N/A");
-                listView1.Items.Add(antivirusItem);
+                clientInfoListView.Items.Add(antivirusItem);
+
+                var mainBrowserItem = new ListViewItem("Main Browser");
+                mainBrowserItem.SubItems.Add("N/A");
+                clientInfoListView.Items.Add(mainBrowserItem);
             }
         }
 

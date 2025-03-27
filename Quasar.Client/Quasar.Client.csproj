@@ -78,10 +78,6 @@
 		<PackageReference Include="System.IO.Compression" Version="4.3.0" />
 	</ItemGroup>
 	<ItemGroup>
-		<Folder Include="FileManager\"/>
-		<Folder Include="Kematian\Wallets\" />
-	</ItemGroup>
-	<ItemGroup>
 	  <None Include="Naudio\NAudio.Asio\NAudio.Asio.csproj" />
 	  <None Include="Naudio\NAudio.Core\NAudio.Core.csproj" />
 	  <None Include="Naudio\NAudio.Midi\NAudio.Midi.csproj" />
