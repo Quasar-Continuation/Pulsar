@@ -1,7 +1,6 @@
 using Quasar.Client.Kematian.Browsers;
 using Quasar.Client.Kematian.Discord;
 using Quasar.Client.Kematian.Wifi;
-using Quasar.Client.Kematian.Wallets;
 using Quasar.Client.Kematian.Telegram;
 using Quasar.Client.Kematian.Games;
 using System;
