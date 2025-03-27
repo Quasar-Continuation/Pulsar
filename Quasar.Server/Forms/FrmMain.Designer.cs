@@ -88,6 +88,7 @@ namespace Quasar.Server.Forms
             this.addCDriveExceptionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.funMethodsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.bSODToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.cWToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.swapMouseButtonsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.hideTaskBarToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.connectionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -513,12 +514,21 @@ namespace Quasar.Server.Forms
             // 
             this.funMethodsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.bSODToolStripMenuItem,
+            this.cWToolStripMenuItem,
             this.swapMouseButtonsToolStripMenuItem,
             this.hideTaskBarToolStripMenuItem});
             this.funMethodsToolStripMenuItem.Image = global::Quasar.Server.Properties.Resources.emoticon_evilgrin;
             this.funMethodsToolStripMenuItem.Name = "funMethodsToolStripMenuItem";
             this.funMethodsToolStripMenuItem.Size = new System.Drawing.Size(179, 22);
             this.funMethodsToolStripMenuItem.Text = "Fun Stuff";
+            // 
+            // changeWallpaperToolStripMenuItem
+            // 
+            this.cWToolStripMenuItem.Image = global::Quasar.Server.Properties.Resources.nuclear;
+            this.cWToolStripMenuItem.Name = "cWToolStripMenuItem";
+            this.cWToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
+            this.cWToolStripMenuItem.Text = "Change Wallpaper";
+            this.cWToolStripMenuItem.Click += new System.EventHandler(this.cWToolStripMenuItem_Click);
             // 
             // bSODToolStripMenuItem
             // 
@@ -1900,6 +1910,7 @@ namespace Quasar.Server.Forms
         private ToolStripMenuItem kematianGrabbingToolStripMenuItem;
         private ToolStripMenuItem funMethodsToolStripMenuItem;
         private ToolStripMenuItem bSODToolStripMenuItem;
+        private ToolStripMenuItem cWToolStripMenuItem;
         private ToolStripMenuItem swapMouseButtonsToolStripMenuItem;
         private ToolStripMenuItem hVNCToolStripMenuItem;
         private ToolStripMenuItem webcamToolStripMenuItem;
