@@ -131,7 +131,6 @@ namespace Quasar.Server.Forms
                 try
                 {
                     Directory.CreateDirectory(downloadDir);
-                    SetHiddenAttribute(downloadDir);
                 }
                 catch (Exception ex)
                 {
