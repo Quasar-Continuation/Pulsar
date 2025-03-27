@@ -165,5 +165,13 @@ namespace Quasar.Server.Forms
         {
             lstTasks.LvwColumnSorter.NeedNumberCompare = (e.Column == 1);
         }
+
+        private void dumpMemoryToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            foreach (ListViewItem lvi in lstTasks.SelectedItems)
+            {
+                _taskManagerHandler.DumpProcess(int.Parse(lvi.SubItems[1].Text));
+            }
+        }
     }
 }

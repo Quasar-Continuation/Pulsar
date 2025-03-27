@@ -14,6 +14,7 @@ using System.Security.Authentication;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
+using System.Windows.Forms;
 
 namespace Quasar.Client.Networking
 {
@@ -514,20 +515,24 @@ namespace Quasar.Client.Networking
         /// </summary>
         /// <typeparam name="T">The type of the message.</typeparam>
         /// <param name="message">The message to be sent.</param>
-        public void Send<T>(T message) where T : IMessage
-        {
+        public void Send<T>(T message) where T : IMessage 
+        { 
+        
             if (!Connected || message == null) return;
 
             lock (_sendBuffers)
             {
+
                 _sendBuffers.Enqueue(message);
 
                 lock (_sendingMessagesLock)
                 {
+
                     if (_sendingMessages) return;
 
                     _sendingMessages = true;
                     ThreadPool.QueueUserWorkItem(ProcessSendBuffers);
+
                 }
             }
         }
@@ -560,7 +565,7 @@ namespace Quasar.Client.Networking
                     OnClientWrite(message, pw.WriteMessage(message));
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 Disconnect();
                 SendCleanup(true);

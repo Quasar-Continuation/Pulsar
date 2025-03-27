@@ -1,7 +1,9 @@
 ﻿using ProtoBuf;
 using Quasar.Common.Messages.other;
+using Quasar.Common.Messages.Administration.TaskManager;
 using System;
 using System.IO;
+using System.Windows.Forms;
 
 namespace Quasar.Common.Networking
 {
