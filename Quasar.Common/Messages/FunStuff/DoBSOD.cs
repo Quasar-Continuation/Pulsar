@@ -1,4 +1,5 @@
-﻿using ProtoBuf;
+﻿using System;
+using ProtoBuf;
 using Quasar.Common.Messages.other;
 using Quasar.Common.Models;
 
@@ -11,3 +12,4 @@ namespace Quasar.Common.Messages.FunStuff
         public string Message { get; set; }
     }
 }
+
