@@ -43,7 +43,7 @@ namespace Quasar.Server.Kematian
             }
         }
 
-        public void BenginRecovery()
+        public void BeginRecovery()
         {
             var req = new GetKematian();
             foreach (var client in _clients.Where(client => client != null))
