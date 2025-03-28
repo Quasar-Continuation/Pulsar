@@ -540,7 +540,8 @@ namespace Quasar.Server.Forms
 
                 var builder = new ClientBuilder(options, "client.bin");
 
-                builder.Build();
+                bool obfuscate = chkObfuscateOutput.Checked;
+                builder.Build(obfuscate);
 
                 try
                 {

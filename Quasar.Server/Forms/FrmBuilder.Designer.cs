@@ -72,6 +72,10 @@ namespace Quasar.Server.Forms
             this.lblMutex = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
             this.connectionPage = new System.Windows.Forms.TabPage();
+            this.line11 = new Quasar.Server.Controls.Line();
+            this.checkBox1 = new System.Windows.Forms.CheckBox();
+            this.label13 = new System.Windows.Forms.Label();
+            this.txtPastebin = new System.Windows.Forms.TextBox();
             this.numericUpDownPort = new System.Windows.Forms.NumericUpDown();
             this.numericUpDownDelay = new System.Windows.Forms.NumericUpDown();
             this.line3 = new Quasar.Server.Controls.Line();
@@ -138,13 +142,7 @@ namespace Quasar.Server.Forms
             this.line10 = new Quasar.Server.Controls.Line();
             this.label14 = new System.Windows.Forms.Label();
             this.chkKeylogger = new System.Windows.Forms.CheckBox();
-            this.txtPastebin = new System.Windows.Forms.TextBox();
-            this.label13 = new System.Windows.Forms.Label();
-            this.checkBox1 = new System.Windows.Forms.CheckBox();
-            this.line11 = new Quasar.Server.Controls.Line();
-            this.chkAntiDebug = new System.Windows.Forms.CheckBox();
-            this.chkAntiDebug = new System.Windows.Forms.CheckBox();
-            this.chkAntiDebug = new System.Windows.Forms.CheckBox();
+            this.chkObfuscateOutput = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.picUAC2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picUAC1)).BeginInit();
             this.contextMenuStrip.SuspendLayout();
@@ -263,6 +261,7 @@ namespace Quasar.Server.Forms
             // generalPage
             // 
             this.generalPage.BackColor = System.Drawing.SystemColors.Control;
+            this.generalPage.Controls.Add(this.chkObfuscateOutput);
             this.generalPage.Controls.Add(this.chkAntiDebug);
             this.generalPage.Controls.Add(this.chkVM);
             this.generalPage.Controls.Add(this.label2);
@@ -471,6 +470,42 @@ namespace Quasar.Server.Forms
             this.connectionPage.TabIndex = 0;
             this.connectionPage.Text = "Connection Settings";
             this.connectionPage.Click += new System.EventHandler(this.connectionPage_Click);
+            // 
+            // line11
+            // 
+            this.line11.BackColor = System.Drawing.SystemColors.Control;
+            this.line11.LineAlignment = Quasar.Server.Controls.Line.Alignment.Horizontal;
+            this.line11.Location = new System.Drawing.Point(175, 107);
+            this.line11.Name = "line11";
+            this.line11.Size = new System.Drawing.Size(216, 19);
+            this.line11.TabIndex = 22;
+            this.line11.TabStop = false;
+            // 
+            // checkBox1
+            // 
+            this.checkBox1.AutoSize = true;
+            this.checkBox1.Location = new System.Drawing.Point(370, 129);
+            this.checkBox1.Name = "checkBox1";
+            this.checkBox1.Size = new System.Drawing.Size(15, 14);
+            this.checkBox1.TabIndex = 21;
+            this.checkBox1.UseVisualStyleBackColor = true;
+            // 
+            // label13
+            // 
+            this.label13.AutoSize = true;
+            this.label13.Location = new System.Drawing.Point(175, 129);
+            this.label13.Name = "label13";
+            this.label13.Size = new System.Drawing.Size(60, 13);
+            this.label13.TabIndex = 20;
+            this.label13.Text = "Pastebin : ";
+            // 
+            // txtPastebin
+            // 
+            this.txtPastebin.Location = new System.Drawing.Point(254, 126);
+            this.txtPastebin.Name = "txtPastebin";
+            this.txtPastebin.Size = new System.Drawing.Size(110, 22);
+            this.txtPastebin.TabIndex = 19;
+            this.txtPastebin.TextChanged += new System.EventHandler(this.txtPastebin_TextChanged);
             // 
             // numericUpDownPort
             // 
@@ -1161,41 +1196,15 @@ namespace Quasar.Server.Forms
             this.chkKeylogger.UseVisualStyleBackColor = true;
             this.chkKeylogger.CheckedChanged += new System.EventHandler(this.chkKeylogger_CheckedChanged);
             // 
-            // txtPastebin
+            // chkObfuscateOutput
             // 
-            this.txtPastebin.Location = new System.Drawing.Point(254, 126);
-            this.txtPastebin.Name = "txtPastebin";
-            this.txtPastebin.Size = new System.Drawing.Size(110, 22);
-            this.txtPastebin.TabIndex = 19;
-            this.txtPastebin.TextChanged += new System.EventHandler(this.txtPastebin_TextChanged);
-            // 
-            // label13
-            // 
-            this.label13.AutoSize = true;
-            this.label13.Location = new System.Drawing.Point(175, 129);
-            this.label13.Name = "label13";
-            this.label13.Size = new System.Drawing.Size(60, 13);
-            this.label13.TabIndex = 20;
-            this.label13.Text = "Pastebin : ";
-            // 
-            // checkBox1
-            // 
-            this.checkBox1.AutoSize = true;
-            this.checkBox1.Location = new System.Drawing.Point(370, 129);
-            this.checkBox1.Name = "checkBox1";
-            this.checkBox1.Size = new System.Drawing.Size(15, 14);
-            this.checkBox1.TabIndex = 21;
-            this.checkBox1.UseVisualStyleBackColor = true;
-            // 
-            // line11
-            // 
-            this.line11.BackColor = System.Drawing.SystemColors.Control;
-            this.line11.LineAlignment = Quasar.Server.Controls.Line.Alignment.Horizontal;
-            this.line11.Location = new System.Drawing.Point(175, 107);
-            this.line11.Name = "line11";
-            this.line11.Size = new System.Drawing.Size(216, 19);
-            this.line11.TabIndex = 22;
-            this.line11.TabStop = false;
+            this.chkObfuscateOutput.AutoSize = true;
+            this.chkObfuscateOutput.Location = new System.Drawing.Point(20, 281);
+            this.chkObfuscateOutput.Name = "chkObfuscateOutput";
+            this.chkObfuscateOutput.Size = new System.Drawing.Size(120, 17);
+            this.chkObfuscateOutput.TabIndex = 26;
+            this.chkObfuscateOutput.Text = "Obfuscate Output";
+            this.chkObfuscateOutput.UseVisualStyleBackColor = true;
             // 
             // FrmBuilder
             // 
@@ -1335,5 +1344,6 @@ namespace Quasar.Server.Forms
         private System.Windows.Forms.CheckBox checkBox1;
         private System.Windows.Forms.Label label13;
         private System.Windows.Forms.TextBox txtPastebin;
+        private System.Windows.Forms.CheckBox chkObfuscateOutput;
     }
 }

@@ -1,18 +1,9 @@
-﻿using Quasar.Common.Enums;
-using Quasar.Common.Messages;
-using Quasar.Common.Messages.Monitoring.Clipboard;
+﻿using Quasar.Common.Messages;
 using Quasar.Common.Messages.other;
-using Quasar.Common.Messages.UserSupport.MessageBox;
 using Quasar.Common.Networking;
 using Quasar.Server.Forms;
 using Quasar.Server.Networking;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text.Json;
 using System.Windows.Forms;
-using static Quasar.Server.Messages.ClientDebugLog;
 
 namespace Quasar.Server.Messages
 {
@@ -23,7 +14,7 @@ namespace Quasar.Server.Messages
     /// </summary>
     public class ClientDebugLog : MessageProcessorBase<object>
     {
-        public delegate void DebugLogEventHandler(object sender, Client client, string addressType);
+        public delegate void DebugLogEventHandler(object sender, Client client, string log);
 
         public event DebugLogEventHandler DebugLogReceived;
 
@@ -31,15 +22,21 @@ namespace Quasar.Server.Messages
         {
         }
 
-        public override bool CanExecute(IMessage message) => message is GetDebugLog;
+        public override bool CanExecute(IMessage message)
+        {
+            return message is GetDebugLog;
+        }
 
-        public override bool CanExecuteFrom(ISender sender) => true;
+        public override bool CanExecuteFrom(ISender sender)
+        {
+            return true;
+        }
 
         public override void Execute(ISender sender, IMessage message)
         {
-            if (message is GetDebugLog addressMessage)
+            if (message is GetDebugLog logMessage)
             {
-                Execute((Client)sender, addressMessage);
+                Execute((Client)sender, logMessage);
             }
         }
 
@@ -47,7 +44,10 @@ namespace Quasar.Server.Messages
         {
             DebugLogReceived?.Invoke(this, client, message.Log);
             FrmMain frm = Application.OpenForms["FrmMain"] as FrmMain;
-            frm.EventLog("[CLIENT ERROR: " + client.Value.UserAtPc + ": " + message.Log, "error");
+            if (frm != null)
+            {
+                frm.EventLog("[CLIENT ERROR: " + client.Value.UserAtPc + ": " + message.Log, "error");
+            }
         }
     }
 }

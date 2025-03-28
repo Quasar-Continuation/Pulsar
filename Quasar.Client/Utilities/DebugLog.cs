@@ -3,10 +3,8 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using Quasar.Client.IO;
 using Quasar.Client.Networking;
 using Quasar.Common.Messages;
-using Quasar.Common.Messages.Monitoring.Clipboard;
 
 namespace Quasar.Client.User
 {
@@ -42,8 +40,9 @@ namespace Quasar.Client.User
         }
         private void LogException(Exception ex)
         {
-            Console.WriteLine($"Exception: {ex.Message}\nStack Trace: {ex.StackTrace}");
+            Debug.WriteLine($"Exception: {ex.Message}\nStack Trace: {ex.StackTrace}");
         }
+
         public void Dispose()
         {
             Dispose(true);

