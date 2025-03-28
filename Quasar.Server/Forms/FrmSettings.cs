@@ -1,4 +1,4 @@
-﻿using Quasar.Server.Forms.DarkMode;
+using Quasar.Server.Forms.DarkMode;
 using Quasar.Server.Models;
 using Quasar.Server.Networking;
 using Quasar.Server.Utilities;
@@ -8,6 +8,8 @@ using System.Linq;
 using System.Net.Sockets;
 using System.Windows.Forms;
 using Quasar.Server.DiscordRPC;
+using Quasar.Server.TelegramSender;
+
 
 namespace Quasar.Server.Forms
 {
@@ -40,11 +42,15 @@ namespace Quasar.Server.Forms
             chkShowTooltip.Checked = Settings.ShowToolTip;
             chkNoIPIntegration.Checked = Settings.EnableNoIPUpdater;
             chkEventLog.Checked = Settings.EventLog;
+            txtTelegramChatID.Text = Settings.TelegramChatID;
+            txtTelegramToken.Text = Settings.TelegramBotToken;
+            chkTelegramNotis.Checked = Settings.TelegramNotifications;
             txtNoIPHost.Text = Settings.NoIPHost;
             txtNoIPUser.Text = Settings.NoIPUsername;
             txtNoIPPass.Text = Settings.NoIPPassword;
             chkDiscordRPC.Checked = Settings.DiscordRPC; // Will load as false by default
-            _previousDiscordRPCState = chkDiscordRPC.Checked; // Initialize previous state
+            _previousDiscordRPCState = chkDiscordRPC.Checked;
+            
         }
 
         private ushort GetPortSafe()
@@ -127,7 +133,9 @@ namespace Quasar.Server.Forms
             Settings.NoIPUsername = txtNoIPUser.Text;
             Settings.NoIPPassword = txtNoIPPass.Text;
             Settings.DiscordRPC = chkDiscordRPC.Checked;
-
+            Settings.TelegramChatID = txtTelegramChatID.Text;
+            Settings.TelegramBotToken = txtTelegramToken.Text;
+            Settings.TelegramNotifications = chkTelegramNotis.Checked;
             DiscordRPCManager.ApplyDiscordRPC(this);
 
             FrmMain mainForm = Application.OpenForms.OfType<FrmMain>().FirstOrDefault();
@@ -190,6 +198,11 @@ namespace Quasar.Server.Forms
             txtNoIPPass.Enabled = enable;
             chkShowPassword.Enabled = enable;
         }
+        private void TelegramControlHandler(bool enable)
+        {
+            txtTelegramToken.Enabled = enable;
+            txtTelegramChatID.Enabled = enable;
+        }
 
         private void ShowPassword(bool show = true)
         {
@@ -199,6 +212,67 @@ namespace Quasar.Server.Forms
         private void chkShowPassword_CheckedChanged(object sender, EventArgs e)
         {
             ShowPassword(chkShowPassword.Checked);
+        }
+
+        private void textBox1_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void chkTelegramNotis_CheckedChanged(object sender, EventArgs e)
+        {
+            TelegramControlHandler(chkTelegramNotis.Checked);
+        }
+
+        private async void button1_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(txtTelegramToken.Text))
+                {
+                    MessageBox.Show("Error: Please Make Sure You Started A Chat With The Bot");
+                    return;
+                }
+
+                string[] tokenParts = txtTelegramToken.Text.Split(':');
+                if (tokenParts.Length != 2 ||
+                    !tokenParts[0].All(char.IsDigit) ||
+                    tokenParts[1].Length != 35 ||
+                    !tokenParts[1].All(c => char.IsLetterOrDigit(c) || c == '_' || c == '-'))
+                {
+                    MessageBox.Show("Error: Please Make Sure You Started A Chat With The Bot");
+                    return;
+                }
+
+                if (string.IsNullOrWhiteSpace(txtTelegramChatID.Text))
+                {
+                    MessageBox.Show("Error: Please Make Sure You Started A Chat With The Bot");
+                    return;
+                }
+
+                if (!long.TryParse(txtTelegramChatID.Text, out long chatId))
+                {
+                    MessageBox.Show("Error: Please Make Sure You Started A Chat With The Bot");
+                    return;
+                }
+
+                string response = await Quasar.Server.TelegramSender.Send.SendConnectionMessage(
+                    txtTelegramToken.Text,
+                    txtTelegramChatID.Text,
+                    "TestClient123",
+                    "192.168.1.100",
+                    "TestLand"
+                );
+                MessageBox.Show("Checked And Working");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error: Please Make Sure You Started A Chat With The Bot");
+            }
+        }
+        private void txtNoIPHost_TextChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }
