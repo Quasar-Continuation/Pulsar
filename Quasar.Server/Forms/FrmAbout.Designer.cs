@@ -38,6 +38,8 @@
             this.lnkCredits = new System.Windows.Forms.LinkLabel();
             this.lnkGithubPage = new System.Windows.Forms.LinkLabel();
             this.lblSubTitle = new System.Windows.Forms.Label();
+            this.label1 = new System.Windows.Forms.Label();
+            this.cntTxtContent = new System.Windows.Forms.RichTextBox();
             ((System.ComponentModel.ISupportInitialize)(this.picIcon)).BeginInit();
             this.SuspendLayout();
             // 
@@ -57,7 +59,7 @@
             this.lblTitle.Font = new System.Drawing.Font("Segoe UI", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblTitle.Location = new System.Drawing.Point(82, 7);
             this.lblTitle.Name = "lblTitle";
-            this.lblTitle.Size = new System.Drawing.Size(79, 30);
+            this.lblTitle.Size = new System.Drawing.Size(163, 30);
             this.lblTitle.TabIndex = 0;
             this.lblTitle.Text = "Quasar Modded";
             // 
@@ -85,11 +87,11 @@
             // rtxtContent
             // 
             this.rtxtContent.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.rtxtContent.Location = new System.Drawing.Point(15, 112);
+            this.rtxtContent.Location = new System.Drawing.Point(15, 219);
             this.rtxtContent.Name = "rtxtContent";
             this.rtxtContent.ReadOnly = true;
             this.rtxtContent.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
-            this.rtxtContent.Size = new System.Drawing.Size(498, 252);
+            this.rtxtContent.Size = new System.Drawing.Size(498, 145);
             this.rtxtContent.TabIndex = 6;
             this.rtxtContent.Text = "";
             // 
@@ -97,7 +99,7 @@
             // 
             this.lblLicense.AutoSize = true;
             this.lblLicense.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblLicense.Location = new System.Drawing.Point(12, 94);
+            this.lblLicense.Location = new System.Drawing.Point(12, 201);
             this.lblLicense.Name = "lblLicense";
             this.lblLicense.Size = new System.Drawing.Size(46, 15);
             this.lblLicense.TabIndex = 5;
@@ -135,6 +137,27 @@
             this.lblSubTitle.TabIndex = 1;
             this.lblSubTitle.Text = "Remote Administration Tool";
             // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label1.Location = new System.Drawing.Point(12, 108);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(74, 15);
+            this.label1.TabIndex = 8;
+            this.label1.Text = "Contributors";
+            // 
+            // cntTxtContent
+            // 
+            this.cntTxtContent.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.cntTxtContent.Location = new System.Drawing.Point(14, 131);
+            this.cntTxtContent.Name = "cntTxtContent";
+            this.cntTxtContent.ReadOnly = true;
+            this.cntTxtContent.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
+            this.cntTxtContent.Size = new System.Drawing.Size(498, 62);
+            this.cntTxtContent.TabIndex = 9;
+            this.cntTxtContent.Text = "";
+            // 
             // FrmAbout
             // 
             this.AcceptButton = this.btnOkay;
@@ -142,6 +165,8 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.CancelButton = this.btnOkay;
             this.ClientSize = new System.Drawing.Size(525, 405);
+            this.Controls.Add(this.cntTxtContent);
+            this.Controls.Add(this.label1);
             this.Controls.Add(this.lblSubTitle);
             this.Controls.Add(this.lnkGithubPage);
             this.Controls.Add(this.lnkCredits);
@@ -176,5 +201,7 @@
         private System.Windows.Forms.LinkLabel lnkCredits;
         private System.Windows.Forms.LinkLabel lnkGithubPage;
         private System.Windows.Forms.Label lblSubTitle;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.RichTextBox cntTxtContent;
     }
 }
