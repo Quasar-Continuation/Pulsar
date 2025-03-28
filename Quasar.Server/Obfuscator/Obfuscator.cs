@@ -1,5 +1,5 @@
 ﻿using dnlib.DotNet;
-using Quasar.Obfuscator.Core.Transformers;
+using Quasar.Obfuscator.Transformers;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -8,7 +8,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Quasar.Obfuscator.Core
+namespace Quasar.Obfuscator
 {
     public class Obfuscator
     {

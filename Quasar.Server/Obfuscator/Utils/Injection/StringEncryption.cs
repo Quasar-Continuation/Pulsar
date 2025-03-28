@@ -5,7 +5,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Quasar.Obfuscator.Core.Utils.Injection
+namespace Quasar.Obfuscator.Utils.Injection
 {
     public class StringEncryption
     {

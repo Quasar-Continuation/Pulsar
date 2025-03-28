@@ -23,6 +23,9 @@ namespace Quasar.Client
             // enable TLS 1.2
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
 
+            // Set the unhandled exception mode to force all Windows Forms errors to go through our handler
+            Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
+
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
@@ -34,64 +37,6 @@ namespace Quasar.Client
         private static void SaveOriginalDesktop()
         {
             Settings.OriginalDesktopPointer = GetThreadDesktop(GetCurrentThreadId());
-        }
-
-        private static void HandleThreadException(object sender, ThreadExceptionEventArgs e)
-        {
-            Debug.WriteLine(e);
-            try
-            {
-                string batchFile = BatchFile.CreateRestartBatch(Application.ExecutablePath);
-
-                ProcessStartInfo startInfo = new ProcessStartInfo
-                {
-                    WindowStyle = ProcessWindowStyle.Hidden,
-                    UseShellExecute = true,
-                    FileName = batchFile
-                };
-                Process.Start(startInfo);
-            }
-            catch (Exception exception)
-            {
-                Debug.WriteLine(exception);
-            }
-            finally
-            {
-                Environment.Exit(0);
-            }
-        }
-
-        /// <summary>
-        /// Handles unhandled exceptions by restarting the application and hoping that they don't happen again.
-        /// </summary>
-        /// <param name="sender">The source of the unhandled exception event.</param>
-        /// <param name="e">The exception event arguments. </param>
-        private static void HandleUnhandledException(object sender, UnhandledExceptionEventArgs e)
-        {
-            if (e.IsTerminating)
-            {
-                Debug.WriteLine(e);
-                try
-                {
-                    string batchFile = BatchFile.CreateRestartBatch(Application.ExecutablePath);
-
-                    ProcessStartInfo startInfo = new ProcessStartInfo
-                    {
-                        WindowStyle = ProcessWindowStyle.Hidden,
-                        UseShellExecute = true,
-                        FileName = batchFile
-                    };
-                    Process.Start(startInfo);
-                }
-                catch (Exception exception)
-                {
-                    Debug.WriteLine(exception);
-                }
-                finally
-                {
-                    Environment.Exit(0);
-                }
-            }
         }
     }
 }

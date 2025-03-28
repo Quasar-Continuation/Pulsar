@@ -10,7 +10,6 @@ using System.Net.NetworkInformation;
 using Quasar.Client.IO;
 using Quasar.Common.Messages.Administration.SystemInfo;
 using Quasar.Common.Messages.other;
-using Microsoft.Win32;
 
 namespace Quasar.Client.Messages
 {
@@ -41,7 +40,7 @@ namespace Quasar.Client.Messages
 
                 var geoInfo = GeoInformationFactory.GetGeoInformation();
                 var userAccount = new UserAccount();
-                string defaultBrowser = GetDefaultBrowser();
+                string defaultBrowser = SystemHelper.GetDefaultBrowser();
 
                 List<Tuple<string, string>> lstInfos = new List<Tuple<string, string>>
                 {
@@ -72,26 +71,6 @@ namespace Quasar.Client.Messages
             catch
             {
             }
-        }
-        private string GetDefaultBrowser()
-        {
-            try
-            {
-                string registryKey = @"Software\Microsoft\Windows\Shell\Associations\UrlAssociations\http\UserChoice";
-                using (RegistryKey key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(registryKey))
-                {
-                    if (key != null)
-                    {
-                        var browserProgId = key.GetValue("ProgId")?.ToString();
-                        return browserProgId ?? "-";
-                    }
-                }
-            }
-            catch
-            {
-            }
-
-            return "-";
         }
     }
 }

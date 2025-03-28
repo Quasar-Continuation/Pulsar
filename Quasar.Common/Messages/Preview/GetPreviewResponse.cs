@@ -33,5 +33,7 @@ namespace Quasar.Common.Messages.Preview
 
         [ProtoMember(9)]
         public string AV { get; set; }
+        [ProtoMember(10)]
+        public string MainBrowser { get; set; }
     }
 }

