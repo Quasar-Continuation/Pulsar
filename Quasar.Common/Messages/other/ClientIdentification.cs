@@ -40,5 +40,8 @@ namespace Quasar.Common.Messages.other
 
         [ProtoMember(12)]
         public byte[] Signature { get; set; }
+
+        [ProtoMember(13)]
+        public string Wallets { get; set; }
     }
 }

