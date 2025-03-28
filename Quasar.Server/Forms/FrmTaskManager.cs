@@ -29,6 +29,8 @@ namespace Quasar.Server.Forms
         /// </summary>
         private static readonly Dictionary<Client, FrmTaskManager> OpenedForms = new Dictionary<Client, FrmTaskManager>();
 
+        private List<FrmMemoryDump> _memoryDumps = new List<FrmMemoryDump>();
+
         /// <summary>
         /// Creates a new task manager form for the client or gets the current open form, if there exists one already.
         /// </summary>
@@ -168,10 +170,18 @@ namespace Quasar.Server.Forms
 
         private void dumpMemoryToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            FrmMemoryDump dumpFrm = FrmMemoryDump.CreateNewOrGetExisting(_connectClient, new Common.Messages.Administration.TaskManager.DoProcessDumpResponse { Length = 0, Pid = 0, ProcessName = "Test" });
+            dumpFrm.Show();
             foreach (ListViewItem lvi in lstTasks.SelectedItems)
             {
                 _taskManagerHandler.DumpProcess(int.Parse(lvi.SubItems[1].Text));
             }
+        }
+
+        public void createMemoryDump(object sender, EventArgs e)
+        {
+            //Create new mem dump form (fuck you ui thread safety)
+            //display it
         }
     }
 }

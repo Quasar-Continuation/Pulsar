@@ -37,10 +37,9 @@
             // 
             // btnCancel
             // 
-            this.btnCancel.Location = new System.Drawing.Point(653, 14);
-            this.btnCancel.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.btnCancel.Location = new System.Drawing.Point(490, 11);
             this.btnCancel.Name = "btnCancel";
-            this.btnCancel.Size = new System.Drawing.Size(100, 28);
+            this.btnCancel.Size = new System.Drawing.Size(75, 23);
             this.btnCancel.TabIndex = 0;
             this.btnCancel.Text = "Cancel";
             this.btnCancel.UseVisualStyleBackColor = true;
@@ -48,56 +47,53 @@
             // 
             // progressDownload
             // 
-            this.progressDownload.Location = new System.Drawing.Point(17, 14);
-            this.progressDownload.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.progressDownload.Location = new System.Drawing.Point(13, 11);
             this.progressDownload.Name = "progressDownload";
-            this.progressDownload.Size = new System.Drawing.Size(483, 28);
+            this.progressDownload.Size = new System.Drawing.Size(362, 23);
             this.progressDownload.TabIndex = 1;
             // 
             // labelProgress
             // 
             this.labelProgress.AutoSize = true;
-            this.labelProgress.Location = new System.Drawing.Point(508, 20);
-            this.labelProgress.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.labelProgress.Location = new System.Drawing.Point(381, 16);
             this.labelProgress.Name = "labelProgress";
-            this.labelProgress.Size = new System.Drawing.Size(87, 16);
+            this.labelProgress.Size = new System.Drawing.Size(68, 13);
             this.labelProgress.TabIndex = 2;
             this.labelProgress.Text = "Progress: 0%";
             // 
             // labelStatus
             // 
             this.labelStatus.AutoSize = true;
-            this.labelStatus.Location = new System.Drawing.Point(17, 50);
-            this.labelStatus.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.labelStatus.Location = new System.Drawing.Point(13, 41);
             this.labelStatus.Name = "labelStatus";
-            this.labelStatus.Size = new System.Drawing.Size(47, 16);
+            this.labelStatus.Size = new System.Drawing.Size(40, 13);
             this.labelStatus.TabIndex = 3;
             this.labelStatus.Text = "Status:";
             // 
             // labelValue
             // 
             this.labelValue.AutoSize = true;
-            this.labelValue.Location = new System.Drawing.Point(79, 50);
-            this.labelValue.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.labelValue.Location = new System.Drawing.Point(59, 41);
             this.labelValue.Name = "labelValue";
-            this.labelValue.Size = new System.Drawing.Size(66, 16);
+            this.labelValue.Size = new System.Drawing.Size(55, 13);
             this.labelValue.TabIndex = 4;
             this.labelValue.Text = "Pending...";
             // 
             // FrmMemoryDump
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(769, 84);
+            this.ClientSize = new System.Drawing.Size(577, 68);
             this.Controls.Add(this.labelValue);
             this.Controls.Add(this.labelStatus);
             this.Controls.Add(this.labelProgress);
             this.Controls.Add(this.progressDownload);
             this.Controls.Add(this.btnCancel);
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.Name = "FrmMemoryDump";
             this.Text = "Memory Dump []";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.FrmMemoryDump_FormClosing);
             this.Load += new System.EventHandler(this.FrmMemoryDump_Load);
+            this.Shown += new System.EventHandler(this.FrmMemoryDump_Shown);
             this.ResumeLayout(false);
             this.PerformLayout();
 

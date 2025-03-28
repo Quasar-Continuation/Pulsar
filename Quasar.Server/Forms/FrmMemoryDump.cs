@@ -11,7 +11,9 @@ using Quasar.Server.Networking;
 using Quasar.Server.Models;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Windows.Forms;
+using System.Threading.Tasks;
 
 namespace Quasar.Server.Forms
 {
@@ -42,45 +44,52 @@ namespace Quasar.Server.Forms
         /// <returns>
         /// Returns a new memory dump form for the client if there is none currently open, otherwise creates a new one.
         /// </returns>
-        public static FrmMemoryDump CreateNewOrGetExisting(Client client, DoProcessDumpResponse dump)
+        public static FrmMemoryDump CreateNewOrGetExisting(Client client, DoProcessDumpResponse dump) // Check this
         {
             if (OpenedForms.ContainsKey(dump))
             {
                 return OpenedForms[dump].Value;
             }
+            MessageBox.Show("Creating form...");
             FrmMemoryDump f = new FrmMemoryDump(client, dump);
+            MessageBox.Show("Adding Dispose event...");
             f.Disposed += (sender, args) => OpenedForms.Remove(dump);
+            MessageBox.Show("Adding to active forms...");
             OpenedForms.Add(dump, new KeyValuePair<Client, FrmMemoryDump>(client, f));
             return f;
         }
         public FrmMemoryDump(Client client, DoProcessDumpResponse dump)
         {
-            _connectClient = client;
-            _dumpHandler = new MemoryDumpHandler(client);
-
-            RegisterMessageHandler();
             InitializeComponent();
 
+            MessageBox.Show("Setting Client...");
+            _connectClient = client;
+            MessageBox.Show("Creating Memory Dump Handler...");
+            _dumpHandler = new MemoryDumpHandler(client, dump);
+            MessageBox.Show("Setting Dump...");
+            _dumpedProcess = dump;
+            MessageBox.Show("Registering handlers...");
+            RegisterMessageHandler();
+            MessageBox.Show("Setting Maximum...");
             progressDownload.Maximum = (int)dump.Length;
+            MessageBox.Show("Setting Minimum...");
             progressDownload.Minimum = 0;
+            MessageBox.Show("Applying Dark Mode...");
             DarkModeManager.ApplyDarkMode(this);
+            MessageBox.Show("Done!");
         }
 
         private void RegisterMessageHandler()
         {
             _connectClient.ClientState += ClientDisconnected;
-            _dumpHandler.ProgressChanged += SetStatusMessage;
             _dumpHandler.FileTransferUpdated += FileTransferUpdated;
-            //MessageHandler.Register(_dumpHandler);
-            // See MemoryDumpHandler for why thats commented out
+            MessageHandler.Register(_dumpHandler);
         }
 
         private void UnregisterMessageHandler()
         {
-            //MessageHandler.Unregister(_dumpHandler);
-            // See MemoryDumpHandler for why thats commented out
+            MessageHandler.Unregister(_dumpHandler);
             _dumpHandler.FileTransferUpdated -= FileTransferUpdated;
-            _dumpHandler.ProgressChanged -= SetStatusMessage;
             _connectClient.ClientState -= ClientDisconnected;
         }
 
@@ -97,24 +106,80 @@ namespace Quasar.Server.Forms
             }
         }
 
-        private void SetStatusMessage(object sender, string message)
-        {
-
-        }
-
         private void FileTransferUpdated(object sender, FileTransfer transfer)
         {
-            _dumpedProcess.Length;
+            if (transfer.RemotePath == _dumpedProcess.DumpPath)
+            {
+                if (transfer.Status == "Completed")
+                {
+                    MessageBox.Show("Dump Transfer Complete!");
+                    this.Close();
+                }
+                if (progressDownload.InvokeRequired)
+                {
+                    progressDownload.BeginInvoke((MethodInvoker)delegate
+                    {
+                        progressDownload.Value = (int)transfer.TransferredSize;
+                    });
+                }
+                else
+                {
+                    progressDownload.Value = (int)transfer.TransferredSize;
+                }
+                if (labelProgress.InvokeRequired)
+                {
+                    labelProgress.BeginInvoke((MethodInvoker)delegate
+                    {
+                        labelProgress.Text = $"Progress: {Math.Round((double)(transfer.TransferredSize / this._dumpedProcess.Length), 2)}%";
+                    });
+                }
+                else
+                {
+                    labelProgress.Text = $"Progress: {Math.Round((double)(transfer.TransferredSize / this._dumpedProcess.Length), 2)}%";
+                }
+                if (labelValue.InvokeRequired)
+                {
+                    labelValue.BeginInvoke((MethodInvoker)delegate
+                    {
+                        labelValue.Text = transfer.Status;
+                    });
+                }
+                else
+                {
+                    labelValue.Text = transfer.Status;
+                }
+                this.BeginInvoke((MethodInvoker)(() =>
+                {
+                    MessageBox.Show($"ID: {transfer.Id}\nLocal Path: {transfer.LocalPath}\nRemote Path: {transfer.RemotePath}\nSize: {transfer.Size}\nStatus: {transfer.Status}\nTransferred Size: {transfer.TransferredSize}\nProgress: {Math.Round((double)(transfer.TransferredSize / _dumpedProcess.Length), 2)}", "Dump Transfer Report");
+                }));
+            }
         }
 
         private void btnCancel_Click(object sender, EventArgs e)
         {
+            // Fix this later
             _connectClient.Send(new FileTransferCancel { Id = 0, Reason = "User Requested" });
+            this.Close();
         }
 
         private void FrmMemoryDump_Load(object sender, EventArgs e)
         {
             this.Text = WindowHelper.GetWindowTitle("Memory Dump", _connectClient) + $" of {_dumpedProcess.Pid} : {_dumpedProcess.ProcessName}";
+        }
+
+        private void FrmMemoryDump_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            UnregisterMessageHandler();
+            _dumpHandler.Dispose();
+        }
+
+        private void FrmMemoryDump_Shown(object sender, EventArgs e)
+        {
+            MessageBox.Show("Starting Download...");
+            Task.Run(() =>
+            {
+                _dumpHandler.BeginDumpDownload(_dumpedProcess);
+            });
         }
     }
 }
