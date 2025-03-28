@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using System.Windows.Forms;
 using System.Xml;
 using System.Xml.XPath;
@@ -103,6 +103,19 @@ namespace Quasar.Server.Models
             }
         }
 
+        public static bool TelegramNotifications
+        {
+            get
+            {
+                return bool.Parse(ReadValueSafe("TelegramNotifications", "False"));
+            }
+            set
+            {
+                WriteValue("TelegramNotifications", value.ToString());
+            }
+        }
+
+
         public static bool ShowPopup
         {
             get
@@ -150,6 +163,34 @@ namespace Quasar.Server.Models
                 WriteValue("EnableNoIPUpdater", value.ToString());
             }
         }
+
+
+        public static string TelegramChatID
+        {
+            get
+            {
+                return ReadValueSafe("TelegramChatID");
+            }
+            set
+            {
+                WriteValue("TelegramChatID", value);
+            }
+        }
+
+        public static string TelegramBotToken
+        {
+            get
+            {
+                return ReadValueSafe("TelegramBotToken");
+            }
+            set
+            {
+                WriteValue("TelegramBotToken", value);
+            }
+        }
+
+
+
 
         public static string NoIPHost
         {

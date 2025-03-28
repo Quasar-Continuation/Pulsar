@@ -325,7 +325,6 @@ namespace Quasar.Server.Forms
             this.hType});
             this.lstDirectory.ContextMenuStrip = this.contextMenuStripDirectory;
             this.lstDirectory.FullRowSelect = true;
-            this.lstDirectory.GridLines = true;
             this.lstDirectory.HideSelection = false;
             this.lstDirectory.Location = new System.Drawing.Point(8, 35);
             listViewColumnSorter1.NeedNumberCompare = false;
@@ -411,7 +410,6 @@ namespace Quasar.Server.Forms
             this.hFilename});
             this.lstTransfers.ContextMenuStrip = this.contextMenuStripTransfers;
             this.lstTransfers.FullRowSelect = true;
-            this.lstTransfers.GridLines = true;
             this.lstTransfers.HideSelection = false;
             this.lstTransfers.Location = new System.Drawing.Point(8, 35);
             listViewColumnSorter2.NeedNumberCompare = false;
