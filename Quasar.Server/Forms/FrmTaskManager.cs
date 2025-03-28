@@ -181,12 +181,20 @@ namespace Quasar.Server.Forms
 
         public void CreateMemoryDump(object sender, DoProcessDumpResponse response)
         {
-            this.Invoke((MethodInvoker)delegate
+            if (response.Result == true)
             {
-                FrmMemoryDump dumpFrm = FrmMemoryDump.CreateNewOrGetExisting(_connectClient, response);
-                _memoryDumps.Add(dumpFrm);
-                dumpFrm.Show();
-            });
+                this.Invoke((MethodInvoker)delegate
+                {
+                    FrmMemoryDump dumpFrm = FrmMemoryDump.CreateNewOrGetExisting(_connectClient, response);
+                    _memoryDumps.Add(dumpFrm);
+                    dumpFrm.Show();
+                });
+            } 
+            else
+            {
+                string reason = response.FailureReason == "" ? "" : $"Reason: {response.FailureReason}";
+                MessageBox.Show($"Failed to dump process!\n{reason}", $"Failed to dump process ({response.Pid}) - {response.ProcessName}");
+            }
         }
     }
 }

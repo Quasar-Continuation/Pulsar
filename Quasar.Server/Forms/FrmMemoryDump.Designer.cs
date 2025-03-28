@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FrmMemoryDump));
             this.btnCancel = new System.Windows.Forms.Button();
             this.progressDownload = new System.Windows.Forms.ProgressBar();
             this.labelProgress = new System.Windows.Forms.Label();
@@ -89,6 +90,7 @@
             this.Controls.Add(this.labelProgress);
             this.Controls.Add(this.progressDownload);
             this.Controls.Add(this.btnCancel);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "FrmMemoryDump";
             this.Text = "Memory Dump []";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.FrmMemoryDump_FormClosing);

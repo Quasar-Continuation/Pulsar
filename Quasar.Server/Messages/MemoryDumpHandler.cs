@@ -1,20 +1,12 @@
 ﻿using Quasar.Common.Enums;
-using Quasar.Common.IO;
 using Quasar.Common.Messages;
 using Quasar.Common.Messages.Administration.FileManager;
 using Quasar.Common.Messages.Administration.TaskManager;
 using Quasar.Common.Messages.other;
-using Quasar.Common.Models;
 using Quasar.Common.Networking;
-using Quasar.Server.Enums;
 using Quasar.Server.Models;
 using Quasar.Server.Networking;
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading;
-using System.Windows.Forms;
 using static Quasar.Server.Messages.FileManagerHandler;
 
 namespace Quasar.Server.Messages
@@ -49,7 +41,7 @@ namespace Quasar.Server.Messages
             _client = client;
             _activeDump = response;
             _fileManagerHandler = new FileManagerHandler(client);
-            _fileManagerHandler.FileTransferUpdated += FileTransferUpdated;
+            _fileManagerHandler.FileTransferUpdated += OnFileTransferUpdateForward;
             MessageHandler.Register(_fileManagerHandler);
         }
 
@@ -72,10 +64,17 @@ namespace Quasar.Server.Messages
 
         private void Execute(ISender sender, FileTransferComplete complete)
         {
-            if (complete.FilePath == _activeDump.DumpPath)
-            {
-                MessageBox.Show("Transfer Completed!");
-            }
+
+        }
+
+        private void OnFileTransferUpdateForward(object sender, FileTransfer transfer)
+        {
+            FileTransferUpdated?.Invoke(sender, transfer);
+        }
+
+        public void Cleanup(FileTransfer transfer)
+        {
+            _fileManagerHandler.DeleteFile(transfer.RemotePath, FileType.File);
         }
 
         public void BeginDumpDownload(DoProcessDumpResponse response)
@@ -92,7 +91,7 @@ namespace Quasar.Server.Messages
 
         protected virtual void Dispose(bool disposing)
         {
-            this._fileManagerHandler.FileTransferUpdated -= FileTransferUpdated;
+            this._fileManagerHandler.FileTransferUpdated -= OnFileTransferUpdateForward;
             MessageHandler.Unregister(this._fileManagerHandler);
             this._fileManagerHandler.Dispose();
         }

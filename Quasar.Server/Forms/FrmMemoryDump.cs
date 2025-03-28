@@ -1,9 +1,5 @@
-﻿using Quasar.Common.Enums;
-using Quasar.Common.Messages;
-using Quasar.Common.Models;
+﻿using Quasar.Common.Messages;
 using Quasar.Common.Messages.Administration.TaskManager;
-using Quasar.Common.Messages.Administration.FileManager;
-using Quasar.Server.Controls;
 using Quasar.Server.Forms.DarkMode;
 using Quasar.Server.Helper;
 using Quasar.Server.Messages;
@@ -11,9 +7,7 @@ using Quasar.Server.Networking;
 using Quasar.Server.Models;
 using System;
 using System.Collections.Generic;
-using System.Threading;
 using System.Windows.Forms;
-using System.Threading.Tasks;
 
 namespace Quasar.Server.Forms
 {
@@ -57,12 +51,13 @@ namespace Quasar.Server.Forms
         }
         public FrmMemoryDump(Client client, DoProcessDumpResponse dump)
         {
-            InitializeComponent();
-
             _connectClient = client;
             _dumpHandler = new MemoryDumpHandler(client, dump);
             _dumpedProcess = dump;
+
+            InitializeComponent();
             RegisterMessageHandler();
+
             progressDownload.Maximum = (int)dump.Length;
             progressDownload.Minimum = 0;
 
@@ -102,7 +97,7 @@ namespace Quasar.Server.Forms
             {
                 if (transfer.Status == "Completed")
                 {
-                    MessageBox.Show("Dump Transfer Complete!");
+                    _dumpHandler.Cleanup(transfer);
                     this.Close();
                 }
                 if (progressDownload.InvokeRequired)
@@ -144,13 +139,14 @@ namespace Quasar.Server.Forms
         private void btnCancel_Click(object sender, EventArgs e)
         {
             // Fix this later
-            _connectClient.Send(new FileTransferCancel { Id = 0, Reason = "User Requested" });
+            MessageBox.Show("Unimplemented!");
+            //_connectClient.Send(new FileTransferCancel { Id = 0, Reason = "User Requested" });
             this.Close();
         }
 
         private void FrmMemoryDump_Load(object sender, EventArgs e)
         {
-            this.Text = WindowHelper.GetWindowTitle("Memory Dump", _connectClient) + $" of {_dumpedProcess.Pid} : {_dumpedProcess.ProcessName}";
+            this.Text = WindowHelper.GetWindowTitle("Memory Dump", _connectClient) + $" => {_dumpedProcess.Pid} : {_dumpedProcess.ProcessName}";
         }
 
         private void FrmMemoryDump_FormClosing(object sender, FormClosingEventArgs e)
@@ -161,11 +157,7 @@ namespace Quasar.Server.Forms
 
         private void FrmMemoryDump_Shown(object sender, EventArgs e)
         {
-            MessageBox.Show("Starting Download...");
-            Task.Run(() =>
-            {
-                _dumpHandler.BeginDumpDownload(_dumpedProcess);
-            });
+            _dumpHandler.BeginDumpDownload(_dumpedProcess);
         }
     }
 }
