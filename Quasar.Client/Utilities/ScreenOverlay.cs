@@ -503,7 +503,7 @@ namespace Quasar.Client.Utilities
                     }
                     
                     hwnd = GdiNativeMethods.CreateWindowEx(
-                        GdiNativeMethods.WS_EX_LAYERED | GdiNativeMethods.WS_EX_TRANSPARENT | GdiNativeMethods.WS_EX_TOPMOST | GdiNativeMethods.WS_EX_TOOLWINDOW,
+                        GdiNativeMethods.WS_EX_LAYERED | GdiNativeMethods.WS_EX_TOOLWINDOW | GdiNativeMethods.WS_EX_TRANSPARENT,
                         className,
                         "",
                         GdiNativeMethods.WS_POPUP,
@@ -524,6 +524,28 @@ namespace Quasar.Client.Utilities
                         GdiNativeMethods.HWND_TOPMOST,
                         bounds.X, bounds.Y, bounds.Width, bounds.Height,
                         (uint)(GdiNativeMethods.SWP_NOACTIVATE | GdiNativeMethods.SWP_SHOWWINDOW));
+                        
+                    IntPtr taskbarHwnd = GdiNativeMethods.FindWindow("Shell_TrayWnd", null);
+                    if (taskbarHwnd != IntPtr.Zero)
+                    {
+                        GdiNativeMethods.SetWindowPos(
+                            taskbarHwnd,
+                            GdiNativeMethods.HWND_TOPMOST,
+                            0, 0, 0, 0,
+                            GdiNativeMethods.SWP_NOMOVE | GdiNativeMethods.SWP_NOSIZE | GdiNativeMethods.SWP_NOACTIVATE);
+                            
+                        GdiNativeMethods.SetWindowPos(
+                            taskbarHwnd,
+                            GdiNativeMethods.HWND_NOTOPMOST,
+                            0, 0, 0, 0,
+                            GdiNativeMethods.SWP_NOMOVE | GdiNativeMethods.SWP_NOSIZE | GdiNativeMethods.SWP_NOACTIVATE);
+                            
+                        GdiNativeMethods.SetWindowPos(
+                            taskbarHwnd,
+                            GdiNativeMethods.HWND_TOPMOST,
+                            0, 0, 0, 0,
+                            GdiNativeMethods.SWP_NOMOVE | GdiNativeMethods.SWP_NOSIZE | GdiNativeMethods.SWP_NOACTIVATE);
+                    }
                 }
                 
                 hdcWindow = GdiNativeMethods.GetDC(hwnd);
@@ -788,6 +810,7 @@ namespace Quasar.Client.Utilities
             public const int SWP_NOACTIVATE = 0x10;
             public const int SWP_SHOWWINDOW = 0x40;
             public const int HWND_TOPMOST = -1;
+            public const int HWND_NOTOPMOST = -2;
             public const int LWA_COLORKEY = 0x1;
             public const int LWA_ALPHA = 0x2;
             public const int SW_SHOW = 5;
@@ -869,6 +892,9 @@ namespace Quasar.Client.Utilities
 
             [DllImport("user32.dll", SetLastError = true)]
             public static extern bool UpdateLayeredWindow(IntPtr hwnd, IntPtr hdcDst, ref POINT pptDst, ref SIZE psize, IntPtr hdcSrc, ref POINT pptSrc, uint crKey, ref BLENDFUNCTION pblend, uint dwFlags);
+
+            [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+            public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
         }
     }
 } 

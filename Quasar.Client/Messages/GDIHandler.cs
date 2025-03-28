@@ -23,6 +23,8 @@ namespace Quasar.Client.Messages
             }
         }
 
+
+        // TODO: Implement this
         private void Execute(ISender client, DoPixelCorrupt message)
         {
             client.Send(new SetStatus 

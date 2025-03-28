@@ -1902,6 +1902,8 @@ namespace Quasar.Server.Forms
         private System.Windows.Forms.ColumnHeader hUserPC;
         private System.Windows.Forms.ToolStripSeparator lineToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem selectAllToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem addFakeClientsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem removeFakeClientsToolStripMenuItem;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel;
         private System.Windows.Forms.MenuStrip menuStrip;
         private System.Windows.Forms.ToolStripMenuItem settingsToolStripMenuItem;

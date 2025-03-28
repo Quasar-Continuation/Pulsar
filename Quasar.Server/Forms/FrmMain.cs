@@ -723,7 +723,14 @@ namespace Quasar.Server.Forms
             if (item == null || starControl == null) return;
 
             var bounds = item.Bounds;
-            starControl.Location = new Point(lstClients.Width - 25, bounds.Top + (bounds.Height - starControl.Height) / 2);
+            int rightMargin = 23;
+            
+            if (lstClients.Items.Count > lstClients.ClientSize.Height / lstClients.GetItemRect(0).Height)
+            {
+                rightMargin += SystemInformation.VerticalScrollBarWidth;
+            }
+            
+            starControl.Location = new Point(lstClients.Width - rightMargin, bounds.Top + (bounds.Height - starControl.Height) / 2);
         }
 
         private void StarButton_Click(object sender, EventArgs e)
@@ -877,11 +884,11 @@ namespace Quasar.Server.Forms
         }
 
         private void SetUserActiveWindowByClient(object sender, Client client, string newWindow)
-        {
-            var item = GetListViewItemByClient(client);
-            if (item != null)
+            {
+                var item = GetListViewItemByClient(client);
+                if (item != null)
                 item.SubItems[CURRENTWINDOW_ID].Text = newWindow;
-        }
+            }
 
         private ListViewItem GetListViewItemByClient(Client client)
         {
