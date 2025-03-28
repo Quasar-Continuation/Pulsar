@@ -50,7 +50,6 @@ namespace Quasar.Server.Kematian
             {
                 client.Send(req);
             }
-
         }
     }
 }
