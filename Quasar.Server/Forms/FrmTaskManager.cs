@@ -1,5 +1,6 @@
 ﻿using Quasar.Common.Enums;
 using Quasar.Common.Messages;
+using Quasar.Common.Messages.Administration.TaskManager;
 using Quasar.Common.Models;
 using Quasar.Server.Controls;
 using Quasar.Server.Forms.DarkMode;
@@ -73,6 +74,7 @@ namespace Quasar.Server.Forms
             _connectClient.ClientState += ClientDisconnected;
             _taskManagerHandler.ProgressChanged += TasksChanged;
             _taskManagerHandler.ProcessActionPerformed += ProcessActionPerformed;
+            _taskManagerHandler.OnResponseReceived += CreateMemoryDump;
             MessageHandler.Register(_taskManagerHandler);
         }
 
@@ -82,6 +84,7 @@ namespace Quasar.Server.Forms
         private void UnregisterMessageHandler()
         {
             MessageHandler.Unregister(_taskManagerHandler);
+            _taskManagerHandler.OnResponseReceived -= CreateMemoryDump;
             _taskManagerHandler.ProcessActionPerformed -= ProcessActionPerformed;
             _taskManagerHandler.ProgressChanged -= TasksChanged;
             _connectClient.ClientState -= ClientDisconnected;
@@ -170,18 +173,20 @@ namespace Quasar.Server.Forms
 
         private void dumpMemoryToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            FrmMemoryDump dumpFrm = FrmMemoryDump.CreateNewOrGetExisting(_connectClient, new Common.Messages.Administration.TaskManager.DoProcessDumpResponse { Length = 0, Pid = 0, ProcessName = "Test" });
-            dumpFrm.Show();
             foreach (ListViewItem lvi in lstTasks.SelectedItems)
             {
                 _taskManagerHandler.DumpProcess(int.Parse(lvi.SubItems[1].Text));
             }
         }
 
-        public void createMemoryDump(object sender, EventArgs e)
+        public void CreateMemoryDump(object sender, DoProcessDumpResponse response)
         {
-            //Create new mem dump form (fuck you ui thread safety)
-            //display it
+            this.Invoke((MethodInvoker)delegate
+            {
+                FrmMemoryDump dumpFrm = FrmMemoryDump.CreateNewOrGetExisting(_connectClient, response);
+                _memoryDumps.Add(dumpFrm);
+                dumpFrm.Show();
+            });
         }
     }
 }

@@ -50,11 +50,8 @@ namespace Quasar.Server.Forms
             {
                 return OpenedForms[dump].Value;
             }
-            MessageBox.Show("Creating form...");
             FrmMemoryDump f = new FrmMemoryDump(client, dump);
-            MessageBox.Show("Adding Dispose event...");
             f.Disposed += (sender, args) => OpenedForms.Remove(dump);
-            MessageBox.Show("Adding to active forms...");
             OpenedForms.Add(dump, new KeyValuePair<Client, FrmMemoryDump>(client, f));
             return f;
         }
@@ -62,21 +59,14 @@ namespace Quasar.Server.Forms
         {
             InitializeComponent();
 
-            MessageBox.Show("Setting Client...");
             _connectClient = client;
-            MessageBox.Show("Creating Memory Dump Handler...");
             _dumpHandler = new MemoryDumpHandler(client, dump);
-            MessageBox.Show("Setting Dump...");
             _dumpedProcess = dump;
-            MessageBox.Show("Registering handlers...");
             RegisterMessageHandler();
-            MessageBox.Show("Setting Maximum...");
             progressDownload.Maximum = (int)dump.Length;
-            MessageBox.Show("Setting Minimum...");
             progressDownload.Minimum = 0;
-            MessageBox.Show("Applying Dark Mode...");
+
             DarkModeManager.ApplyDarkMode(this);
-            MessageBox.Show("Done!");
         }
 
         private void RegisterMessageHandler()
@@ -148,10 +138,6 @@ namespace Quasar.Server.Forms
                 {
                     labelValue.Text = transfer.Status;
                 }
-                this.BeginInvoke((MethodInvoker)(() =>
-                {
-                    MessageBox.Show($"ID: {transfer.Id}\nLocal Path: {transfer.LocalPath}\nRemote Path: {transfer.RemotePath}\nSize: {transfer.Size}\nStatus: {transfer.Status}\nTransferred Size: {transfer.TransferredSize}\nProgress: {Math.Round((double)(transfer.TransferredSize / _dumpedProcess.Length), 2)}", "Dump Transfer Report");
-                }));
             }
         }
 

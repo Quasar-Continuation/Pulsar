@@ -145,21 +145,7 @@ namespace Quasar.Server.Messages
 
         private void Execute(ISender client, DoProcessDumpResponse message)
         {
-            //MessageBox.Show($"Path: {message.DumpPath}\nPID: {message.Pid}\nProcess Name: {message.ProcessName}\nSuccess: {message.Result}\nLength: {message.Length}\nFailure Reason: {message.FailureReason}", "We got a dump response!");
-            FrmMemoryDump dump = FrmMemoryDump.CreateNewOrGetExisting(_client, message);
-            if (dump.InvokeRequired)
-            {
-                dump.Invoke((MethodInvoker)delegate
-                {
-                    dump.Show();
-                    dump.Focus();
-                });
-            } 
-            else
-            {
-                dump.Show();
-                dump.Focus();
-            }
+            OnResponseReceived?.Invoke(this, message);
         }
     }
 }
