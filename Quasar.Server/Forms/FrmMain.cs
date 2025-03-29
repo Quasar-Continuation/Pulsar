@@ -828,7 +828,7 @@ namespace Quasar.Server.Forms
                 {
                     " " + client.EndPoint.Address, nickname, client.Value.Tag,
                     client.Value.UserAtPc, client.Value.Version, "Connected", "", "Active", client.Value.CountryWithCode,
-                    client.Value.OperatingSystem, client.Value.AccountType, client.Value.Wallets
+                    client.Value.OperatingSystem, client.Value.AccountType
                 })
 
                 { Tag = client, ImageIndex = client.Value.ImageIndex };

