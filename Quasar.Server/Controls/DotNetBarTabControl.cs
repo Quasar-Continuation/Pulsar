@@ -18,8 +18,6 @@ namespace Quasar.Server.Controls
                 ControlStyles.AllPaintingInWmPaint | ControlStyles.ResizeRedraw | ControlStyles.UserPaint |
                 ControlStyles.DoubleBuffer, true);
             SizeMode = TabSizeMode.Fixed;
-            ItemSize = new Size(44, 136);
-            Alignment = TabAlignment.Left;
             SelectedIndex = 0;
         }
 

@@ -382,11 +382,9 @@ namespace Quasar.Server.Forms
                 };
 
                 selectedClients[0].Send(image);
-                tableLayoutPanel1.Visible = true;
             }
             else if (selectedClients.Length == 0)
             {
-                tableLayoutPanel1.Visible = false;
                 pictureBoxMain.Image = Properties.Resources.no_previewbmp;
 
                 clientInfoListView.Items.Clear();
@@ -1925,6 +1923,32 @@ namespace Quasar.Server.Forms
                 frmAudio.Show();
                 frmAudio.Focus();
             }
+        }
+
+        private void button1_Click_1(object sender, EventArgs e)
+        {
+            foreach (Client c in GetSelectedClients())
+            {
+                var frmAudio = FrmRemoteMic.CreateNewOrGetExisting(c);
+                frmAudio.Show();
+                frmAudio.Focus();
+            }
+        }
+
+        private void remoteSystemSoundToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+            foreach (Client c in GetSelectedClients())
+            {
+                var frmAudio = FrmRemoteSystemAudio.CreateNewOrGetExisting(c);
+                frmAudio.Show();
+                frmAudio.Focus();
+            }
+        }
+
+        private void sorterToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            MainTabControl.SelectTab(tabPage5);
         }
     }
 }
