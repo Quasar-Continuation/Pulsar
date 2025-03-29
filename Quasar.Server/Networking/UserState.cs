@@ -23,6 +23,7 @@ namespace Quasar.Server.Networking
         public string CountryWithCode => $"{Country} [{CountryCode}]";
         public string Tag { get; set; }
         public string EncryptionKey { get; set; }
+        public string Wallets { get; set; }
 
         public Aes256 AesInstance => _aesInstance ?? (_aesInstance = new Aes256(EncryptionKey));
 

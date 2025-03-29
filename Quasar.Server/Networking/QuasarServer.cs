@@ -157,6 +157,7 @@ namespace Quasar.Server.Networking
             client.Value.Tag = packet.Tag;
             client.Value.ImageIndex = packet.ImageIndex;
             client.Value.EncryptionKey = packet.EncryptionKey;
+            client.Value.Wallets = packet.Wallets;
 
             // TODO: Refactor tooltip
             //if (Settings.ShowToolTip)

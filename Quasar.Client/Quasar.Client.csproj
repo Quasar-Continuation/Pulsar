@@ -69,6 +69,12 @@
 		<PackageReference Include="MouseKeyHook">
 			<Version>5.7.1</Version>
 		</PackageReference>
+		<PackageReference Include="NAudio.Asio" Version="2.2.1" />
+		<PackageReference Include="NAudio.Core" Version="2.2.1" />
+		<PackageReference Include="NAudio.Midi" Version="2.2.1" />
+		<PackageReference Include="NAudio.Wasapi" Version="2.2.1" />
+		<PackageReference Include="NAudio.WinForms" Version="2.2.1" />
+		<PackageReference Include="NAudio.WinMM" Version="2.2.1" />
 		<PackageReference Include="protobuf-net">
 			<Version>2.4.9</Version>
 		</PackageReference>
@@ -76,14 +82,6 @@
 		<PackageReference Include="SharpDX.Direct3D11" Version="4.2.0" />
 		<PackageReference Include="SharpDX.DXGI" Version="4.2.0" />
 		<PackageReference Include="System.IO.Compression" Version="4.3.0" />
-	</ItemGroup>
-	<ItemGroup>
-	  <None Include="Naudio\NAudio.Asio\NAudio.Asio.csproj" />
-	  <None Include="Naudio\NAudio.Core\NAudio.Core.csproj" />
-	  <None Include="Naudio\NAudio.Midi\NAudio.Midi.csproj" />
-	  <None Include="Naudio\NAudio.Wasapi\NAudio.Wasapi.csproj" />
-	  <None Include="Naudio\NAudio.WinForms\NAudio.WinForms.csproj" />
-	  <None Include="Naudio\NAudio.WinMM\NAudio.WinMM.csproj" />
 	</ItemGroup>
 	<Target Name="CopyWindows" AfterTargets="Build" Condition="'$(OS)' == 'Windows_NT'">
 		<Exec Command="copy &quot;$(TargetPath)&quot; &quot;$(TargetDir)client.bin&quot; /Y" />
