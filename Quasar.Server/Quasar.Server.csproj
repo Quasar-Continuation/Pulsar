@@ -29,14 +29,6 @@
 		<CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
 	</PropertyGroup>
 	<ItemGroup>
-	  <None Include="Naudio\NAudio.Asio\NAudio.Asio.csproj" />
-	  <None Include="Naudio\NAudio.Core\NAudio.Core.csproj" />
-	  <None Include="Naudio\NAudio.Midi\NAudio.Midi.csproj" />
-	  <None Include="Naudio\NAudio.Wasapi\NAudio.Wasapi.csproj" />
-	  <None Include="Naudio\NAudio.WinForms\NAudio.WinForms.csproj" />
-	  <None Include="Naudio\NAudio.WinMM\NAudio.WinMM.csproj" />
-	</ItemGroup>
-	<ItemGroup>
 		<Reference Include="System.Configuration">
 			<Private>False</Private>
 		</Reference>
@@ -273,6 +265,12 @@
 		<PackageReference Include="MouseKeyHook">
 			<Version>5.7.1</Version>
 		</PackageReference>
+		<PackageReference Include="NAudio.Asio" Version="2.2.1" />
+		<PackageReference Include="NAudio.Core" Version="2.2.1" />
+		<PackageReference Include="NAudio.Midi" Version="2.2.1" />
+		<PackageReference Include="NAudio.Wasapi" Version="2.2.1" />
+		<PackageReference Include="NAudio.WinForms" Version="2.2.1" />
+		<PackageReference Include="NAudio.WinMM" Version="2.2.1" />
 		<PackageReference Include="Open.Nat" Version="2.1.0" />
 		<PackageReference Include="Portable.BouncyCastle" Version="1.9.0" />
 		<PackageReference Include="protobuf-net">
