@@ -23,7 +23,6 @@ namespace Pulsar.Client.User
         {
             if (e.ExceptionObject is Exception ex)
             {
-
                 LogException(ex);
                 _client.Send(new GetDebugLog { Log = ex.ToString() });
             }
