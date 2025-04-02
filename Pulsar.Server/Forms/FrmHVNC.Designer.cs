@@ -49,6 +49,7 @@ namespace Pulsar.Server.Forms
             this.startFirefoxToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.startCmdToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.startPowershellToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.startCustomPathToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.sizeLabelCounter = new System.Windows.Forms.Label();
             this.btnKeyboard = new System.Windows.Forms.Button();
             this.cbMonitors = new System.Windows.Forms.ComboBox();
@@ -56,7 +57,7 @@ namespace Pulsar.Server.Forms
             this.btnShow = new System.Windows.Forms.Button();
             this.toolTipButtons = new System.Windows.Forms.ToolTip(this.components);
             this.picDesktop = new Pulsar.Server.Controls.HVNCRapidPictureBox();
-            this.startCustomPathToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.startDiscordToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.barQuality)).BeginInit();
             this.panelTop.SuspendLayout();
             this.contextMenuStrip.SuspendLayout();
@@ -175,10 +176,11 @@ namespace Pulsar.Server.Forms
             this.startFirefoxToolStripMenuItem,
             this.startCmdToolStripMenuItem,
             this.startPowershellToolStripMenuItem,
-            this.startCustomPathToolStripMenuItem});
+            this.startCustomPathToolStripMenuItem,
+            this.startDiscordToolStripMenuItem});
             this.contextMenuStrip.Name = "contextMenuStrip";
             this.contextMenuStrip.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
-            this.contextMenuStrip.Size = new System.Drawing.Size(181, 224);
+            this.contextMenuStrip.Size = new System.Drawing.Size(181, 246);
             // 
             // menuItem1
             // 
@@ -244,6 +246,14 @@ namespace Pulsar.Server.Forms
             this.startPowershellToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.startPowershellToolStripMenuItem.Text = "Start Powershell";
             this.startPowershellToolStripMenuItem.Click += new System.EventHandler(this.startPowershellToolStripMenuItem_Click);
+            // 
+            // startCustomPathToolStripMenuItem
+            // 
+            this.startCustomPathToolStripMenuItem.ForeColor = System.Drawing.SystemColors.Control;
+            this.startCustomPathToolStripMenuItem.Name = "startCustomPathToolStripMenuItem";
+            this.startCustomPathToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.startCustomPathToolStripMenuItem.Text = "Start Custom Path";
+            this.startCustomPathToolStripMenuItem.Click += new System.EventHandler(this.startCustomPathToolStripMenuItem_Click);
             // 
             // sizeLabelCounter
             // 
@@ -318,13 +328,13 @@ namespace Pulsar.Server.Forms
             this.picDesktop.TabIndex = 0;
             this.picDesktop.TabStop = false;
             // 
-            // startCustomPathToolStripMenuItem
+            // startDiscordToolStripMenuItem
             // 
-            this.startCustomPathToolStripMenuItem.ForeColor = System.Drawing.SystemColors.Control;
-            this.startCustomPathToolStripMenuItem.Name = "startCustomPathToolStripMenuItem";
-            this.startCustomPathToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.startCustomPathToolStripMenuItem.Text = "Start Custom Path";
-            this.startCustomPathToolStripMenuItem.Click += new System.EventHandler(this.startCustomPathToolStripMenuItem_Click);
+            this.startDiscordToolStripMenuItem.ForeColor = System.Drawing.SystemColors.Control;
+            this.startDiscordToolStripMenuItem.Name = "startDiscordToolStripMenuItem";
+            this.startDiscordToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.startDiscordToolStripMenuItem.Text = "Start Discord";
+            this.startDiscordToolStripMenuItem.Click += new System.EventHandler(this.startDiscordToolStripMenuItem_Click);
             // 
             // FrmHVNC
             // 
@@ -380,5 +390,6 @@ namespace Pulsar.Server.Forms
         private System.Windows.Forms.ToolStripMenuItem startCmdToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem startPowershellToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem startCustomPathToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem startDiscordToolStripMenuItem;
     }
 }

