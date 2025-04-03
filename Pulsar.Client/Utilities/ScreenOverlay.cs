@@ -168,7 +168,7 @@ namespace Pulsar.Client.Utilities
                                 didWork = true;
                                 processedOps++;
                             }
-                            catch (Exception ex)
+                            catch (Exception)
                             {
 
                             }
@@ -193,13 +193,13 @@ namespace Pulsar.Client.Utilities
                             _drawingSignal.Reset();
                         }
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
                         Thread.Sleep(100);
                     }
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 _drawingThreadRunning = false;
             }
@@ -308,7 +308,7 @@ namespace Pulsar.Client.Utilities
                         _needsUpdate = true;
                     }
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
 
                 }
@@ -377,7 +377,7 @@ namespace Pulsar.Client.Utilities
                         _needsUpdate = true;
                     }
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
 
                 }
@@ -406,7 +406,7 @@ namespace Pulsar.Client.Utilities
                         _needsUpdate = true;
                     }
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
 
                 }
@@ -448,7 +448,7 @@ namespace Pulsar.Client.Utilities
                 {
                     ShowDrawingOverlay(monitorIndex);
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
 
                 }
@@ -498,7 +498,7 @@ namespace Pulsar.Client.Utilities
                     {
                         GdiNativeMethods.RegisterClass(ref wndClass);
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
                     }
                     
@@ -611,7 +611,7 @@ namespace Pulsar.Client.Utilities
                         
                         _overlayBitmaps[monitorIndex] = hBitmap;
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
                         return;
                     }
@@ -659,7 +659,7 @@ namespace Pulsar.Client.Utilities
                     int error = Marshal.GetLastWin32Error();
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
             }
             finally
@@ -683,7 +683,7 @@ namespace Pulsar.Client.Utilities
 
                     drawingLayerCopy?.Dispose();
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                 }
             }
@@ -723,7 +723,7 @@ namespace Pulsar.Client.Utilities
                             _overlayCache.Remove(key);
                         }
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
                     }
                     break;

