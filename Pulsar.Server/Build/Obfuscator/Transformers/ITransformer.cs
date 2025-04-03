@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Pulsar.Obfuscator.Transformers
+namespace Pulsar.Server.Build.Obfuscator.Transformers
 {
     public class ITransformer
     {

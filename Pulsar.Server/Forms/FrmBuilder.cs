@@ -540,8 +540,7 @@ namespace Pulsar.Server.Forms
 
                 var builder = new ClientBuilder(options, "client.bin");
 
-                bool obfuscate = chkObfuscateOutput.Checked;
-                builder.Build(obfuscate);
+                builder.Build(chkObfuscateOutput.Checked, chkPackOutput.Checked);
 
                 try
                 {
