@@ -18,15 +18,6 @@ namespace Pulsar.Server.Build.TinyLoader
     public class TinyLoader
     {
 
-        public class Entrypoint
-        {
-            public static void Main()
-            {
-                MessageBox.Show("Hello World");
-            }
-        }
-
-
         private byte[] app;
 
         public TinyLoader(string path)
