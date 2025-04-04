@@ -6,11 +6,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Pulsar.Obfuscator.Transformers
+namespace Pulsar.Server.Build.Obfuscator.Transformers
 {
     public class RenamerTransformer : ITransformer
     {
-        
+
         public override void Transform(Obfuscator obf)
         {
             //TODO: rewrite this and use this transformer instead of the Build/Renamer one
@@ -68,5 +68,5 @@ namespace Pulsar.Obfuscator.Transformers
             //}
         }
     }
-    
+
 }
