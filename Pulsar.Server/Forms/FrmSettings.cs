@@ -9,6 +9,9 @@ using System.Net.Sockets;
 using System.Windows.Forms;
 using Pulsar.Server.DiscordRPC;
 using Pulsar.Server.TelegramSender;
+using System.Text.Json;
+using System.IO;
+using System.Collections.Generic;
 
 
 namespace Pulsar.Server.Forms
@@ -27,8 +30,6 @@ namespace Pulsar.Server.Forms
             DarkModeManager.ApplyDarkMode(this);
 
             ToggleListenerSettings(!listenServer.Listening);
-
-            ShowPassword(false);
         }
 
         private void FrmSettings_Load(object sender, EventArgs e)
@@ -40,17 +41,31 @@ namespace Pulsar.Server.Forms
             chkPopup.Checked = Settings.ShowPopup;
             chkUseUpnp.Checked = Settings.UseUPnP;
             chkShowTooltip.Checked = Settings.ShowToolTip;
-            chkNoIPIntegration.Checked = Settings.EnableNoIPUpdater;
             chkEventLog.Checked = Settings.EventLog;
             txtTelegramChatID.Text = Settings.TelegramChatID;
             txtTelegramToken.Text = Settings.TelegramBotToken;
             chkTelegramNotis.Checked = Settings.TelegramNotifications;
-            txtNoIPHost.Text = Settings.NoIPHost;
-            txtNoIPUser.Text = Settings.NoIPUsername;
-            txtNoIPPass.Text = Settings.NoIPPassword;
             chkDiscordRPC.Checked = Settings.DiscordRPC; // Will load as false by default
             _previousDiscordRPCState = chkDiscordRPC.Checked;
-            
+
+            string filePath = "blocked.json";
+            try
+            {
+                string json = File.ReadAllText(filePath);
+                var blockedIPs = JsonSerializer.Deserialize<List<string>>(json);
+                if (blockedIPs != null && blockedIPs.Count > 0)
+                {
+                    BlockedRichTB.Text = string.Join(Environment.NewLine, blockedIPs);
+                }
+                else
+                {
+                    BlockedRichTB.Text = string.Empty; 
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
         }
 
         private ushort GetPortSafe()
@@ -75,8 +90,6 @@ namespace Pulsar.Server.Forms
             {
                 try
                 {
-                    if (chkNoIPIntegration.Checked)
-                        NoIpUpdater.Start();
                     _listenServer.Listen(port, chkIPv6Support.Checked, chkUseUpnp.Checked);
                     ToggleListenerSettings(false);
                 }
@@ -127,11 +140,7 @@ namespace Pulsar.Server.Forms
             Settings.ShowPopup = chkPopup.Checked;
             Settings.UseUPnP = chkUseUpnp.Checked;
             Settings.ShowToolTip = chkShowTooltip.Checked;
-            Settings.EnableNoIPUpdater = chkNoIPIntegration.Checked;
             Settings.EventLog = chkEventLog.Checked;
-            Settings.NoIPHost = txtNoIPHost.Text;
-            Settings.NoIPUsername = txtNoIPUser.Text;
-            Settings.NoIPPassword = txtNoIPPass.Text;
             Settings.DiscordRPC = chkDiscordRPC.Checked;
             Settings.TelegramChatID = txtTelegramChatID.Text;
             Settings.TelegramBotToken = txtTelegramToken.Text;
@@ -145,18 +154,6 @@ namespace Pulsar.Server.Forms
             }
 
             this.Close();
-        }
-
-        private void btnCancel_Click(object sender, EventArgs e)
-        {
-            if (MessageBox.Show("Discard your changes?", "Cancel", MessageBoxButtons.YesNo, MessageBoxIcon.Question) ==
-                DialogResult.Yes)
-                this.Close();
-        }
-
-        private void chkNoIPIntegration_CheckedChanged(object sender, EventArgs e)
-        {
-            NoIPControlHandler(chkNoIPIntegration.Checked);
         }
 
         private void chkDiscordRPC_CheckedChanged(object sender, EventArgs e)
@@ -188,30 +185,10 @@ namespace Pulsar.Server.Forms
             chkUseUpnp.Enabled = enabled;
         }
 
-        private void NoIPControlHandler(bool enable)
-        {
-            lblHost.Enabled = enable;
-            lblUser.Enabled = enable;
-            lblPass.Enabled = enable;
-            txtNoIPHost.Enabled = enable;
-            txtNoIPUser.Enabled = enable;
-            txtNoIPPass.Enabled = enable;
-            chkShowPassword.Enabled = enable;
-        }
         private void TelegramControlHandler(bool enable)
         {
             txtTelegramToken.Enabled = enable;
             txtTelegramChatID.Enabled = enable;
-        }
-
-        private void ShowPassword(bool show = true)
-        {
-            txtNoIPPass.PasswordChar = (show) ? (char)0 : (char)'●';
-        }
-
-        private void chkShowPassword_CheckedChanged(object sender, EventArgs e)
-        {
-            ShowPassword(chkShowPassword.Checked);
         }
 
         private void textBox1_TextChanged(object sender, EventArgs e)
@@ -273,6 +250,62 @@ namespace Pulsar.Server.Forms
         private void txtNoIPHost_TextChanged(object sender, EventArgs e)
         {
 
+        }
+
+        private void button_Click(object sender, EventArgs e)
+        {
+            ushort port = GetPortSafe();
+
+            if (port == 0)
+            {
+                MessageBox.Show("Please enter a valid port > 0.", "Please enter a valid port", MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+                return;
+            }
+
+            Settings.ListenPort = port;
+            Settings.DarkMode = chkDarkMode.Checked;
+            Settings.IPv6Support = chkIPv6Support.Checked;
+            Settings.AutoListen = chkAutoListen.Checked;
+            Settings.ShowPopup = chkPopup.Checked;
+            Settings.UseUPnP = chkUseUpnp.Checked;
+            Settings.ShowToolTip = chkShowTooltip.Checked;
+            Settings.EventLog = chkEventLog.Checked;
+            Settings.DiscordRPC = chkDiscordRPC.Checked;
+            Settings.TelegramChatID = txtTelegramChatID.Text;
+            Settings.TelegramBotToken = txtTelegramToken.Text;
+            Settings.TelegramNotifications = chkTelegramNotis.Checked;
+            DiscordRPCManager.ApplyDiscordRPC(this);
+
+            FrmMain mainForm = Application.OpenForms.OfType<FrmMain>().FirstOrDefault();
+            if (mainForm != null)
+            {
+                mainForm.EventLogVisability();
+            }
+
+            this.Close();
+
+            string[] ipList = BlockedRichTB.Text.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
+            var blockedIPs = ipList.ToList();
+            string filePath = "blocked.json";
+            try
+            {
+                string json = JsonSerializer.Serialize(blockedIPs, new JsonSerializerOptions { WriteIndented = true });
+                File.WriteAllText(filePath, json);
+
+                MessageBox.Show("Blocked IPs successfully saved.");
+            }
+            catch (Exception ex)
+            {
+
+            }
+        }
+
+        private void btnCancel_Click(object sender, EventArgs e)
+        {
+            if (MessageBox.Show("Discard your changes?", "Cancel", MessageBoxButtons.YesNo, MessageBoxIcon.Question) ==
+               DialogResult.Yes)
+                this.Close();
         }
     }
 }

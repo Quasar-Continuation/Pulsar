@@ -1,6 +1,5 @@
 ﻿using NAudio.CoreAudioApi;
 using NAudio.Wave;
-using Pulsar.Common.Messages;
 using Pulsar.Common.Messages.Audio;
 using Pulsar.Common.Messages.other;
 using Pulsar.Common.Networking;
