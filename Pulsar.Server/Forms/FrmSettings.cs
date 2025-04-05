@@ -153,6 +153,21 @@ namespace Pulsar.Server.Forms
                 mainForm.EventLogVisability();
             }
 
+            string[] ipList = BlockedRichTB.Text.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
+            var blockedIPs = ipList.ToList();
+            string filePath = "blocked.json";
+            try
+            {
+                string json = JsonSerializer.Serialize(blockedIPs, new JsonSerializerOptions { WriteIndented = true });
+                File.WriteAllText(filePath, json);
+
+                MessageBox.Show("Blocked IPs successfully saved.");
+            }
+            catch (Exception ex)
+            {
+
+            }
+
             this.Close();
         }
 
@@ -250,55 +265,6 @@ namespace Pulsar.Server.Forms
         private void txtNoIPHost_TextChanged(object sender, EventArgs e)
         {
 
-        }
-
-        private void button_Click(object sender, EventArgs e)
-        {
-            ushort port = GetPortSafe();
-
-            if (port == 0)
-            {
-                MessageBox.Show("Please enter a valid port > 0.", "Please enter a valid port", MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
-                return;
-            }
-
-            Settings.ListenPort = port;
-            Settings.DarkMode = chkDarkMode.Checked;
-            Settings.IPv6Support = chkIPv6Support.Checked;
-            Settings.AutoListen = chkAutoListen.Checked;
-            Settings.ShowPopup = chkPopup.Checked;
-            Settings.UseUPnP = chkUseUpnp.Checked;
-            Settings.ShowToolTip = chkShowTooltip.Checked;
-            Settings.EventLog = chkEventLog.Checked;
-            Settings.DiscordRPC = chkDiscordRPC.Checked;
-            Settings.TelegramChatID = txtTelegramChatID.Text;
-            Settings.TelegramBotToken = txtTelegramToken.Text;
-            Settings.TelegramNotifications = chkTelegramNotis.Checked;
-            DiscordRPCManager.ApplyDiscordRPC(this);
-
-            FrmMain mainForm = Application.OpenForms.OfType<FrmMain>().FirstOrDefault();
-            if (mainForm != null)
-            {
-                mainForm.EventLogVisability();
-            }
-
-            this.Close();
-
-            string[] ipList = BlockedRichTB.Text.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
-            var blockedIPs = ipList.ToList();
-            string filePath = "blocked.json";
-            try
-            {
-                string json = JsonSerializer.Serialize(blockedIPs, new JsonSerializerOptions { WriteIndented = true });
-                File.WriteAllText(filePath, json);
-
-                MessageBox.Show("Blocked IPs successfully saved.");
-            }
-            catch (Exception ex)
-            {
-
-            }
         }
 
         private void btnCancel_Click(object sender, EventArgs e)

