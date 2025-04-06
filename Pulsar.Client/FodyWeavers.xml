@@ -11,9 +11,7 @@
 		SharpDX
 		SharpDX.Direct3D11
 		SharpDX.DXGI
-		NAudio.Asio
 		NAudio.Core
-		NAudio.Midi
 		NAudio.Wasapi
 		NAudio.WinForms
 		NAudio.WinMM
