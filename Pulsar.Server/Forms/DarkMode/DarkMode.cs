@@ -715,7 +715,7 @@ namespace DarkModeForms
                 pGrid.CategoryForeColor = OScolors.TextActive;
                 pGrid.CategorySplitterColor = OScolors.ControlLight;
             }
-            if (control is ListView)
+            if (control is ListView || control is AeroListView)
             {
                 var lView = control as ListView;
                 //Mode = IsDarkMode ? "DarkMode_ItemsView" : "ClearMode_ItemsView";
