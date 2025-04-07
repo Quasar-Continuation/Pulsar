@@ -11,7 +11,6 @@ using System.Threading;
 using System.Diagnostics;
 using Pulsar.Common.Messages.Webcam;
 using Pulsar.Common.Messages.other;
-using Pulsar.Common.Messages.Monitoring.RemoteDesktop;
 using System.Collections.Concurrent;
 
 namespace Pulsar.Client.Messages
@@ -71,8 +70,6 @@ namespace Pulsar.Client.Messages
                 // server is requesting more frames
                 Interlocked.Add(ref _pendingFrameRequests, message.FramesRequested);
                 _frameRequestEvent.Set();
-
-                Debug.WriteLine($"Server requested {message.FramesRequested} more frames. Total pending: {_pendingFrameRequests}");
             }
         }
 
@@ -218,7 +215,6 @@ namespace Pulsar.Client.Messages
 
                 if (_webcam == null)
                 {
-                    Debug.WriteLine("Error capturing webcam: Bitmap is null");
                     return null;
                 }
 

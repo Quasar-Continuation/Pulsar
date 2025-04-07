@@ -193,8 +193,6 @@ namespace Pulsar.Client.Messages
                 // server is requesting more frames
                 Interlocked.Add(ref _pendingFrameRequests, message.FramesRequested);
                 _frameRequestEvent.Set();
-
-                Debug.WriteLine($"Server requested {message.FramesRequested} more frames. Total pending: {_pendingFrameRequests}");
             }
         }
 

