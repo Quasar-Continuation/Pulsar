@@ -13,6 +13,7 @@
 		SharpDX.DXGI
 		SharpDX.Mathematics
 		SharpDX.D3DCompiler
+	        SharpDZ.Direct2D1
 		NAudio.Core
 		NAudio.Wasapi
 		NAudio.WinForms
