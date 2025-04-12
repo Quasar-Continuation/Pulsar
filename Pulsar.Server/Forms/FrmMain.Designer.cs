@@ -612,7 +612,6 @@ namespace Pulsar.Server.Forms
             this.pixelCorruptToolStripMenuItem.Name = "pixelCorruptToolStripMenuItem";
             this.pixelCorruptToolStripMenuItem.Size = new System.Drawing.Size(142, 22);
             this.pixelCorruptToolStripMenuItem.Text = "Pixel Corrupt";
-            this.pixelCorruptToolStripMenuItem.Click += new System.EventHandler(this.pixelCorruptToolStripMenuItem_Click);
             // 
             // connectionToolStripMenuItem
             // 
