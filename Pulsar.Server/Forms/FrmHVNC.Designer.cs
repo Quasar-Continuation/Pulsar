@@ -1,6 +1,6 @@
-﻿using Quasar.Server.Controls;
+﻿using Pulsar.Server.Controls;
 
-namespace Quasar.Server.Forms
+namespace Pulsar.Server.Forms
 {
     partial class FrmHVNC
     {
@@ -39,7 +39,7 @@ namespace Quasar.Server.Forms
             this.lblQualityShow = new System.Windows.Forms.Label();
             this.btnMouse = new System.Windows.Forms.Button();
             this.panelTop = new System.Windows.Forms.Panel();
-            this.dropDownMenuButton = new Quasar.Server.Controls.MenuButton();
+            this.dropDownMenuButton = new Pulsar.Server.Controls.MenuButton();
             this.contextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.menuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.menuItem2 = new System.Windows.Forms.ToolStripMenuItem();
@@ -54,7 +54,7 @@ namespace Quasar.Server.Forms
             this.btnHide = new System.Windows.Forms.Button();
             this.btnShow = new System.Windows.Forms.Button();
             this.toolTipButtons = new System.Windows.Forms.ToolTip(this.components);
-            this.picDesktop = new Quasar.Server.Controls.HVNCRapidPictureBox();
+            this.picDesktop = new Pulsar.Server.Controls.HVNCRapidPictureBox();
             this.startPowershellToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.barQuality)).BeginInit();
             this.panelTop.SuspendLayout();
@@ -120,7 +120,7 @@ namespace Quasar.Server.Forms
             // btnMouse
             // 
             this.btnMouse.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnMouse.Image = global::Quasar.Server.Properties.Resources.mouse_delete;
+            this.btnMouse.Image = global::Pulsar.Server.Properties.Resources.mouse_delete;
             this.btnMouse.Location = new System.Drawing.Point(626, 3);
             this.btnMouse.Name = "btnMouse";
             this.btnMouse.Size = new System.Drawing.Size(28, 28);
@@ -247,7 +247,7 @@ namespace Quasar.Server.Forms
             // btnKeyboard
             // 
             this.btnKeyboard.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnKeyboard.Image = global::Quasar.Server.Properties.Resources.keyboard_delete;
+            this.btnKeyboard.Image = global::Pulsar.Server.Properties.Resources.keyboard_delete;
             this.btnKeyboard.Location = new System.Drawing.Point(660, 3);
             this.btnKeyboard.Name = "btnKeyboard";
             this.btnKeyboard.Size = new System.Drawing.Size(28, 28);
