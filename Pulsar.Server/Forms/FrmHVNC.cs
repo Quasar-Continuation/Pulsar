@@ -1,22 +1,21 @@
 ﻿using Gma.System.MouseKeyHook;
-using Pulsar.Common.Enums;
-using Pulsar.Common.Helpers;
-using Pulsar.Common.Messages;
-using Pulsar.Server.Forms.DarkMode;
-using Pulsar.Server.Helper;
-using Pulsar.Server.Messages;
-using Pulsar.Server.Networking;
-using Pulsar.Server.Utilities;
+using Quasar.Common.Enums;
+using Quasar.Common.Helpers;
+using Quasar.Common.Messages;
+using Quasar.Server.Forms.DarkMode;
+using Quasar.Server.Helper;
+using Quasar.Server.Messages;
+using Quasar.Server.Networking;
+using Quasar.Server.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 using System.Diagnostics;
 using System.IO;
-using Pulsar.Common.Messages.Monitoring.HVNC;
-using Pulsar.Server.Forms.HVNC;
+using Quasar.Common.Messages.Monitoring.HVNC;
 
-namespace Pulsar.Server.Forms
+namespace Quasar.Server.Forms
 {
     public partial class FrmHVNC : Form
     {
@@ -445,12 +444,6 @@ namespace Pulsar.Server.Forms
             });
         }
 
-        private void startCustomPathToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            FrmHVNCFileSelection fileSelectionForm = new FrmHVNCFileSelection(_connectClient);
-            fileSelectionForm.ShowDialog();
-        }
-
         #endregion
 
         private void btnHide_Click(object sender, EventArgs e)
@@ -461,14 +454,6 @@ namespace Pulsar.Server.Forms
         private void btnShow_Click(object sender, EventArgs e)
         {
             TogglePanelVisibility(true);
-        }
-
-        private void startDiscordToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            _connectClient.Send(new StartHVNCProcess
-            {
-                Application = "Discord"
-            });
         }
     }
 }
