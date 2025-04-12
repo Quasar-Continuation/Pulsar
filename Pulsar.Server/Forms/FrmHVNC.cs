@@ -1,21 +1,21 @@
 ﻿using Gma.System.MouseKeyHook;
-using Quasar.Common.Enums;
-using Quasar.Common.Helpers;
-using Quasar.Common.Messages;
-using Quasar.Server.Forms.DarkMode;
-using Quasar.Server.Helper;
-using Quasar.Server.Messages;
-using Quasar.Server.Networking;
-using Quasar.Server.Utilities;
+using Pulsar.Common.Enums;
+using Pulsar.Common.Helpers;
+using Pulsar.Common.Messages;
+using Pulsar.Server.Forms.DarkMode;
+using Pulsar.Server.Helper;
+using Pulsar.Server.Messages;
+using Pulsar.Server.Networking;
+using Pulsar.Server.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 using System.Diagnostics;
 using System.IO;
-using Quasar.Common.Messages.Monitoring.HVNC;
+using Pulsar.Common.Messages.Monitoring.HVNC;
 
-namespace Quasar.Server.Forms
+namespace Pulsar.Server.Forms
 {
     public partial class FrmHVNC : Form
     {
