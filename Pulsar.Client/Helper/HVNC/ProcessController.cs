@@ -5,7 +5,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
 
-namespace Quasar.Client.Helper.HVNC
+namespace Pulsar.Client.Helper.HVNC
 {
     public class ProcessController
     {
