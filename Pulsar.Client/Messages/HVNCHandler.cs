@@ -189,7 +189,7 @@ namespace Pulsar.Client.Messages
                         SendFrameToServer(frameToSend, Interlocked.Decrement(ref _pendingFrameRequests) == 0);
                     }
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     Thread.Sleep(100);
                 }

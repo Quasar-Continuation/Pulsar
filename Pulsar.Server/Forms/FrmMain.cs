@@ -442,7 +442,7 @@ namespace Pulsar.Server.Forms
                 var blockedIPs = System.Text.Json.JsonSerializer.Deserialize<List<string>>(json);
                 return blockedIPs.Contains(clientAddress.ToString());
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return false;
             }
@@ -2011,7 +2011,7 @@ namespace Pulsar.Server.Forms
                         string updatedJson = System.Text.Json.JsonSerializer.Serialize(blockedIPs, new JsonSerializerOptions { WriteIndented = true });
                         File.WriteAllText(filePath, updatedJson);
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
                     }
                     c.Send(new DoClientUninstall());
