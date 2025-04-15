@@ -69,9 +69,7 @@
 		<PackageReference Include="MouseKeyHook">
 			<Version>5.7.1</Version>
 		</PackageReference>
-		<PackageReference Include="NAudio.Asio" Version="2.2.1" />
 		<PackageReference Include="NAudio.Core" Version="2.2.1" />
-		<PackageReference Include="NAudio.Midi" Version="2.2.1" />
 		<PackageReference Include="NAudio.Wasapi" Version="2.2.1" />
 		<PackageReference Include="NAudio.WinForms" Version="2.2.1" />
 		<PackageReference Include="NAudio.WinMM" Version="2.2.1" />
@@ -79,8 +77,11 @@
 			<Version>2.4.9</Version>
 		</PackageReference>
 		<PackageReference Include="SharpDX" Version="4.2.0" />
+		<PackageReference Include="SharpDX.D3DCompiler" Version="4.2.0" />
+		<PackageReference Include="SharpDX.Direct2D1" Version="4.2.0" />
 		<PackageReference Include="SharpDX.Direct3D11" Version="4.2.0" />
 		<PackageReference Include="SharpDX.DXGI" Version="4.2.0" />
+		<PackageReference Include="SharpDX.Mathematics" Version="4.2.0" />
 		<PackageReference Include="System.IO.Compression" Version="4.3.0" />
 	</ItemGroup>
 	<Target Name="CopyWindows" AfterTargets="Build" Condition="'$(OS)' == 'Windows_NT'">

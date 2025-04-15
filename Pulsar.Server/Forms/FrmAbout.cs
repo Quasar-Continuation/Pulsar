@@ -12,7 +12,7 @@ namespace Pulsar.Server.Forms
 {
     public partial class FrmAbout : Form
     {
-        private readonly string _repositoryUrl = @"https://github.com/Quasar-Continuation/Pulsar-Modded";
+        private readonly string _repositoryUrl = @"https://github.com/Quasar-Continuation/Pulsar";
 
         public FrmAbout()
         {
@@ -46,7 +46,7 @@ namespace Pulsar.Server.Forms
             using (WebClient client = new WebClient())
             {
                 client.Headers.Add("User-Agent", "Pulsar-Modded");
-                string apiUrl = "https://api.github.com/repos/Quasar-Continuation/Pulsar-Modded/contributors";
+                string apiUrl = "https://api.github.com/repos/Quasar-Continuation/Pulsar/contributors";
                 
                 string response = await client.DownloadStringTaskAsync(new Uri(apiUrl));
                 var contributorData = JsonConvert.DeserializeObject<List<Contributor>>(response);

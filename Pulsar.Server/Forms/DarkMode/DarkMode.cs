@@ -715,7 +715,7 @@ namespace DarkModeForms
                 pGrid.CategoryForeColor = OScolors.TextActive;
                 pGrid.CategorySplitterColor = OScolors.ControlLight;
             }
-            if (control is ListView)
+            if (control is ListView || control is AeroListView)
             {
                 var lView = control as ListView;
                 //Mode = IsDarkMode ? "DarkMode_ItemsView" : "ClearMode_ItemsView";
@@ -1517,12 +1517,16 @@ namespace DarkModeForms
             base.OnRenderItemText(e);
         }
 
+        // Fix for CS0184: The given expression is never of the provided ('ComboBox') type
+        // The issue occurs because `e.Item` is of type `ToolStripItem`, which cannot be a `ComboBox`.
+        // Instead, we should check for `ToolStripComboBox`, which is the correct type for combo boxes in a ToolStrip.
+
         protected override void OnRenderItemBackground(ToolStripItemRenderEventArgs e)
         {
             base.OnRenderItemBackground(e);
 
-            // Only draw border for ComboBox items
-            if (e.Item is ComboBox)
+            // Corrected type check from ComboBox to ToolStripComboBox
+            if (e.Item is ToolStripComboBox)
             {
                 Rectangle rect = new Rectangle(Point.Empty, e.Item.Size);
                 e.Graphics.DrawRectangle(new Pen(MyColors.ControlLight, 1), rect);

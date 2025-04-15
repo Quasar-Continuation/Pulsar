@@ -10,6 +10,7 @@ using SharpDX.DXGI;
 using Device = SharpDX.Direct3D11.Device;
 using Resource = SharpDX.Direct3D11.Resource;
 using MapFlags = SharpDX.Direct3D11.MapFlags;
+using Rectangle = System.Drawing.Rectangle;
 using Pulsar.Client.Config;
 
 namespace Pulsar.Client.Helper

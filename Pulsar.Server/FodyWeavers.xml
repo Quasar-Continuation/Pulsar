@@ -3,7 +3,7 @@
   <Costura>
 	  <IncludeAssemblies>
 		  Pulsar.Common
-	      dnlib
+		  dnlib
 		  Mono.Cecil
 		  Gma.System.MouseKeyHook
 		  Open.NAT
@@ -13,6 +13,12 @@
 		  System.Text.Json
 		  DiscordRPC
 		  Newtonsoft.Json
+		  NAudio.Asio
+		  NAudio.Core
+		  NAudio.Midi
+		  NAudio.Wasapi
+		  NAudio.WinForms
+		  NAudio.WinMM
 	  </IncludeAssemblies>
   </Costura>
 </Weavers>

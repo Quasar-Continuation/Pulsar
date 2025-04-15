@@ -433,13 +433,17 @@ namespace Pulsar.Server.Networking
             ProcessingDisconnect = false;
             OnServerState(false);
             FrmMain mainForm = Application.OpenForms.OfType<FrmMain>().FirstOrDefault();
-            if (mainForm.statusStrip.Items.ContainsKey("listenToolStripStatusLabel"))
+            if (mainForm != null)
             {
-                try
+                if (mainForm.statusStrip.Items.ContainsKey("listenToolStripStatusLabel"))
                 {
-                    mainForm.statusStrip.Items["listenToolStripStatusLabel"].Image = Pulsar.Server.Properties.Resources.bullet_red;
-                } catch (System.ComponentModel.Win32Exception)
-                {
+                    try
+                    {
+                        mainForm.statusStrip.Items["listenToolStripStatusLabel"].Image = Pulsar.Server.Properties.Resources.bullet_red;
+                    }
+                    catch (System.ComponentModel.Win32Exception)
+                    {
+                    }
                 }
             }
         }

