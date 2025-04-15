@@ -6,6 +6,7 @@ using Pulsar.Common.Networking;
 using System;
 using System.Threading;
 using System.Windows.Forms;
+using System.Collections.Generic;
 
 
 namespace Pulsar.Client.Messages
@@ -13,7 +14,7 @@ namespace Pulsar.Client.Messages
     public class ClipboardHandler : IMessageProcessor
     {
         // Do not use this for changing addresses, the clipper address might have changed (or the clipper may be off altogether).
-        public static List<string> _cachedAddresses; 
+        public static List<string> _cachedAddresses = new List<string>(); 
 
         public bool CanExecute(IMessage message) => message is DoSendAddress;
 
