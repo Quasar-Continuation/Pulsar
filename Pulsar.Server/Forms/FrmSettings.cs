@@ -68,7 +68,7 @@ namespace Pulsar.Server.Forms
                     BlockedRichTB.Text = string.Empty;
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
 
             }
@@ -173,7 +173,7 @@ namespace Pulsar.Server.Forms
                 string json = JsonSerializer.Serialize(blockedIPs, new JsonSerializerOptions { WriteIndented = true });
                 File.WriteAllText(filePath, json);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
 
             }
@@ -299,7 +299,7 @@ namespace Pulsar.Server.Forms
                 );
                 MessageBox.Show("Checked And Working");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 MessageBox.Show("Error: Please Make Sure You Started A Chat With The Bot");
             }
