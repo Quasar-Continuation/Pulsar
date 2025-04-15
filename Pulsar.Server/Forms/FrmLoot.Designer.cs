@@ -68,6 +68,7 @@
             this.dotNetBarTabControl1.Size = new System.Drawing.Size(757, 396);
             this.dotNetBarTabControl1.SizeMode = System.Windows.Forms.TabSizeMode.Fixed;
             this.dotNetBarTabControl1.TabIndex = 0;
+            this.dotNetBarTabControl1.ShowCloseButtons = false;
             // 
             // tabPage1
             // 

