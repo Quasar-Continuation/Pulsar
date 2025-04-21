@@ -58,6 +58,7 @@ namespace Pulsar.Server.Forms
             this.button1 = new System.Windows.Forms.Button();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.BlockedRichTB = new System.Windows.Forms.RichTextBox();
+            this.hideFromScreenCapture = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.ncPort)).BeginInit();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
@@ -66,7 +67,7 @@ namespace Pulsar.Server.Forms
             // 
             this.btnSave.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnSave.Location = new System.Drawing.Point(227, 594);
+            this.btnSave.Location = new System.Drawing.Point(227, 617);
             this.btnSave.Name = "btnSave";
             this.btnSave.Size = new System.Drawing.Size(75, 23);
             this.btnSave.TabIndex = 19;
@@ -114,7 +115,7 @@ namespace Pulsar.Server.Forms
             this.chkAutoListen.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.chkAutoListen.AutoSize = true;
-            this.chkAutoListen.Location = new System.Drawing.Point(12, 105);
+            this.chkAutoListen.Location = new System.Drawing.Point(12, 128);
             this.chkAutoListen.Name = "chkAutoListen";
             this.chkAutoListen.Size = new System.Drawing.Size(222, 17);
             this.chkAutoListen.TabIndex = 6;
@@ -126,7 +127,7 @@ namespace Pulsar.Server.Forms
             this.chkPopup.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.chkPopup.AutoSize = true;
-            this.chkPopup.Location = new System.Drawing.Point(12, 128);
+            this.chkPopup.Location = new System.Drawing.Point(12, 151);
             this.chkPopup.Name = "chkPopup";
             this.chkPopup.Size = new System.Drawing.Size(259, 17);
             this.chkPopup.TabIndex = 7;
@@ -149,7 +150,7 @@ namespace Pulsar.Server.Forms
             // 
             this.btnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnCancel.Location = new System.Drawing.Point(146, 594);
+            this.btnCancel.Location = new System.Drawing.Point(146, 617);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(75, 23);
             this.btnCancel.TabIndex = 18;
@@ -162,7 +163,7 @@ namespace Pulsar.Server.Forms
             this.chkUseUpnp.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.chkUseUpnp.AutoSize = true;
-            this.chkUseUpnp.Location = new System.Drawing.Point(12, 151);
+            this.chkUseUpnp.Location = new System.Drawing.Point(12, 174);
             this.chkUseUpnp.Name = "chkUseUpnp";
             this.chkUseUpnp.Size = new System.Drawing.Size(249, 17);
             this.chkUseUpnp.TabIndex = 8;
@@ -174,7 +175,7 @@ namespace Pulsar.Server.Forms
             this.chkShowTooltip.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.chkShowTooltip.AutoSize = true;
-            this.chkShowTooltip.Location = new System.Drawing.Point(12, 174);
+            this.chkShowTooltip.Location = new System.Drawing.Point(12, 197);
             this.chkShowTooltip.Name = "chkShowTooltip";
             this.chkShowTooltip.Size = new System.Drawing.Size(268, 17);
             this.chkShowTooltip.TabIndex = 9;
@@ -186,7 +187,7 @@ namespace Pulsar.Server.Forms
             this.chkNoIPIntegration.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.chkNoIPIntegration.AutoSize = true;
-            this.chkNoIPIntegration.Location = new System.Drawing.Point(12, 486);
+            this.chkNoIPIntegration.Location = new System.Drawing.Point(12, 509);
             this.chkNoIPIntegration.Name = "chkNoIPIntegration";
             this.chkNoIPIntegration.Size = new System.Drawing.Size(187, 17);
             this.chkNoIPIntegration.TabIndex = 10;
@@ -200,7 +201,7 @@ namespace Pulsar.Server.Forms
             | System.Windows.Forms.AnchorStyles.Right)));
             this.lblHost.AutoSize = true;
             this.lblHost.Enabled = false;
-            this.lblHost.Location = new System.Drawing.Point(30, 512);
+            this.lblHost.Location = new System.Drawing.Point(30, 535);
             this.lblHost.Name = "lblHost";
             this.lblHost.Size = new System.Drawing.Size(34, 13);
             this.lblHost.TabIndex = 11;
@@ -212,7 +213,7 @@ namespace Pulsar.Server.Forms
             | System.Windows.Forms.AnchorStyles.Right)));
             this.lblPass.AutoSize = true;
             this.lblPass.Enabled = false;
-            this.lblPass.Location = new System.Drawing.Point(167, 540);
+            this.lblPass.Location = new System.Drawing.Point(167, 563);
             this.lblPass.Name = "lblPass";
             this.lblPass.Size = new System.Drawing.Size(32, 13);
             this.lblPass.TabIndex = 15;
@@ -224,7 +225,7 @@ namespace Pulsar.Server.Forms
             | System.Windows.Forms.AnchorStyles.Right)));
             this.lblUser.AutoSize = true;
             this.lblUser.Enabled = false;
-            this.lblUser.Location = new System.Drawing.Point(30, 540);
+            this.lblUser.Location = new System.Drawing.Point(30, 563);
             this.lblUser.Name = "lblUser";
             this.lblUser.Size = new System.Drawing.Size(32, 13);
             this.lblUser.TabIndex = 13;
@@ -235,7 +236,7 @@ namespace Pulsar.Server.Forms
             this.txtNoIPPass.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.txtNoIPPass.Enabled = false;
-            this.txtNoIPPass.Location = new System.Drawing.Point(199, 537);
+            this.txtNoIPPass.Location = new System.Drawing.Point(199, 560);
             this.txtNoIPPass.Name = "txtNoIPPass";
             this.txtNoIPPass.Size = new System.Drawing.Size(63, 22);
             this.txtNoIPPass.TabIndex = 16;
@@ -245,7 +246,7 @@ namespace Pulsar.Server.Forms
             this.txtNoIPUser.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.txtNoIPUser.Enabled = false;
-            this.txtNoIPUser.Location = new System.Drawing.Point(70, 537);
+            this.txtNoIPUser.Location = new System.Drawing.Point(70, 560);
             this.txtNoIPUser.Name = "txtNoIPUser";
             this.txtNoIPUser.Size = new System.Drawing.Size(91, 22);
             this.txtNoIPUser.TabIndex = 14;
@@ -255,7 +256,7 @@ namespace Pulsar.Server.Forms
             this.txtNoIPHost.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.txtNoIPHost.Enabled = false;
-            this.txtNoIPHost.Location = new System.Drawing.Point(70, 509);
+            this.txtNoIPHost.Location = new System.Drawing.Point(70, 532);
             this.txtNoIPHost.Name = "txtNoIPHost";
             this.txtNoIPHost.Size = new System.Drawing.Size(192, 22);
             this.txtNoIPHost.TabIndex = 12;
@@ -267,7 +268,7 @@ namespace Pulsar.Server.Forms
             | System.Windows.Forms.AnchorStyles.Right)));
             this.chkShowPassword.AutoSize = true;
             this.chkShowPassword.Enabled = false;
-            this.chkShowPassword.Location = new System.Drawing.Point(192, 565);
+            this.chkShowPassword.Location = new System.Drawing.Point(192, 588);
             this.chkShowPassword.Name = "chkShowPassword";
             this.chkShowPassword.Size = new System.Drawing.Size(107, 17);
             this.chkShowPassword.TabIndex = 17;
@@ -280,7 +281,7 @@ namespace Pulsar.Server.Forms
             this.chkIPv6Support.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.chkIPv6Support.AutoSize = true;
-            this.chkIPv6Support.Location = new System.Drawing.Point(12, 82);
+            this.chkIPv6Support.Location = new System.Drawing.Point(12, 105);
             this.chkIPv6Support.Name = "chkIPv6Support";
             this.chkIPv6Support.Size = new System.Drawing.Size(128, 17);
             this.chkIPv6Support.TabIndex = 5;
@@ -306,7 +307,7 @@ namespace Pulsar.Server.Forms
             this.chkEventLog.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.chkEventLog.AutoSize = true;
-            this.chkEventLog.Location = new System.Drawing.Point(12, 197);
+            this.chkEventLog.Location = new System.Drawing.Point(12, 220);
             this.chkEventLog.Name = "chkEventLog";
             this.chkEventLog.Size = new System.Drawing.Size(186, 17);
             this.chkEventLog.TabIndex = 21;
@@ -333,7 +334,7 @@ namespace Pulsar.Server.Forms
             this.chkTelegramNotis.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.chkTelegramNotis.AutoSize = true;
-            this.chkTelegramNotis.Location = new System.Drawing.Point(12, 235);
+            this.chkTelegramNotis.Location = new System.Drawing.Point(12, 251);
             this.chkTelegramNotis.Name = "chkTelegramNotis";
             this.chkTelegramNotis.Size = new System.Drawing.Size(178, 17);
             this.chkTelegramNotis.TabIndex = 23;
@@ -346,7 +347,7 @@ namespace Pulsar.Server.Forms
             this.txtTelegramToken.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.txtTelegramToken.Enabled = false;
-            this.txtTelegramToken.Location = new System.Drawing.Point(70, 258);
+            this.txtTelegramToken.Location = new System.Drawing.Point(70, 274);
             this.txtTelegramToken.Name = "txtTelegramToken";
             this.txtTelegramToken.Size = new System.Drawing.Size(232, 22);
             this.txtTelegramToken.TabIndex = 24;
@@ -358,7 +359,7 @@ namespace Pulsar.Server.Forms
             | System.Windows.Forms.AnchorStyles.Right)));
             this.label1.AutoSize = true;
             this.label1.Enabled = false;
-            this.label1.Location = new System.Drawing.Point(20, 261);
+            this.label1.Location = new System.Drawing.Point(20, 277);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(43, 13);
             this.label1.TabIndex = 25;
@@ -369,7 +370,7 @@ namespace Pulsar.Server.Forms
             this.txtTelegramChatID.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.txtTelegramChatID.Enabled = false;
-            this.txtTelegramChatID.Location = new System.Drawing.Point(70, 286);
+            this.txtTelegramChatID.Location = new System.Drawing.Point(70, 302);
             this.txtTelegramChatID.Name = "txtTelegramChatID";
             this.txtTelegramChatID.Size = new System.Drawing.Size(232, 22);
             this.txtTelegramChatID.TabIndex = 26;
@@ -380,7 +381,7 @@ namespace Pulsar.Server.Forms
             | System.Windows.Forms.AnchorStyles.Right)));
             this.label2.AutoSize = true;
             this.label2.Enabled = false;
-            this.label2.Location = new System.Drawing.Point(19, 289);
+            this.label2.Location = new System.Drawing.Point(19, 305);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(45, 13);
             this.label2.TabIndex = 27;
@@ -390,7 +391,7 @@ namespace Pulsar.Server.Forms
             // 
             this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.button1.Location = new System.Drawing.Point(192, 314);
+            this.button1.Location = new System.Drawing.Point(192, 330);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(110, 23);
             this.button1.TabIndex = 28;
@@ -400,11 +401,9 @@ namespace Pulsar.Server.Forms
             // 
             // groupBox1
             // 
-            this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox1.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.groupBox1.Controls.Add(this.BlockedRichTB);
-            this.groupBox1.Location = new System.Drawing.Point(12, 343);
+            this.groupBox1.Location = new System.Drawing.Point(12, 355);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Size = new System.Drawing.Size(290, 137);
             this.groupBox1.TabIndex = 30;
@@ -413,19 +412,33 @@ namespace Pulsar.Server.Forms
             // 
             // BlockedRichTB
             // 
+            this.BlockedRichTB.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.BlockedRichTB.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.BlockedRichTB.Dock = System.Windows.Forms.DockStyle.Fill;
             this.BlockedRichTB.Location = new System.Drawing.Point(3, 18);
             this.BlockedRichTB.Name = "BlockedRichTB";
             this.BlockedRichTB.Size = new System.Drawing.Size(284, 116);
             this.BlockedRichTB.TabIndex = 0;
             this.BlockedRichTB.Text = "";
             // 
+            // checkBox1
+            // 
+            this.hideFromScreenCapture.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.hideFromScreenCapture.AutoSize = true;
+            this.hideFromScreenCapture.Location = new System.Drawing.Point(12, 82);
+            this.hideFromScreenCapture.Name = "checkBox1";
+            this.hideFromScreenCapture.Size = new System.Drawing.Size(189, 17);
+            this.hideFromScreenCapture.TabIndex = 31;
+            this.hideFromScreenCapture.Text = "Hide Pulsar from screen capture";
+            this.hideFromScreenCapture.UseVisualStyleBackColor = true;
+            this.hideFromScreenCapture.CheckedChanged += new System.EventHandler(this.hideFromScreenCapture_CheckedChanged);
+            // 
             // FrmSettings
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
-            this.ClientSize = new System.Drawing.Size(314, 629);
+            this.ClientSize = new System.Drawing.Size(314, 652);
+            this.Controls.Add(this.hideFromScreenCapture);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.label2);
@@ -501,5 +514,6 @@ namespace Pulsar.Server.Forms
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.RichTextBox BlockedRichTB;
+        private System.Windows.Forms.CheckBox hideFromScreenCapture;
     }
 }
