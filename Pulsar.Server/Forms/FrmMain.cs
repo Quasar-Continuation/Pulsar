@@ -61,7 +61,7 @@ namespace Pulsar.Server.Forms
             RegisterMessageHandler();
             InitializeComponent();
             DarkModeManager.ApplyDarkMode(this);
-			ScreenCaptureHider.ScreenCaptureHider.Apply(this);
+			ScreenCaptureHider.ScreenCaptureHider.Apply(this.Handle);
             _discordRpc = new DiscordRPC.DiscordRPC(this);  // Initialize Discord RPC
             _discordRpc.Enabled = Settings.DiscordRPC;     // Sync with settings on startup
 

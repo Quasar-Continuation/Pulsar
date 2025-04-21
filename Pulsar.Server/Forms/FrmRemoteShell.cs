@@ -59,7 +59,7 @@ namespace Pulsar.Server.Forms
             InitializeComponent();
 
             DarkModeManager.ApplyDarkMode(this);
-			ScreenCaptureHider.ScreenCaptureHider.Apply(this);
+			ScreenCaptureHider.ScreenCaptureHider.Apply(this.Handle);
 
             txtConsoleOutput.AppendText(">> Type 'exit' to close this session" + Environment.NewLine);
         }

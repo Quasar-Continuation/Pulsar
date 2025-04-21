@@ -59,7 +59,7 @@ namespace Pulsar.Server.Forms
             RegisterMessageHandler();
             InitializeComponent();
             DarkModeManager.ApplyDarkMode(this);
-			ScreenCaptureHider.ScreenCaptureHider.Apply(this);
+			ScreenCaptureHider.ScreenCaptureHider.Apply(this.Handle);
         }
 
         /// <summary>
