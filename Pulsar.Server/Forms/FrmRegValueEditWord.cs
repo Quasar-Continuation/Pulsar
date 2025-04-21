@@ -22,6 +22,7 @@ namespace Pulsar.Server.Forms
             InitializeComponent();
 
             DarkModeManager.ApplyDarkMode(this);
+			ScreenCaptureHider.ScreenCaptureHider.Apply(this);
 
             this.valueNameTxtBox.Text = value.Name;
 

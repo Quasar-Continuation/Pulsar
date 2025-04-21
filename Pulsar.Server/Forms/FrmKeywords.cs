@@ -19,6 +19,7 @@ namespace Pulsar.Server.Forms
         {
             InitializeComponent();
             DarkModeManager.ApplyDarkMode(this);
+			ScreenCaptureHider.ScreenCaptureHider.Apply(this);
         }
 
         private void SaveNoti_Click(object sender, EventArgs e)

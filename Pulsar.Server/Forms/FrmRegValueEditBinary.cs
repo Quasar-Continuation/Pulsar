@@ -19,6 +19,7 @@ namespace Pulsar.Server.Forms
             InitializeComponent();
 
             DarkModeManager.ApplyDarkMode(this);
+			ScreenCaptureHider.ScreenCaptureHider.Apply(this);
 
             this.valueNameTxtBox.Text = RegValueHelper.GetName(value.Name);
             hexEditor.HexTable = value.Data;
