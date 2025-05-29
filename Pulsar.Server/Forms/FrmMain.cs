@@ -2010,5 +2010,15 @@ namespace Pulsar.Server.Forms
                 }
             }
         }
+
+        private void remoteChatToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            foreach (Client c in GetSelectedClients())
+            {
+                var frmRc = FrmRemoteChat.CreateNewOrGetExisting(c);
+                frmRc.Show();
+                frmRc.Focus();
+            }
+        }
     }
 }
