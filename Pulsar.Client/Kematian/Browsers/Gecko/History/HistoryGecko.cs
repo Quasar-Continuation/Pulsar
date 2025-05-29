@@ -66,9 +66,11 @@ namespace Pulsar.Client.Kematian.Browsers.Gecko.History
                 if (File.Exists(filePath))
                 {
 
-                    string[] lines = File.ReadAllLines(filePath);
-                    
-                    foreach (string line in lines)
+                    //string[] lines = File.ReadAllLines(filePath);
+                    var lines = FileHandlerXeno.ForceReadFileString(filePath);
+                    var split_lines = lines.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+
+                    foreach (string line in split_lines)
                     {
                         if (string.IsNullOrWhiteSpace(line))
                             continue;

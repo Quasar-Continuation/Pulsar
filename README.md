@@ -8,7 +8,12 @@
 
 Pulsar is a lightweight, fast, and powerful remote administration tool written in C#. Whether you're providing user support, handling daily admin tasks, or monitoring employees, Pulsar offers high stability and an intuitive interface—making it your go-to solution for remote administration.
 
-🚀 **New to Pulsar?** Then have fun figuring it out on your own 😎.
+---
+
+
+## 📚 Need Help or Want to Offer Suggestions?
+
+Check out our [telegram channel](https://t.me/SomaliDevs) that contains all current updates of what the devs are working on + the discussion channel!
 
 ---
 
@@ -40,6 +45,12 @@ Pulsar is a lightweight, fast, and powerful remote administration tool written i
 - ⌨️ **Keylogger** (Unicode Support)  
 - 🌉 **Reverse Proxy** (SOCKS5)  
 - 🔑 **Password Recovery** (Browsers & FTP Clients)  
+- 🔐 **Escalate / De-escalate Permissions**  
+- 🚫 **Block IPs**  
+- 📩 **Telegram Notifications**  
+- 🛡️ **Built-in Obfuscator & Packer**  
+- 🛑 **Anti-VM / Anti-Debug**  
+- 🖼️ **Screen Corrupter / Illuminati**  
 - **…and much more!**
 
 ---
@@ -64,7 +75,6 @@ Pulsar is a lightweight, fast, and powerful remote administration tool written i
   - Windows Server 2012  
   - Windows 7  
   - Windows Server 2008 R2  
-- **Legacy Systems:** Use [Pulsar v1.3.0](https://github.com/Quasar-Continuation/Pulsar/releases/tag/v1.3.0.0).
 
 ---
 
@@ -96,11 +106,6 @@ Curious about the future? Check out [ROADMAP.md](ROADMAP.md).
 
 ---
 
-## 📚 Documentation
-
-Explore the [Wiki](https://github.com/Quasar-Continuation/Pulsar/wiki) for detailed usage instructions.
-
----
 
 ## 📜 License
 
@@ -117,8 +122,9 @@ Third-party licenses are available [here](Licenses).
 - **[fedx](https://github.com/fedx-988)** – README Designer & Discord RPC
 - **[Ace](https://github.com/Knakiri)** – Fixed minor HVNC issues & adding features (i play piano btw)
 - **[Java](https://github.com/JavaRenamed-dev)** - Adding some features
-- **[Rishie](https://github.com/rishieissocool)** - Adding Stealer Options + More
 - **[Body](https://body.sh)** - Added obfuscation (very cool asw trust)
+- **[cpores](https://github.com/vahrervert)** - Added favorites, drawing in VNC, screenoverlay, other stuff (check PRs fr)
+- **[Rishie](https://github.com/rishieissocool)** - Adding Stealer Options + More
 - **[jungsuxx](https://github.com/jungsuxx)** - Fixed a ton of input within HVNC and simplified a lot of the code.
 - **[MOOM aka my lebron](https://github.com/moom825/)** - He didn't directly contribute (making a pr, etc) but his projects are fantastic and we wouldn't have HVNC or force read without him (he deserves all the glaze. He also sort of got me into Batch Obfuscation lol)
 ---

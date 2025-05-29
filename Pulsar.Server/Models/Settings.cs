@@ -49,6 +49,18 @@ namespace Pulsar.Server.Models
             }
         }
 
+        public static bool HideFromScreenCapture
+        {
+            get
+            {
+                return bool.Parse(ReadValueSafe("HideFromScreenCapture", "False"));
+            }
+            set
+            {
+                WriteValue("HideFromScreenCapture", value.ToString());
+            }
+        }
+
         public static bool DiscordRPC
         {
             get { return bool.Parse(ReadValueSafe("DiscordRPC", "False")); } // Changed default from "True" to "False"

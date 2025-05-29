@@ -2,7 +2,7 @@
 using Pulsar.Common.Messages;
 using Pulsar.Common.Messages.Administration.FileManager;
 using Pulsar.Common.Messages.Monitoring.KeyLogger;
-using Pulsar.Common.Messages.other;
+using Pulsar.Common.Messages.Other;
 using Pulsar.Common.Models;
 using Pulsar.Common.Networking;
 using Pulsar.Server.Models;

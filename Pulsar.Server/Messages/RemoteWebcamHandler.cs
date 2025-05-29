@@ -1,6 +1,6 @@
 ﻿using Pulsar.Common.Enums;
 using Pulsar.Common.Messages;
-using Pulsar.Common.Messages.other;
+using Pulsar.Common.Messages.Other;
 using Pulsar.Common.Messages.Webcam;
 using Pulsar.Common.Networking;
 using Pulsar.Common.Video.Codecs;

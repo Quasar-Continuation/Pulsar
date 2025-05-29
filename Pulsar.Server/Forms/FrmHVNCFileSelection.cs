@@ -11,7 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace Pulsar.Server.Forms.HVNC
+namespace Pulsar.Server.Forms
 {
     public partial class FrmHVNCFileSelection: Form
     {
@@ -22,6 +22,7 @@ namespace Pulsar.Server.Forms.HVNC
 
             InitializeComponent();
             DarkModeManager.ApplyDarkMode(this);
+			ScreenCaptureHider.ScreenCaptureHider.Apply(this.Handle);
         }
 
         private void btnStart_Click(object sender, EventArgs e)

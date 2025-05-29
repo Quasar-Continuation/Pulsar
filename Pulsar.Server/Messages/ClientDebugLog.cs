@@ -1,5 +1,5 @@
 ﻿using Pulsar.Common.Messages;
-using Pulsar.Common.Messages.other;
+using Pulsar.Common.Messages.Other;
 using Pulsar.Common.Networking;
 using Pulsar.Server.Forms;
 using Pulsar.Server.Networking;
@@ -47,6 +47,27 @@ namespace Pulsar.Server.Messages
             if (frm != null)
             {
                 frm.EventLog("[CLIENT ERROR: " + client.Value.UserAtPc + ": " + message.Log, "error");
+                LogToFile("[CLIENT ERROR: " + client.Value.UserAtPc + ": " + message.Log);
+            }
+        }
+
+        private void LogToFile(string text)
+        {
+            //check if log file exists. If it does append to it.
+            string logFilePath = "client_debug_log.txt";
+            if (System.IO.File.Exists(logFilePath))
+            {
+                using (var writer = new System.IO.StreamWriter(logFilePath, true))
+                {
+                    writer.WriteLine($"{System.DateTime.Now}: {text}");
+                }
+            }
+            else
+            {
+                using (var writer = new System.IO.StreamWriter(logFilePath))
+                {
+                    writer.WriteLine($"{System.DateTime.Now}: {text}");
+                }
             }
         }
     }

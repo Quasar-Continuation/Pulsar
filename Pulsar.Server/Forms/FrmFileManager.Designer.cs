@@ -55,6 +55,7 @@ namespace Pulsar.Server.Forms
             this.clearToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.imgListTransfers = new System.Windows.Forms.ImageList(this.components);
             this.TabControlFileManager = new Pulsar.Server.Controls.DotNetBarTabControl();
+            this.TabControlFileManager.ShowCloseButtons = false;
             this.tabFileExplorer = new System.Windows.Forms.TabPage();
             this.btnRefresh = new System.Windows.Forms.Button();
             this.lblPath = new System.Windows.Forms.Label();

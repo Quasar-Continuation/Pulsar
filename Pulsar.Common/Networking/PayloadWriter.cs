@@ -1,5 +1,5 @@
 ﻿using ProtoBuf;
-using Pulsar.Common.Messages.other;
+using Pulsar.Common.Messages.Other;
 using Pulsar.Common.Messages.Administration.TaskManager;
 using System;
 using System.IO;

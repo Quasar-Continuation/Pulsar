@@ -1,4 +1,4 @@
-﻿namespace Pulsar.Common.Messages.other
+﻿namespace Pulsar.Common.Messages.Other
 {
     public interface IMessage
     {

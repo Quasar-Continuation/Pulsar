@@ -1,7 +1,7 @@
 ﻿using Pulsar.Common.Messages;
 using Pulsar.Common.Networking;
 using Pulsar.Common.Messages.FunStuff;
-using Pulsar.Common.Messages.other;
+using Pulsar.Common.Messages.Other;
 using Pulsar.Client.FunStuff;
 using Pulsar.Common.Messages.QuickCommands;
 using System.Diagnostics;

@@ -1,7 +1,7 @@
 ﻿using ProtoBuf;
-using Pulsar.Common.Messages.other;
+using Pulsar.Common.Messages.Other;
 
-namespace Pulsar.Common.Messages.ReverseProxy
+namespace Pulsar.Common.Messages.Administration.ReverseProxy
 {
     [ProtoContract]
     public class ReverseProxyConnect : IMessage

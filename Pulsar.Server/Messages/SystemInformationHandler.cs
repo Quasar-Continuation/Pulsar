@@ -1,6 +1,6 @@
 ﻿using Pulsar.Common.Messages;
 using Pulsar.Common.Messages.Administration.SystemInfo;
-using Pulsar.Common.Messages.other;
+using Pulsar.Common.Messages.Other;
 using Pulsar.Common.Networking;
 using Pulsar.Server.Networking;
 using System;

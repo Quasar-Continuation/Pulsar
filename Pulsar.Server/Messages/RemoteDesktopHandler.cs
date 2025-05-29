@@ -1,7 +1,7 @@
 ﻿using Pulsar.Common.Enums;
 using Pulsar.Common.Messages;
 using Pulsar.Common.Messages.Monitoring.RemoteDesktop;
-using Pulsar.Common.Messages.other;
+using Pulsar.Common.Messages.Other;
 using Pulsar.Common.Networking;
 using Pulsar.Common.Video.Codecs;
 using Pulsar.Server.Networking;
@@ -286,9 +286,7 @@ namespace Pulsar.Server.Messages
                     MonitorIndex = displayIndex
                 });
             }
-        }
-
-        private async void Execute(ISender client, GetDesktopResponse message)
+        }        private async void Execute(ISender client, GetDesktopResponse message)
         {
             _framesReceived++;
 
@@ -321,13 +319,24 @@ namespace Pulsar.Server.Messages
                     catch (Exception ex)
                     {
                         Debug.WriteLine($"Error decoding frame: {ex.Message}");
+                    }                }                message.Image = null;
+
+                long serverTimestamp = Stopwatch.GetTimestamp();
+                _frameTimestamps.Enqueue(serverTimestamp);
+                
+                _framesReceived++;
+                if (_framesReceived % _fpsCalculationWindow == 0)
+                {
+                    double elapsedSeconds = _performanceMonitor.Elapsed.TotalSeconds;
+                    _estimatedFps = _framesReceived / elapsedSeconds;
+                    
+                    if (_framesReceived >= 100)
+                    {
+                        _framesReceived = 0;
+                        _performanceMonitor.Restart();
                     }
                 }
-
-                message.Image = null;
-
-                long timestamp = message.Timestamp;
-                _frameTimestamps.Enqueue(timestamp);
+                
                 while (_frameTimestamps.Count > _fpsCalculationWindow && _frameTimestamps.TryDequeue(out _)) { }
 
                 Interlocked.Decrement(ref _pendingFrames);

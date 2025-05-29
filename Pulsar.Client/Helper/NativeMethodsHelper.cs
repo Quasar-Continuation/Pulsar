@@ -19,6 +19,22 @@ namespace Pulsar.Client.Helper
         private const uint KEYEVENTF_KEYDOWN = 0x0000;
         private const uint KEYEVENTF_KEYUP = 0x0002;
 
+        public const uint SWP_NOZORDER = 0x0004;
+        public const uint SWP_NOSIZE = 0x0001;
+        public const uint SWP_SHOWWINDOW = 0x0040;
+
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern bool SetWindowPos(
+            IntPtr hWnd, IntPtr hWndInsertAfter,
+            int X, int Y, int cx, int cy, uint uFlags);
+
+        public static void SetWindowPosition(IntPtr hWnd, int x, int y, int width, int height)
+        {
+            const uint SWP_NOZORDER = 0x0004;
+            const uint SWP_SHOWWINDOW = 0x0040;
+            SetWindowPos(hWnd, IntPtr.Zero, x, y, width, height, SWP_NOZORDER | SWP_SHOWWINDOW);
+        }
+
         public static uint GetLastInputInfoTickCount()
         {
             NativeMethods.LASTINPUTINFO lastInputInfo = new NativeMethods.LASTINPUTINFO();
@@ -50,6 +66,26 @@ namespace Pulsar.Client.Helper
             };
 
             NativeMethods.SendInput((uint)inputs.Length, inputs, Marshal.SizeOf(typeof(NativeMethods.INPUT)));
+        }
+
+
+        /// <summary>
+        /// Moves a window to the specified screen bounds.
+        /// </summary>
+        /// <param name="hWnd">Handle to the window.</param>
+        /// <param name="bounds">The bounds of the target screen.</param>
+        public static void MoveWindowToScreen(IntPtr hWnd, Rectangle bounds)
+        {
+            if (hWnd == IntPtr.Zero)
+            {
+                throw new ArgumentException("Window handle cannot be null.", nameof(hWnd));
+            }
+
+            bool result = NativeMethods.SetWindowPos(hWnd, IntPtr.Zero, bounds.X, bounds.Y, 0, 0, NativeMethodsHelper.SWP_NOZORDER | NativeMethodsHelper.SWP_NOSIZE);
+            if (!result)
+            {
+                throw new System.ComponentModel.Win32Exception(Marshal.GetLastWin32Error(), "Failed to move window to the specified screen.");
+            }
         }
 
         public static void DoMouseRightClick(Point p, bool isMouseDown)

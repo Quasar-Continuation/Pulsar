@@ -10,7 +10,7 @@ using System.IO;
 using System.Threading;
 using System.Diagnostics;
 using Pulsar.Common.Messages.Webcam;
-using Pulsar.Common.Messages.other;
+using Pulsar.Common.Messages.Other;
 using System.Collections.Concurrent;
 
 namespace Pulsar.Client.Messages

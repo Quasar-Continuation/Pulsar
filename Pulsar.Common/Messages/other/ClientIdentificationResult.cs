@@ -1,6 +1,6 @@
 ﻿using ProtoBuf;
 
-namespace Pulsar.Common.Messages.other
+namespace Pulsar.Common.Messages.Other
 {
     [ProtoContract]
     public class ClientIdentificationResult : IMessage

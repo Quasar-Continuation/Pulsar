@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Pulsar.Common.Messages.other;
+using Pulsar.Common.Messages.Other;
 using Pulsar.Common.Messages.Monitoring.Query;
 using Pulsar.Common.Models.Query.Browsers;
 using Pulsar.Common.Messages.Monitoring.Query.Browsers;

@@ -3,7 +3,7 @@ using Pulsar.Client.Helper;
 using Pulsar.Client.Registry;
 using Pulsar.Common.Messages;
 using Pulsar.Common.Messages.Administration.RegistryEditor;
-using Pulsar.Common.Messages.other;
+using Pulsar.Common.Messages.Other;
 using Pulsar.Common.Models;
 using Pulsar.Common.Networking;
 using System;

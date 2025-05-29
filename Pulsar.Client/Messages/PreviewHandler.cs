@@ -10,7 +10,7 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Diagnostics;
 using Pulsar.Common.Messages.Preview;
-using Pulsar.Common.Messages.other;
+using Pulsar.Common.Messages.Other;
 using Pulsar.Client.IO;
 
 namespace Pulsar.Client.Messages

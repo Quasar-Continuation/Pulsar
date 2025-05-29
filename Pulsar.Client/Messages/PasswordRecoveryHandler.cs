@@ -5,7 +5,7 @@ using Pulsar.Client.Recovery.Browsers;
 using Pulsar.Client.Recovery.Crawler;
 using Pulsar.Common.Messages;
 using Pulsar.Common.Messages.Monitoring.Passwords;
-using Pulsar.Common.Messages.other;
+using Pulsar.Common.Messages.Other;
 using Pulsar.Common.Models;
 using Pulsar.Common.Networking;
 using System;

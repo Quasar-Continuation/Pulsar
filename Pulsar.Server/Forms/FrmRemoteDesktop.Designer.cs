@@ -40,6 +40,7 @@ namespace Pulsar.Server.Forms
             this.lblQualityShow = new System.Windows.Forms.Label();
             this.btnMouse = new System.Windows.Forms.Button();
             this.panelTop = new System.Windows.Forms.Panel();
+            this.btnStartProgramOnDisplay = new System.Windows.Forms.Button();
             this.btnShowDrawingTools = new System.Windows.Forms.Button();
             this.sizeLabelCounter = new System.Windows.Forms.Label();
             this.enableGPU = new System.Windows.Forms.Button();
@@ -133,6 +134,7 @@ namespace Pulsar.Server.Forms
             // panelTop
             // 
             this.panelTop.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panelTop.Controls.Add(this.btnStartProgramOnDisplay);
             this.panelTop.Controls.Add(this.btnShowDrawingTools);
             this.panelTop.Controls.Add(this.sizeLabelCounter);
             this.panelTop.Controls.Add(this.enableGPU);
@@ -150,6 +152,16 @@ namespace Pulsar.Server.Forms
             this.panelTop.Name = "panelTop";
             this.panelTop.Size = new System.Drawing.Size(784, 36);
             this.panelTop.TabIndex = 7;
+            // 
+            // btnStartProgramOnDisplay
+            // 
+            this.btnStartProgramOnDisplay.Image = global::Pulsar.Server.Properties.Resources.application_add;
+            this.btnStartProgramOnDisplay.Location = new System.Drawing.Point(350, 3);
+            this.btnStartProgramOnDisplay.Name = "btnStartProgramOnDisplay";
+            this.btnStartProgramOnDisplay.Size = new System.Drawing.Size(47, 28);
+            this.btnStartProgramOnDisplay.TabIndex = 18;
+            this.btnStartProgramOnDisplay.UseVisualStyleBackColor = true;
+            this.btnStartProgramOnDisplay.Click += new System.EventHandler(this.btnStartProgramOnDisplay_Click);
             // 
             // btnShowDrawingTools
             // 
@@ -205,7 +217,7 @@ namespace Pulsar.Server.Forms
             this.cbMonitors.FormattingEnabled = true;
             this.cbMonitors.Location = new System.Drawing.Point(159, 5);
             this.cbMonitors.Name = "cbMonitors";
-            this.cbMonitors.Size = new System.Drawing.Size(241, 21);
+            this.cbMonitors.Size = new System.Drawing.Size(185, 21);
             this.cbMonitors.TabIndex = 8;
             this.cbMonitors.TabStop = false;
             // 
@@ -381,5 +393,6 @@ namespace Pulsar.Server.Forms
         private System.Windows.Forms.Button btnClearDrawing;
         private System.Windows.Forms.Button btnShowDrawingTools;
         private System.Windows.Forms.Panel panelDrawingTools;
+        private System.Windows.Forms.Button btnStartProgramOnDisplay;
     }
 }

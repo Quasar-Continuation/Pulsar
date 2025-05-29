@@ -18,7 +18,7 @@ namespace Pulsar.Client
         private static extern uint GetCurrentThreadId();
 
         [STAThread]
-        private static void Main(string[] args)
+        private static void Main()
         {
             // enable TLS 1.2
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;

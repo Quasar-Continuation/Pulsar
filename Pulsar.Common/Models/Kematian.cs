@@ -1,4 +1,4 @@
-﻿using Pulsar.Common.Messages.other;
+﻿using Pulsar.Common.Messages.Other;
 
 namespace Pulsar.Common.Models
 {

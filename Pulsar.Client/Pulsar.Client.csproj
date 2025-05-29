@@ -28,6 +28,7 @@
 	</PropertyGroup>
 	<ItemGroup>
 		<Reference Include="System.Management" />
+		<Reference Include="System.Net.Http" />
 		<Reference Include="System.Security" />
 		<Reference Include="System.Web" />
 	</ItemGroup>
@@ -60,7 +61,7 @@
 		<PackageReference Include="AForge.Video.DirectShow" Version="2.2.5" />
 		<PackageReference Include="Costura.Fody" Version="6.0.0">
 		  <PrivateAssets>all</PrivateAssets>
-		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		  <IncludeAssets>runtime; build; compile; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 		<PackageReference Include="Fody" Version="6.9.2">
 		  <PrivateAssets>all</PrivateAssets>
@@ -77,8 +78,11 @@
 			<Version>2.4.9</Version>
 		</PackageReference>
 		<PackageReference Include="SharpDX" Version="4.2.0" />
+		<PackageReference Include="SharpDX.D3DCompiler" Version="4.2.0" />
+		<PackageReference Include="SharpDX.Direct2D1" Version="4.2.0" />
 		<PackageReference Include="SharpDX.Direct3D11" Version="4.2.0" />
 		<PackageReference Include="SharpDX.DXGI" Version="4.2.0" />
+		<PackageReference Include="SharpDX.Mathematics" Version="4.2.0" />
 		<PackageReference Include="System.IO.Compression" Version="4.3.0" />
 	</ItemGroup>
 	<Target Name="CopyWindows" AfterTargets="Build" Condition="'$(OS)' == 'Windows_NT'">

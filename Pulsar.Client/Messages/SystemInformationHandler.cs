@@ -9,7 +9,7 @@ using System.IO;
 using System.Net.NetworkInformation;
 using Pulsar.Client.IO;
 using Pulsar.Common.Messages.Administration.SystemInfo;
-using Pulsar.Common.Messages.other;
+using Pulsar.Common.Messages.Other;
 
 namespace Pulsar.Client.Messages
 {

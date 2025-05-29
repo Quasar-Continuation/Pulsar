@@ -1,4 +1,4 @@
-﻿using Pulsar.Common.Messages.ReverseProxy;
+﻿using Pulsar.Common.Messages.Administration.ReverseProxy;
 using Pulsar.Server.Networking;
 using System;
 using System.Collections.Generic;

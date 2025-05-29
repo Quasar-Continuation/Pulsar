@@ -1,7 +1,7 @@
 ﻿using Pulsar.Common.Enums;
 using Pulsar.Common.Messages;
 using Pulsar.Common.Messages.Monitoring.RemoteDesktop;
-using Pulsar.Common.Messages.other;
+using Pulsar.Common.Messages.Other;
 using Pulsar.Common.Networking;
 using Pulsar.Common.Video.Codecs;
 using Pulsar.Server.Networking;
@@ -76,15 +76,6 @@ namespace Pulsar.Server.Messages
         /// <param name="sender">The message processor which raised the event.</param>
         /// <param name="value">All currently available displays.</param>
         public delegate void DisplaysChangedEventHandler(object sender, int value);
-
-        /// <summary>
-        /// Raised when a display changed.
-        /// </summary>
-        /// <remarks>
-        /// Handlers registered with this event will be invoked on the 
-        /// <see cref="System.Threading.SynchronizationContext"/> chosen when the instance was constructed.
-        /// </remarks>
-        public event DisplaysChangedEventHandler DisplaysChanged;
 
         /// <summary>
         /// The client which is associated with this remote desktop handler.
@@ -240,7 +231,7 @@ namespace Pulsar.Server.Messages
                 IsStarted = false;
             }
 
-            Debug.WriteLine("Remote desktop session stopped");
+            Debug.WriteLine("HVNC session stopped");
 
             _client.Send(new GetHVNCDesktop { Status = RemoteDesktopStatus.Stop });
         }
@@ -254,10 +245,7 @@ namespace Pulsar.Server.Messages
             {
                 int batchSize = _defaultFrameRequestBatch;
 
-                if (_estimatedFps > 25)
-                    batchSize = 5;
-                else if (_estimatedFps < 10)
-                    batchSize = 2;
+                batchSize = 5;
 
                 Debug.WriteLine($"Requesting {batchSize} more frames");
                 Interlocked.Add(ref _pendingFrames, batchSize);

@@ -32,6 +32,7 @@
 		<Reference Include="System.Configuration">
 			<Private>False</Private>
 		</Reference>
+		<Reference Include="System.IO.Compression" />
 		<Reference Include="System.Messaging" />
 		<Reference Include="System.ServiceModel">
 			<Private>False</Private>
@@ -41,12 +42,13 @@
 		</Reference>
 	</ItemGroup>
 	<ItemGroup>
+		<Compile Update="Controls\BetterProgressBar.cs">
+			<SubType>Component</SubType>
+		</Compile>
 		<Compile Update="Controls\DotNetBarTabControl.cs" />
 		<Compile Update="Controls\HexEditor\HexEditor.cs" />
 		<Compile Update="Controls\Line.cs" />
-		<Compile Update="Controls\HVNCRapidPictureBox.cs">
-		  <SubType>Component</SubType>
-		</Compile>
+		<Compile Update="Controls\HVNCRapidPictureBox.cs" />
 		<Compile Update="Controls\RapidPictureBox.cs" />
 		<Compile Update="Controls\RegistryTreeView.cs" />
 		<Compile Update="Controls\WordTextBox.cs" />
@@ -251,7 +253,7 @@
 	<ItemGroup>
 		<PackageReference Include="Costura.Fody" Version="6.0.0">
 			<PrivateAssets>all</PrivateAssets>
-			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+			<IncludeAssets>runtime; build; compile; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 		<PackageReference Include="DiscordRichPresence" Version="1.2.1.24" />
 		<PackageReference Include="dnlib" Version="4.4.0" />
@@ -273,6 +275,7 @@
 		<PackageReference Include="NAudio.WinMM" Version="2.2.1" />
 		<PackageReference Include="Open.Nat" Version="2.1.0" />
 		<PackageReference Include="Portable.BouncyCastle" Version="1.9.0" />
+    <PackageReference Include="System.IO.Compression.ZipFile" Version="4.3.0" />
 		<PackageReference Include="protobuf-net">
 			<Version>2.4.9</Version>
 		</PackageReference>

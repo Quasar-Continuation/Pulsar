@@ -339,10 +339,12 @@ namespace Pulsar.Client.Anti.Helper
         {
             unsafe
             {
+#pragma warning disable CS8500 // This takes the address of, gets the size of, or declares a pointer to a managed type
                 fixed (T* ptr = &o)
                 {
                     return (IntPtr)ptr;
                 }
+#pragma warning restore CS8500 // This takes the address of, gets the size of, or declares a pointer to a managed type
             }
         }
 

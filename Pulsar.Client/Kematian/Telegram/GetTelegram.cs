@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace Pulsar.Client.Kematian.Telegram
 {
@@ -72,7 +73,7 @@ namespace Pulsar.Client.Kematian.Telegram
                             }
                             catch (Exception ex)
                             {
-                                // if isssues put something here to catch the errors or smth
+                                Debug.WriteLine(ex.Message);
                             }
                         }
                     }

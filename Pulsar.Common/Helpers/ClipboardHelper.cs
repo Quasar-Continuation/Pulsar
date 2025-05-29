@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Forms;
 
-namespace Pulsar.Server.Helper
+namespace Pulsar.Common.Helpers
 {
     public static class ClipboardHelper
     {

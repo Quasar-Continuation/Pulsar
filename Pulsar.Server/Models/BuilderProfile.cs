@@ -237,6 +237,18 @@ namespace Pulsar.Server.Models
             }
         }
 
+        public bool EnablePastebin
+        {
+            get
+            {
+                return bool.Parse(ReadValueSafe("EnablePastebin", "False"));
+            }
+            set
+            {
+                WriteValue("EnablePastebin", value.ToString());
+            }
+        }
+
         public bool EnableAntiVM
         {
             get

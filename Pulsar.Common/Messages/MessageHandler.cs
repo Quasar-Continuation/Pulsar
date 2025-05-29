@@ -1,4 +1,4 @@
-﻿using Pulsar.Common.Messages.other;
+﻿using Pulsar.Common.Messages.Other;
 using Pulsar.Common.Networking;
 using System.Collections.Generic;
 using System.Linq;

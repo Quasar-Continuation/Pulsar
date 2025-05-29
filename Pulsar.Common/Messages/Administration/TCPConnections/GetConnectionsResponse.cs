@@ -1,5 +1,5 @@
 ﻿using ProtoBuf;
-using Pulsar.Common.Messages.other;
+using Pulsar.Common.Messages.Other;
 using Pulsar.Common.Models;
 
 namespace Pulsar.Common.Messages.Administration.TCPConnections

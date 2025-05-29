@@ -1,6 +1,6 @@
 using Pulsar.Common.Cryptography;
 using Pulsar.Common.Messages;
-using Pulsar.Common.Messages.other;
+using Pulsar.Common.Messages.Other;
 using System;
 using System.Linq;
 using System.Security.Cryptography;

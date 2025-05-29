@@ -1,4 +1,4 @@
-﻿namespace Pulsar.Server.Forms.HVNC
+﻿namespace Pulsar.Server.Forms
 {
     partial class FrmHVNCFileSelection
     {
@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FrmHVNCFileSelection));
             this.txtBoxPathAndArgs = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.btnStart = new System.Windows.Forms.Button();
@@ -72,6 +73,7 @@
             this.Controls.Add(this.btnStart);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.txtBoxPathAndArgs);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MinimumSize = new System.Drawing.Size(400, 150);
             this.Name = "FrmHVNCFileSelection";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;

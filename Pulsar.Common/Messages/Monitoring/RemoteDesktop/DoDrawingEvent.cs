@@ -1,5 +1,5 @@
 using ProtoBuf;
-using Pulsar.Common.Messages.other;
+using Pulsar.Common.Messages.Other;
 using System.Drawing;
 
 namespace Pulsar.Common.Messages.Monitoring.RemoteDesktop

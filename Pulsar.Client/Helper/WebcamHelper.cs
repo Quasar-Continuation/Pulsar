@@ -37,6 +37,7 @@ namespace Pulsar.Client.Helper
 
                 _videoDevice = new VideoCaptureDevice(captureDevices[webcamIndex].MonikerString);
                 _videoDevice.NewFrame += new NewFrameEventHandler(FinalFrame_NewFrame);
+                _videoDevice.VideoSourceError += VideoDevice_VideoSourceError;
                 _videoDevice.Start();
                 _isRunning = true;
             }
@@ -83,6 +84,7 @@ namespace Pulsar.Client.Helper
                 if (_videoDevice != null)
                 {
                     _videoDevice.NewFrame -= FinalFrame_NewFrame;
+                    _videoDevice.VideoSourceError -= VideoDevice_VideoSourceError;
                     _videoDevice = null;
                 }
                 _isRunning = false;
@@ -137,6 +139,20 @@ namespace Pulsar.Client.Helper
                 {
                     Debug.WriteLine($"Error processing new frame: {ex.Message}");
                 }
+            }
+        }
+
+        private void VideoDevice_VideoSourceError(object sender, VideoSourceErrorEventArgs eventArgs)
+        {
+            var desc = eventArgs.Description ?? string.Empty;
+            if (desc.IndexOf("0x80004002", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                desc.IndexOf("Interface not supported", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                Debug.WriteLine("Webcam does not support required video control interface; ignoring.");
+            }
+            else
+            {
+                Debug.WriteLine($"Video source error: {desc}");
             }
         }
     }

@@ -5,7 +5,7 @@ using Pulsar.Common.Enums;
 using Pulsar.Common.Helpers;
 using Pulsar.Common.Messages;
 using Pulsar.Common.Messages.Administration.StartupManager;
-using Pulsar.Common.Messages.other;
+using Pulsar.Common.Messages.Other;
 using Pulsar.Common.Networking;
 using System;
 using System.Collections.Generic;

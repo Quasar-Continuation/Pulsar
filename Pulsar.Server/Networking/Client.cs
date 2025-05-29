@@ -1,4 +1,4 @@
-﻿using Pulsar.Common.Messages.other;
+﻿using Pulsar.Common.Messages.Other;
 using Pulsar.Common.Networking;
 using Pulsar.Server.Forms;
 using System;
@@ -38,11 +38,11 @@ namespace Pulsar.Server.Networking
 
             if (connected)
             {
-               
+
             }
         }
 
-        
+
 
         /// <summary>
         /// Occurs when a message is received from the client.
@@ -139,7 +139,7 @@ namespace Pulsar.Server.Networking
         public override int GetHashCode()
         {
             return this.EndPoint.GetHashCode();
-        }  
+        }
 
         /// <summary>
         /// The type of the message received.
@@ -414,9 +414,9 @@ namespace Pulsar.Server.Networking
                         case ReceiveType.Payload:
                             {
                                 int length = (_writeOffset - HeaderSize + _readableDataLen) >= _payloadLen
-                                    ?  _payloadLen - (_writeOffset - HeaderSize)
+                                    ? _payloadLen - (_writeOffset - HeaderSize)
                                     : _readableDataLen;
-                                
+
                                 try
                                 {
                                     Array.Copy(readBuffer, _readOffset, _payloadBuffer, _writeOffset, length);
@@ -427,11 +427,11 @@ namespace Pulsar.Server.Networking
                                     Disconnect();
                                     break;
                                 }
-                                
+
                                 _writeOffset += length;
                                 _readOffset += length;
                                 _readableDataLen -= length;
-                                
+
                                 if (_writeOffset - HeaderSize == _payloadLen)
                                 {
                                     // completely received payload
@@ -449,7 +449,7 @@ namespace Pulsar.Server.Networking
                                         Disconnect();
                                         break;
                                     }
-                                    
+
                                     _receiveState = ReceiveType.Header;
                                     _payloadLen = 0;
                                     _writeOffset = 0;

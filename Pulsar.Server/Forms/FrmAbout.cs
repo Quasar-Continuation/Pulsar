@@ -19,6 +19,7 @@ namespace Pulsar.Server.Forms
             InitializeComponent();
 
             DarkModeManager.ApplyDarkMode(this);
+			ScreenCaptureHider.ScreenCaptureHider.Apply(this.Handle);
 
             lblVersion.Text = $"v{Application.ProductVersion}";
             rtxtContent.Text = Properties.Resources.License;

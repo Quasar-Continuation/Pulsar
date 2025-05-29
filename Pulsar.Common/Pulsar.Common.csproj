@@ -15,6 +15,11 @@
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 	</PropertyGroup>
 	<ItemGroup>
+	  <Compile Remove="Messages\Administration\RemoteExecute\**" />
+	  <EmbeddedResource Remove="Messages\Administration\RemoteExecute\**" />
+	  <None Remove="Messages\Administration\RemoteExecute\**" />
+	</ItemGroup>
+	<ItemGroup>
 		<Reference Include="System.Management" />
 		<Reference Include="System.ServiceModel" />
 		<Reference Include="System.Windows.Forms" />
@@ -28,9 +33,5 @@
 		<PackageReference Include="Microsoft.Win32.Registry" />
 		<PackageReference Include="System.Drawing.Common" />
 		<PackageReference Include="System.Management" />
-	</ItemGroup>
-	<ItemGroup>
-		<Folder Include="Messages\Administration\RemoteExecute\" />
-		<Folder Include="Messages\Administration\ReverseProxy\" />
 	</ItemGroup>
 </Project>

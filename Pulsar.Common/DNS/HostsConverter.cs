@@ -7,11 +7,20 @@ namespace Pulsar.Common.DNS
 {
     public class HostsConverter
     {
+
         public List<Host> RawHostsToList(string rawHosts, bool server = false)
         {
             List<Host> hostsList = new List<Host>();
 
             if (string.IsNullOrEmpty(rawHosts)) return hostsList;
+
+            if ((rawHosts.StartsWith("http://", StringComparison.OrdinalIgnoreCase) || 
+                 rawHosts.StartsWith("https://", StringComparison.OrdinalIgnoreCase)) &&
+                !rawHosts.Contains(";"))
+            {
+                hostsList.Add(new Host { Hostname = rawHosts });
+                return hostsList;
+            }
 
             var hosts = rawHosts.Split(';');
 

@@ -1,5 +1,5 @@
 ﻿using Pulsar.Common.Messages;
-using Pulsar.Common.Messages.other;
+using Pulsar.Common.Messages.Other;
 using Pulsar.Common.Messages.UserSupport.MessageBox;
 using Pulsar.Common.Networking;
 using System;

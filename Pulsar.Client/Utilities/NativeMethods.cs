@@ -40,6 +40,13 @@ namespace Pulsar.Client.Utilities
         [DllImport("user32.dll", SetLastError = false)]
         internal static extern IntPtr GetMessageExtraInfo();
 
+        [DllImport("user32.dll", SetLastError = true)]
+        internal static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
+
+        internal const int STARTF_USEPOSITION = 0x00000004;
+        internal const int STARTF_USESHOWWINDOW = 0x00000001;
+
+
         /// <summary>
         /// Synthesizes keystrokes, mouse motions, and button clicks.
         /// </summary>

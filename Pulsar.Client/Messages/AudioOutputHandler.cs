@@ -2,10 +2,11 @@
 using NAudio.Wave;
 using Pulsar.Common.Messages;
 using Pulsar.Common.Messages.Audio;
-using Pulsar.Common.Messages.other;
+using Pulsar.Common.Messages.Other;
 using Pulsar.Common.Networking;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Windows.Forms;
 
 namespace Pulsar.Client.Messages
@@ -72,7 +73,7 @@ namespace Pulsar.Client.Messages
                 }
                 catch (Exception ex)
                 {
-
+                    Debug.WriteLine(ex.Message);
                 }
             }
         }
