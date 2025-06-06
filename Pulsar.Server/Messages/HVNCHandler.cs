@@ -100,6 +100,16 @@ namespace Pulsar.Server.Messages
         private int _framesReceived = 0;
         private double _estimatedFps = 0;
 
+        /// <summary>
+        /// Stores the last FPS reported by the client.
+        /// </summary>
+        private float _lastReportedFps = -1f;
+
+        /// <summary>
+        /// Shows the estimated frames per second (FPS) based on the last second of received frames.
+        /// </summary>
+        public float LastReportedFps => _lastReportedFps;
+
         public static Size resolution = new Size(0, 0);
 
         /// <summary>
@@ -134,6 +144,13 @@ namespace Pulsar.Server.Messages
             _framesReceived++;
 
             resolution = new Size { Height = message.Resolution.Height, Width = message.Resolution.Width };
+
+            // capture the FPS reported by the client
+            if (message.Fps > 0)
+            {
+                _lastReportedFps = message.Fps;
+                Debug.WriteLine($"Client-reported FPS: {_lastReportedFps}");
+            }
 
             if (_performanceMonitor.ElapsedMilliseconds >= 1000)
             {
@@ -243,9 +260,7 @@ namespace Pulsar.Server.Messages
 
             try
             {
-                int batchSize = _defaultFrameRequestBatch;
-
-                batchSize = 5;
+                int batchSize = 5;
 
                 Debug.WriteLine($"Requesting {batchSize} more frames");
                 Interlocked.Add(ref _pendingFrames, batchSize);

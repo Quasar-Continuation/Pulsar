@@ -45,6 +45,17 @@ namespace Pulsar.Server.Forms
         private readonly HVNCHandler _hVNCHandler;
 
         /// <summary>
+        /// Stopwatch used to suppress FPS display during the initial seconds of the stream,
+        /// preventing unstable or misleading values from being shown.
+        /// </summary>
+        private readonly Stopwatch _fpsDisplayStopwatch = Stopwatch.StartNew();
+
+        /// <summary>
+        /// Last frames per second value to show in the title bar.
+        /// </summary>
+        private float _lastFps = -1f;
+
+        /// <summary>
         /// Holds the opened HVNC form for each client.
         /// </summary>
         private static readonly Dictionary<Client, FrmHVNC> OpenedForms = new Dictionary<Client, FrmHVNC>();
@@ -223,6 +234,11 @@ namespace Pulsar.Server.Forms
 
             double elapsedSeconds = _stopwatch.Elapsed.TotalSeconds;
 
+            if (_hVNCHandler.LastReportedFps > 0)
+            {
+                _lastFps = _hVNCHandler.LastReportedFps;
+            }
+
             if (elapsedSeconds >= 1.0)
             {
                 _frameCount = 0;
@@ -265,7 +281,19 @@ namespace Pulsar.Server.Forms
         /// <param name="e">The new frames per second.</param>
         private void frameCounter_FrameUpdated(FrameUpdatedEventArgs e)
         {
-            this.Text = string.Format("{0} - FPS: {1}", WindowHelper.GetWindowTitle("HVNC", _connectClient), e.CurrentFramesPerSecond.ToString("0.00"));
+            float fpsToShow;
+
+            if (_fpsDisplayStopwatch.Elapsed.TotalSeconds < 2)
+            {
+                // Ignore the first 2 seconds to avoid showing fake FPS values
+                fpsToShow = 0f;
+            }
+            else
+            {
+                fpsToShow = (_lastFps > 0f) ? _lastFps : e.CurrentFramesPerSecond;
+            }
+
+            this.Text = string.Format("{0} - FPS: {1:0.00}", WindowHelper.GetWindowTitle("HVNC", _connectClient), fpsToShow);
         }
 
         private void FrmHVNC_FormClosing(object sender, FormClosingEventArgs e)

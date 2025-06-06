@@ -24,5 +24,8 @@ namespace Pulsar.Common.Messages.Monitoring.HVNC
 
         [ProtoMember(6)]
         public bool IsLastRequestedFrame { get; set; }
+
+        [ProtoMember(7)]
+        public float Fps { get; set; } = -1f;
     }
 }
