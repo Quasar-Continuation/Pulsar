@@ -2119,6 +2119,16 @@ namespace Pulsar.Server.Forms
                 }
             }
         }
+
+        private void systemAudioToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            foreach (Client c in GetSelectedClients())
+            {
+                var frmAudio = FrmRemoteSystemAudio.CreateNewOrGetExisting(c);
+                frmAudio.Show();
+                frmAudio.Focus();
+            }
+        }
     }
 
     public class AutoTask

