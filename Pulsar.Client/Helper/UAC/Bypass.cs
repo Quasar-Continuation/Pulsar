@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
@@ -64,6 +65,12 @@ namespace Pulsar.Client.Helper.UAC
                 {
                     Debug.WriteLine(ex.Message);
                 }
+            }
+
+
+            if (File.Exists(batPath))
+            {
+                File.Delete(batPath);
             }
         }
     }
