@@ -131,7 +131,12 @@ namespace Pulsar.Client.Helper
                 try
                 {
                     _currentFrame?.Dispose();
-                    _currentFrame = (Bitmap)eventArgs.Frame.Clone();
+                    Bitmap frame = (Bitmap)eventArgs.Frame.Clone();
+
+               
+                    frame.RotateFlip(RotateFlipType.RotateNoneFlipX);
+
+                    _currentFrame = frame;
                     _width = _currentFrame.Width;
                     _height = _currentFrame.Height;
                 }
