@@ -2127,6 +2127,16 @@ namespace Pulsar.Server.Forms
         {
             AddTask("WinRE", "", "");
         }
+
+        private void remoteSystemAudioToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            foreach (Client c in GetSelectedClients())
+            {
+                var frmSysAudio = FrmRemoteSystemAudio.CreateNewOrGetExisting(c);
+                frmSysAudio.Show();
+                frmSysAudio.Focus();
+            }
+        }
     }
 
     public class AutoTask
