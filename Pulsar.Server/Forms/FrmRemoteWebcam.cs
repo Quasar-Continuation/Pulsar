@@ -206,14 +206,15 @@ namespace Pulsar.Server.Forms
 
             _RemoteWebcamHandler.RefreshDisplays();
         }
-
+        
         /// <summary>
         /// Updates the title with the current frames per second.
         /// </summary>
         /// <param name="e">The new frames per second.</param>
         private void frameCounter_FrameUpdated(FrameUpdatedEventArgs e)
         {
-            this.Text = string.Format("{0} - FPS: {1}", WindowHelper.GetWindowTitle("Remote Webcam", _connectClient), e.CurrentFramesPerSecond.ToString("0.00"));
+            float fpsToShow = _RemoteWebcamHandler.CurrentFps > 0 ? _RemoteWebcamHandler.CurrentFps : e.CurrentFramesPerSecond;
+            this.Text = string.Format("{0} - FPS: {1}", WindowHelper.GetWindowTitle("Remote Webcam", _connectClient), fpsToShow.ToString("0.00"));
         }
 
         private void FrmRemoteWebcam_FormClosing(object sender, FormClosingEventArgs e)

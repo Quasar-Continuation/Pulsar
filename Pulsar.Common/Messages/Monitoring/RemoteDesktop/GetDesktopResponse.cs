@@ -24,5 +24,8 @@ namespace Pulsar.Common.Messages.Monitoring.RemoteDesktop
 
         [ProtoMember(6)]
         public bool IsLastRequestedFrame { get; set; }
+
+        [ProtoMember(7)]
+        public float FrameRate { get; set; }
     }
 }

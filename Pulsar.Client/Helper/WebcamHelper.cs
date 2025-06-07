@@ -15,6 +15,8 @@ namespace Pulsar.Client.Helper
         private VideoCaptureDevice _videoDevice;
         private int _width;
         private int _height;
+        private DateTime _lastFrameTime = DateTime.MinValue;
+        private readonly TimeSpan _frameInterval = TimeSpan.FromMilliseconds(33); // ~30fps
 
         public void StartWebcam(int webcamIndex)
         {
@@ -36,6 +38,30 @@ namespace Pulsar.Client.Helper
                 }
 
                 _videoDevice = new VideoCaptureDevice(captureDevices[webcamIndex].MonikerString);
+
+                var videoCapabilities = _videoDevice.VideoCapabilities;
+                if (videoCapabilities != null && videoCapabilities.Length > 0)
+                {
+                    bool foundMatchingResolution = false;
+
+                    foreach (var capability in videoCapabilities)
+                    {
+                        if (capability.AverageFrameRate >= 25 && capability.AverageFrameRate <= 35)
+                        {
+                            _videoDevice.VideoResolution = capability;
+                            foundMatchingResolution = true;
+                            Debug.WriteLine($"Selected video mode: {capability.FrameSize.Width}x{capability.FrameSize.Height} @ {capability.AverageFrameRate}fps");
+                            break;
+                        }
+                    }
+
+                    if (!foundMatchingResolution && videoCapabilities.Length > 0)
+                    {
+                        _videoDevice.VideoResolution = videoCapabilities[0];
+                        Debug.WriteLine($"Selected default video mode: {videoCapabilities[0].FrameSize.Width}x{videoCapabilities[0].FrameSize.Height} @ {videoCapabilities[0].AverageFrameRate}fps");
+                    }
+                }
+
                 _videoDevice.NewFrame += new NewFrameEventHandler(FinalFrame_NewFrame);
                 _videoDevice.VideoSourceError += VideoDevice_VideoSourceError;
                 _videoDevice.Start();
@@ -93,12 +119,22 @@ namespace Pulsar.Client.Helper
 
         public Bitmap GetLatestFrame()
         {
+            DateTime now = DateTime.UtcNow;
+
             lock (_lock)
             {
                 try
                 {
-                    Thread.Sleep(22);
-                    return _currentFrame?.Clone() as Bitmap;
+                    if (_currentFrame == null)
+                        return null;
+
+                    if ((now - _lastFrameTime) >= _frameInterval)
+                    {
+                        _lastFrameTime = now;
+                        return _currentFrame?.Clone() as Bitmap;
+                    }
+
+                    return null;
                 }
                 catch (Exception ex)
                 {
@@ -133,7 +169,6 @@ namespace Pulsar.Client.Helper
                     _currentFrame?.Dispose();
                     Bitmap frame = (Bitmap)eventArgs.Frame.Clone();
 
-               
                     frame.RotateFlip(RotateFlipType.RotateNoneFlipX);
 
                     _currentFrame = frame;

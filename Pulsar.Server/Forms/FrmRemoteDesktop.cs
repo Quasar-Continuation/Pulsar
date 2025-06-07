@@ -88,6 +88,19 @@ namespace Pulsar.Server.Forms
         private const int UpdateInterval = 10;
 
         /// <summary>
+        /// Stopwatch used to suppress FPS display during the initial seconds of the stream,
+        /// preventing unstable or misleading values from being shown.
+        /// </summary>
+        private readonly Stopwatch _fpsDisplayStopwatch = Stopwatch.StartNew();
+
+        /// <summary>
+        /// Last frames per second value to show in the title bar.
+        /// </summary>
+        private float _lastFps = -1f;
+
+        private int _framesReceived = 0;
+
+        /// <summary>
         /// Creates a new remote desktop form for the client or gets the current open form, if there exists one already.
         /// </summary>
         /// <param name="client">The client used for the remote desktop form.</param>
@@ -346,37 +359,12 @@ namespace Pulsar.Server.Forms
             cbMonitors.SelectedIndex = 0;
         }
 
-        /// <summary>
-        /// Updates the current desktop image by drawing it to the desktop picturebox.
-        /// </summary>
-        /// <param name="sender">The message handler which raised the event.</param>
-        /// <param name="bmp">The new desktop image to draw.</param>
-        private Stopwatch _stopwatch = new Stopwatch();
-        private int _frameCount = 0;
-        private float _fps = 0;
-
         private void UpdateImage(object sender, Bitmap bmp)
         {
-            if (!_stopwatch.IsRunning)
+            _framesReceived++;
+
+            if (_framesReceived >= 30)
             {
-                _stopwatch.Start();
-            }
-
-            _frameCount++;
-
-            double elapsedSeconds = _stopwatch.Elapsed.TotalSeconds;
-
-            if (elapsedSeconds >= 1.0)
-            {
-                _fps = _frameCount / (float)elapsedSeconds;
-                _frameCount = 0;
-                _stopwatch.Restart();
-            }
-
-            if (_frameCount >= UpdateInterval)
-            {
-                _frameCount = 0;
-
                 long sizeInBytes = 0;
                 using (MemoryStream ms = new MemoryStream())
                 {
@@ -389,6 +377,8 @@ namespace Pulsar.Server.Forms
                 {
                     sizeLabelCounter.Text = $"Size: {sizeInKB:0.00} KB";
                 });
+
+                _framesReceived = 0;
             }
 
             picDesktop.UpdateImage(bmp, false);
@@ -411,14 +401,15 @@ namespace Pulsar.Server.Forms
 
             _remoteDesktopHandler.RefreshDisplays();
         }
-
+        
         /// <summary>
         /// Updates the title with the current frames per second.
         /// </summary>
         /// <param name="e">The new frames per second.</param>
         private void frameCounter_FrameUpdated(FrameUpdatedEventArgs e)
         {
-            this.Text = string.Format("{0} - FPS: {1}", WindowHelper.GetWindowTitle("Remote Desktop", _connectClient), e.CurrentFramesPerSecond.ToString("0.00"));
+            float fpsToShow = _remoteDesktopHandler.CurrentFps > 0 ? _remoteDesktopHandler.CurrentFps : e.CurrentFramesPerSecond;
+            this.Text = string.Format("{0} - FPS: {1}", WindowHelper.GetWindowTitle("Remote Desktop", _connectClient), fpsToShow.ToString("0.00"));
         }
 
         private void FrmRemoteDesktop_FormClosing(object sender, FormClosingEventArgs e)
