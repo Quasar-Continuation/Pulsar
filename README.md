@@ -158,6 +158,7 @@ Pulsar is licensed under the **[MIT](LICENSE)**. Third-party licenses are availa
 - **[Rishie](https://github.com/rishieissocool)** – Stealer Options
 - **[jungsuxx](https://github.com/jungsuxx)** – HVNC Input & Code Simplification
 - **[MOOM aka my lebron](https://github.com/moom825/)** – Inspiration & Batch Obfuscation
+- **[skeeminator](https://github.com/skeeminator/)** – Kematian Improvements
 
 ---
 
