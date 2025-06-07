@@ -1,0 +1,3 @@
+[submodule "external/donut"]
+	path = external/donut
+	url = https://github.com/TheWover/donut.git

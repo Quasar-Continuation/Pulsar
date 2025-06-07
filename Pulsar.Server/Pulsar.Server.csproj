@@ -5,6 +5,7 @@
 		<AssemblyName>Pulsar</AssemblyName>
 		<UseWindowsForms>true</UseWindowsForms>
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+		<Configurations>Debug;Release;ReleaseWithDonut</Configurations>
 	</PropertyGroup>
 	<PropertyGroup>
 		<StartupObject>Pulsar.Server.Program</StartupObject>
@@ -15,6 +16,22 @@
 	<PropertyGroup>
 		<ApplicationManifest>app.manifest</ApplicationManifest>
 	</PropertyGroup>
+	<!-- Donut build configuration -->
+	<PropertyGroup>
+    <DonutDir>$(MSBuildProjectDirectory)\..\external\donut</DonutDir>
+  </PropertyGroup>
+  <!-- Build Donut only for ReleaseWithDonut config -->
+  <Target Name="BuildDonut" BeforeTargets="BeforeBuild" Condition="'$(Configuration)'=='ReleaseWithDonut'">
+    <Message Text="▶ Building Donut via nmake in $(DonutDir)" Importance="High" />
+    <Exec WorkingDirectory="$(MSBuildProjectDirectory)" Command="build-donut.bat" ContinueOnError="false" />
+  </Target>
+  <!-- Copy Donut outputs only when building ReleaseWithDonut -->
+  <Target Name="CopyDonutFiles" AfterTargets="Build" Condition="Exists('$(DonutDir)\donut.exe') and '$(Configuration)'=='ReleaseWithDonut'">
+    <Copy SourceFiles="$(DonutDir)\donut.exe" DestinationFiles="$(OutputPath)donut.exe" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="$(DonutDir)\DonutDLL.dll" DestinationFiles="$(OutputPath)DonutDLL.dll" SkipUnchangedFiles="true" Condition="Exists('$(DonutDir)\DonutDLL.dll')" />
+    <Message Text="▶ Copied Donut files to $(OutputPath)" Importance="High" />
+  </Target>
+	<!-- Donut build configuration end -->
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
 		<OutputPath>..\bin\Debug\</OutputPath>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -27,6 +44,13 @@
 		<DebugType>none</DebugType>
 		<UseVSHostingProcess>false</UseVSHostingProcess>
 		<CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseWithDonut|AnyCPU'">
+	  <OutputPath>..\bin\Release\</OutputPath>
+	  <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+	  <DebugType>none</DebugType>
+	  <UseVSHostingProcess>false</UseVSHostingProcess>
+	  <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
 	</PropertyGroup>
 	<ItemGroup>
 		<Reference Include="System.Configuration">
