@@ -70,7 +70,6 @@ namespace Pulsar.Server.Helper
             Headers headers = Headers.Overwrite
         )
         {
-            System.Windows.Forms.MessageBox.Show("Initializing Donut...");
             if (string.IsNullOrEmpty(donutExePath))
                 donutExePath = Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location), "donut.exe");
             if (!File.Exists(donutExePath))
@@ -105,11 +104,9 @@ namespace Pulsar.Server.Helper
                 CreateNoWindow = true,
                 WindowStyle = ProcessWindowStyle.Hidden
             };
-            System.Windows.Forms.MessageBox.Show("Launching...");
             using (Process proc = Process.Start(psi))
             {
                 proc.WaitForExit();
-                System.Windows.Forms.MessageBox.Show($"Process Completed: {proc.ExitCode}\nSTDOUT: {proc.StandardOutput.ReadToEnd()}\nSTDERR: {proc.StandardError.ReadToEnd()}");
                 if (proc.ExitCode != 0)
                 {
                     var stdout = proc.StandardOutput.ReadToEnd();
@@ -119,13 +116,11 @@ namespace Pulsar.Server.Helper
                     );
                 }
             }
-            System.Windows.Forms.MessageBox.Show("Reading Shellcode from disk...");
             try
             {
                 byte[] bytes = File.ReadAllBytes(binaryPath);
                 if (deleteOutput)
                 {
-                    System.Windows.Forms.MessageBox.Show("Deleting from disk...");
                     File.Delete(binaryPath);
                 }
                 return bytes;
@@ -136,7 +131,6 @@ namespace Pulsar.Server.Helper
                     $"Failed to read generated shellcode!"
                 );
             }
-            return new byte[0];
         }
     }
 }

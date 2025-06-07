@@ -106,7 +106,7 @@ namespace Pulsar.Server.Build
 
         public void BuildShellcode(bool obfuscateBuild, bool packBuild)
         {
-            if (!File.Exists(Path.Combine(System.Reflection.Assembly.GetExecutingAssembly().Location, "donut.exe")))
+            if (!File.Exists(Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location), "donut.exe")))
                 throw new Exception("Donut not found! Shellcode conversion not possible. Try building with donut");
             using (AssemblyDefinition asmDef = AssemblyDefinition.ReadAssembly(_clientFilePath))
             {
