@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Pulsar.Plugin.Common\Pulsar.Plugin.Common.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Management" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Costura.Fody" Version="6.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>    </PackageReference>
+    <PackageReference Include="protobuf-net" Version="2.4.8" />
+  </ItemGroup>
+
+</Project>

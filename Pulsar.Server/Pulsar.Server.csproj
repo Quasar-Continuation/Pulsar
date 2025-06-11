@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
 	<PropertyGroup>
 		<TargetFramework>net472</TargetFramework>
-		<OutputType>WinExe</OutputType>
+		<OutputType>exe</OutputType>
 		<AssemblyName>Pulsar</AssemblyName>
 		<UseWindowsForms>true</UseWindowsForms>
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
@@ -268,11 +268,11 @@
 			<Generator>SettingsSingleFileGenerator</Generator>
 			<LastGenOutput>Settings.Designer.cs</LastGenOutput>
 		</None>
-	</ItemGroup>
-	<ItemGroup>
+	</ItemGroup>	<ItemGroup>
 		<ProjectReference Include="..\Pulsar.Common\Pulsar.Common.csproj">
 			<Private>False</Private>
 		</ProjectReference>
+		<ProjectReference Include="..\Pulsar.Plugin.Common\Pulsar.Plugin.Common.csproj" />
 	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="Costura.Fody" Version="6.0.0">

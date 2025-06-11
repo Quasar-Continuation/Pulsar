@@ -125,7 +125,7 @@ namespace Pulsar.Server.Helper
                 }
                 return bytes;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw new InvalidOperationException(
                     $"Failed to read generated shellcode!"

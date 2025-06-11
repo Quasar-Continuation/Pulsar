@@ -3,6 +3,7 @@
   <Costura>
 	  <IncludeAssemblies>
 		  Pulsar.Common
+		  Pulsar.Plugin.Common
 		  dnlib
 		  Mono.Cecil
 		  Gma.System.MouseKeyHook

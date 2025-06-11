@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
 	<PropertyGroup>
 		<TargetFramework>net472</TargetFramework>
-		<OutputType>WinExe</OutputType>
+		<OutputType>Exe</OutputType>
 		<AssemblyName>Client</AssemblyName>
 		<UseWindowsForms>true</UseWindowsForms>
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
@@ -63,6 +63,7 @@
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\Pulsar.Common\Pulsar.Common.csproj" />
+		<ProjectReference Include="..\Pulsar.Plugin.Common\Pulsar.Plugin.Common.csproj" />
 	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="AForge.Video" Version="2.2.5" />
