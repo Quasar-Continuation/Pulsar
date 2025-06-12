@@ -1,8 +1,8 @@
-<Project Sdk="Microsoft.NET.Sdk">
-
-  <PropertyGroup>
+﻿<Project Sdk="Microsoft.NET.Sdk">  <PropertyGroup>
     <TargetFramework>net472</TargetFramework>
     <LangVersion>latest</LangVersion>
+    <OutputPath>..\bin\$(Configuration)\net472\Plugins\Client\</OutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Pulsar.Plugin.Common\Pulsar.Plugin.Common.csproj" />

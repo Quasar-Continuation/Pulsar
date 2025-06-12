@@ -1,10 +1,10 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
-	<PropertyGroup>
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">	<PropertyGroup>
 		<TargetFramework>net472</TargetFramework>
 		<OutputType>exe</OutputType>
 		<AssemblyName>Pulsar</AssemblyName>
 		<UseWindowsForms>true</UseWindowsForms>
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+		<GenerateResourceUsePreserializedResources>true</GenerateResourceUsePreserializedResources>
 		<Configurations>Debug;Release;ReleaseWithDonut</Configurations>
 	</PropertyGroup>
 	<PropertyGroup>
@@ -267,8 +267,9 @@
 		<None Update="Properties\Settings.settings">
 			<Generator>SettingsSingleFileGenerator</Generator>
 			<LastGenOutput>Settings.Designer.cs</LastGenOutput>
-		</None>
-	</ItemGroup>	<ItemGroup>
+		</None>	
+	</ItemGroup>
+	<ItemGroup>
 		<ProjectReference Include="..\Pulsar.Common\Pulsar.Common.csproj">
 			<Private>False</Private>
 		</ProjectReference>
@@ -288,6 +289,7 @@
 		<PackageReference Include="Mono.Cecil">
 			<Version>0.11.6</Version>
 		</PackageReference>
+		<PackageReference Include="System.Resources.Extensions" Version="8.0.0" />
 		<PackageReference Include="MouseKeyHook">
 			<Version>5.7.1</Version>
 		</PackageReference>

