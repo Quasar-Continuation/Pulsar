@@ -1,4 +1,6 @@
 using Pulsar.Plugin.Common;
+using Pulsar.Plugin.Common.Validation;
+using Pulsar.Plugin.Common.Exceptions;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -26,10 +28,10 @@ namespace Pulsar.Client.Plugin
             
             // Ensure plugin directory exists
             Directory.CreateDirectory(_pluginDirectory);
-        }
-
+        }        
+        
         /// <summary>
-        /// Loads a plugin from byte array.
+        /// Loads a plugin from byte array with validation and error handling.
         /// </summary>
         /// <param name="pluginName">Name of the plugin.</param>
         /// <param name="pluginBytes">Plugin assembly bytes.</param>
@@ -38,39 +40,110 @@ namespace Pulsar.Client.Plugin
         {
             try
             {
-                // Load assembly from memory
-                Assembly assembly = Assembly.Load(pluginBytes);
-                
-                // Find types implementing IClientPlugin
-                var pluginTypes = assembly.GetTypes()
-                    .Where(t => t.GetInterfaces().Contains(typeof(IClientPlugin)) && !t.IsAbstract)
-                    .ToList();
-
-                if (pluginTypes.Count == 0)
+                // Validate plugin before loading
+                var validationResult = PluginValidator.ValidatePluginBytes(pluginBytes, pluginName);
+                if (!validationResult.IsValid)
                 {
+                    Console.WriteLine($"[CLIENT PLUGIN MANAGER] Plugin validation failed for {pluginName}: {validationResult.Message}");
                     return false;
                 }
 
-                // Create instance of the first plugin type found
+                if (validationResult.HasWarnings)
+                {
+                    Console.WriteLine($"[CLIENT PLUGIN MANAGER] Plugin validation warning for {pluginName}: {validationResult.Message}");
+                }
+
+                // Load assembly from memory with error handling
+                Assembly assembly;
+                try
+                {
+                    assembly = Assembly.Load(pluginBytes);
+                }
+                catch (BadImageFormatException)
+                {
+                    Console.WriteLine($"[CLIENT PLUGIN MANAGER] Invalid assembly format for plugin {pluginName}");
+                    return false;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[CLIENT PLUGIN MANAGER] Failed to load assembly for plugin {pluginName}: {ex.Message}");
+                    return false;
+                }
+                
+                // Find types implementing IClientPlugin with error handling
+                List<Type> pluginTypes;
+                try
+                {
+                    pluginTypes = assembly.GetTypes()
+                        .Where(t => t.GetInterfaces().Contains(typeof(IClientPlugin)) && !t.IsAbstract)
+                        .ToList();
+                }
+                catch (ReflectionTypeLoadException ex)
+                {
+                    // Handle partial type loading
+                    pluginTypes = ex.Types.Where(t => t != null && t.GetInterfaces().Contains(typeof(IClientPlugin)) && !t.IsAbstract)
+                        .ToList();
+                    Console.WriteLine($"[CLIENT PLUGIN MANAGER] Warning: Some types could not be loaded from {pluginName}");
+                }
+
+                if (pluginTypes.Count == 0)
+                {
+                    Console.WriteLine($"[CLIENT PLUGIN MANAGER] No IClientPlugin implementations found in {pluginName}");
+                    return false;
+                }
+
+                // Create instance of the first plugin type found with error handling
                 var pluginType = pluginTypes.First();
-                var plugin = (IClientPlugin)Activator.CreateInstance(pluginType);
+                IClientPlugin plugin;
+                try
+                {
+                    plugin = (IClientPlugin)Activator.CreateInstance(pluginType);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[CLIENT PLUGIN MANAGER] Failed to create instance of plugin {pluginName}: {ex.Message}");
+                    return false;
+                }
+
+                if (plugin == null)
+                {
+                    Console.WriteLine($"[CLIENT PLUGIN MANAGER] Plugin instance is null for {pluginName}");
+                    return false;
+                }
+
+                // Initialize plugin with error handling
+                try
+                {
+                    plugin.Initialize();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[CLIENT PLUGIN MANAGER] Plugin initialization failed for {pluginName}: {ex.Message}");
+                    return false;
+                }
                 
-                plugin.Initialize();
-                
+                // Check for duplicate plugin names
+                if (_loadedPlugins.ContainsKey(pluginName))
+                {
+                    Console.WriteLine($"[CLIENT PLUGIN MANAGER] Warning: Plugin with name '{pluginName}' already loaded. Unloading previous version.");
+                    UnloadPlugin(pluginName);
+                }
+
                 _pluginAssemblies[pluginName] = assembly;
                 _loadedPlugins[pluginName] = plugin;
                 
+                Console.WriteLine($"[CLIENT PLUGIN MANAGER] Successfully loaded plugin: {plugin.Name} v{plugin.Version}");
                 return true;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Failed to load plugin {pluginName}: {ex.Message}");
+                Console.WriteLine($"[CLIENT PLUGIN MANAGER] Unexpected error loading plugin {pluginName}: {ex.Message}");
                 return false;
             }
-        }
-
+        }        
+        
         /// <summary>
-        /// Executes a plugin with the provided input.
+        /// Executes a plugin with the provided input, with enhanced error handling.
         /// </summary>
         /// <param name="pluginName">Name of the plugin to execute.</param>
         /// <param name="input">Input data for the plugin.</param>
@@ -81,16 +154,28 @@ namespace Pulsar.Client.Plugin
             {
                 try
                 {
-                    return plugin.Execute(input);
+                    Console.WriteLine($"[CLIENT PLUGIN MANAGER] Executing plugin: {pluginName}");
+                    var result = plugin.Execute(input);
+                    Console.WriteLine($"[CLIENT PLUGIN MANAGER] Plugin {pluginName} executed successfully");
+                    return result;
+                }
+                catch (PluginExecutionException pex)
+                {
+                    Console.WriteLine($"[CLIENT PLUGIN MANAGER] Plugin execution error in {pluginName}: {pex.Message}");
+                    return null;
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Error executing plugin {pluginName}: {ex.Message}");
+                    Console.WriteLine($"[CLIENT PLUGIN MANAGER] Unexpected error executing plugin {pluginName}: {ex.Message}");
+                    Console.WriteLine($"[CLIENT PLUGIN MANAGER] Stack trace: {ex.StackTrace}");
                     return null;
                 }
             }
-            
-            return null;
+            else
+            {
+                Console.WriteLine($"[CLIENT PLUGIN MANAGER] Plugin not found: {pluginName}");
+                return null;
+            }
         }
 
         /// <summary>

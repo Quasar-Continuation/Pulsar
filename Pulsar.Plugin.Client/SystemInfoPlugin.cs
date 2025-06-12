@@ -1,5 +1,7 @@
 using Pulsar.Plugin.Common;
+using Pulsar.Plugin.Common.Attributes;
 using Pulsar.Plugin.Common.Messages;
+using Pulsar.Plugin.Common.Exceptions;
 using ProtoBuf;
 using System;
 using System.Diagnostics;
@@ -8,24 +10,28 @@ using System.Management;
 using System.Text;
 
 namespace Pulsar.Plugin.Client
-{
+{    
     /// <summary>
     /// Example client plugin that gathers system information.
+    /// This plugin demonstrates how to create a client plugin that collects system data.
     /// </summary>
+    [PluginInfo("SystemInfo", "1.0.0", "Collects system information from the client machine", "Pulsar Team")]
     public class SystemInfoPlugin : IClientPlugin
     {
         public string Name => "SystemInfo";
-        public string Version => "1.0.0";
-
+        public string Version => "1.0.0";        
+        
         public void Initialize()
         {
             // Plugin initialization logic
+            Console.WriteLine("[SystemInfo Plugin] Initialized successfully");
         }
-        
-        public byte[] Execute(byte[] input)
+          public byte[] Execute(byte[] input)
         {
             try
             {
+                Console.WriteLine("[SystemInfo Plugin] Starting execution");
+                
                 SystemInfoRequest request;
                 using (var stream = new MemoryStream(input))
                 {
@@ -48,22 +54,15 @@ namespace Pulsar.Plugin.Client
                 using (var stream = new MemoryStream())
                 {
                     Serializer.Serialize(stream, response);
-                    return stream.ToArray();
+                    var result = stream.ToArray();
+                    Console.WriteLine($"[SystemInfo Plugin] Execution completed, returning {result.Length} bytes");
+                    return result;
                 }
             }
             catch (Exception ex)
             {
-                var error = new PluginErrorResponse 
-                { 
-                    Error = ex.Message, 
-                    StackTrace = ex.StackTrace 
-                };
-                
-                using (var stream = new MemoryStream())
-                {
-                    Serializer.Serialize(stream, error);
-                    return stream.ToArray();
-                }
+                Console.WriteLine($"[SystemInfo Plugin] Error during execution: {ex.Message}");
+                throw new PluginExecutionException(Name, "N/A", $"Failed to gather system information: {ex.Message}", ex);
             }
         }
 

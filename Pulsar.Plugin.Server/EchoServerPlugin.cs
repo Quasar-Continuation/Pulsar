@@ -69,7 +69,7 @@ namespace Pulsar.Plugin.Server
                         
                         Console.WriteLine($"[PING PONG SERVER] About to call Common PluginContext.ExecutePlugin for client {clientId}");
                         
-                        PluginContext.ExecutePlugin("Pulsar.Plugin.Client", Guid.NewGuid().ToString(), messageBytes);
+                        PluginContext.ExecuteClientPlugin("Pulsar.Plugin.Client", Guid.NewGuid().ToString(), messageBytes);
                         
                         LogMessage($"Successfully sent response to {clientId}: {responseMessage}");
                         Console.WriteLine($"[PING PONG SERVER] Successfully sent response to {clientId}: {responseMessage}");
@@ -79,8 +79,7 @@ namespace Pulsar.Plugin.Server
                         LogMessage($"Error sending response to {clientId}: {ex.Message}");
                         Console.WriteLine($"[PING PONG SERVER] Error sending response: {ex.Message}");
                     }
-                }
-                else if (responseString.StartsWith("PING_PONG_START"))
+                }                else if (responseString.StartsWith("PING_PONG_START") || responseString.Contains("plugin is ready"))
                 {
                     _activePingPongs[clientId] = true;
                     LogMessage($"Starting ping-pong with {clientId}");
@@ -91,7 +90,7 @@ namespace Pulsar.Plugin.Server
                         string initialMessage = "PING 1";
                         var messageBytes = Encoding.UTF8.GetBytes(initialMessage);
                         
-                        Pulsar.Plugin.Common.PluginContext.ExecutePlugin("Pulsar.Plugin.Client", Guid.NewGuid().ToString(), messageBytes);
+                        Pulsar.Plugin.Common.PluginContext.ExecuteClientPlugin("Pulsar.Plugin.Client", Guid.NewGuid().ToString(), messageBytes);
                         
                         LogMessage($"Sent initial PING to {clientId}: {initialMessage}");
                         Console.WriteLine($"[PING PONG SERVER] Sent initial PING to {clientId}: {initialMessage}");

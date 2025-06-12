@@ -1,4 +1,6 @@
 using Pulsar.Plugin.Common;
+using Pulsar.Plugin.Common.Validation;
+using Pulsar.Plugin.Common.Exceptions;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -16,44 +18,7 @@ namespace Pulsar.Server.Plugin
     /// <param name="pluginName">Name of the plugin to execute</param>
     /// <param name="workId">Work ID for tracking</param>
     /// <param name="input">Input data for the plugin</param>
-    public delegate void ExecutePluginDelegate(string clientId, string pluginName, string workId, byte[] input);
-
-    /// <summary>
-    /// Context for plugin execution - provides access to client execution functionality.
-    /// </summary>
-    public static class PluginContext
-    {
-        private static readonly ThreadLocal<ExecutePluginDelegate> _currentExecutor = new ThreadLocal<ExecutePluginDelegate>();
-
-        /// <summary>
-        /// Sets the executor for the current thread.
-        /// </summary>
-        internal static void SetExecutor(ExecutePluginDelegate executor)
-        {
-            _currentExecutor.Value = executor;
-        }
-
-        /// <summary>
-        /// Executes a plugin on all connected clients.
-        /// </summary>
-        /// <param name="pluginName">Name of the plugin to execute</param>
-        /// <param name="workId">Work ID for tracking</param>
-        /// <param name="input">Input data for the plugin</param>
-        public static void ExecutePlugin(string pluginName, string workId, byte[] input)
-        {
-            var executor = _currentExecutor.Value;
-            if (executor != null)
-            {
-                executor("*", pluginName, workId, input);
-            }
-            else
-            {
-                Console.WriteLine("[PLUGIN CONTEXT] No executor available for current thread");
-            }
-        }
-    }
-
-    /// <summary>
+    public delegate void ExecutePluginDelegate(string clientId, string pluginName, string workId, byte[] input);    /// <summary>
     /// Manages server-side plugins and provides communication mechanisms with client plugins.
     /// </summary>
     public class ServerPluginManager
@@ -141,9 +106,7 @@ namespace Pulsar.Server.Plugin
                     Console.WriteLine($"[SERVER PLUGIN MANAGER] No executor found for client: {clientId}");
                 }
             }
-        }
-
-        /// <summary>
+        }        /// <summary>
         /// Loads all plugins from the server plugin directory.
         /// </summary>
         public void LoadPluginsFromDirectory()
@@ -161,7 +124,7 @@ namespace Pulsar.Server.Plugin
             {
                 try
                 {
-                    LoadPlugin(pluginFile);
+                    LoadPluginSafely(pluginFile);
                 }
                 catch (Exception ex)
                 {
@@ -171,18 +134,83 @@ namespace Pulsar.Server.Plugin
         }
 
         /// <summary>
+        /// Safely loads a plugin with validation and error handling.
+        /// </summary>
+        /// <param name="pluginPath">Path to the plugin file</param>
+        private void LoadPluginSafely(string pluginPath)
+        {
+            var pluginName = Path.GetFileNameWithoutExtension(pluginPath);
+            
+            try
+            {
+                Console.WriteLine($"[SERVER PLUGIN MANAGER] Validating plugin: {pluginName}");
+                
+                // Validate plugin before loading
+                var validationResult = PluginValidator.ValidatePluginFile(pluginPath);
+                if (!validationResult.IsValid)
+                {
+                    Console.WriteLine($"[SERVER PLUGIN MANAGER] Plugin validation failed for {pluginName}: {validationResult.Message}");
+                    return;
+                }
+
+                if (validationResult.HasWarnings)
+                {
+                    Console.WriteLine($"[SERVER PLUGIN MANAGER] Plugin validation warning for {pluginName}: {validationResult.Message}");
+                }
+
+                // Load the plugin
+                LoadPlugin(pluginPath);
+            }
+            catch (PluginException pex)
+            {
+                Console.WriteLine($"[SERVER PLUGIN MANAGER] Plugin-specific error loading {pluginName}: {pex.Message}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[SERVER PLUGIN MANAGER] Unexpected error loading plugin {pluginName}: {ex.Message}");
+                Console.WriteLine($"[SERVER PLUGIN MANAGER] Stack trace: {ex.StackTrace}");
+            }
+        }        /// <summary>
         /// Loads a specific plugin from a file.
         /// </summary>
         /// <param name="pluginPath">Path to the plugin file</param>
         private void LoadPlugin(string pluginPath)
         {
+            var pluginName = Path.GetFileNameWithoutExtension(pluginPath);
+            
             try
             {
                 Console.WriteLine($"[SERVER PLUGIN MANAGER] Attempting to load assembly: {Path.GetFileName(pluginPath)}");
-                var assembly = Assembly.LoadFrom(pluginPath);
+                
+                // Load assembly with error handling
+                Assembly assembly;
+                try
+                {
+                    assembly = Assembly.LoadFrom(pluginPath);
+                }
+                catch (BadImageFormatException)
+                {
+                    throw new PluginLoadException(pluginName, "Invalid assembly format - not a valid .NET assembly");
+                }
+                catch (FileLoadException ex)
+                {
+                    throw new PluginLoadException(pluginName, $"Failed to load assembly: {ex.Message}", ex);
+                }
+
                 Console.WriteLine($"[SERVER PLUGIN MANAGER] Assembly loaded successfully: {assembly.FullName}");
 
-                var allTypes = assembly.GetTypes();
+                Type[] allTypes;
+                try
+                {
+                    allTypes = assembly.GetTypes();
+                }
+                catch (ReflectionTypeLoadException ex)
+                {
+                    // Handle partial type loading
+                    allTypes = ex.Types.Where(t => t != null).ToArray();
+                    Console.WriteLine($"[SERVER PLUGIN MANAGER] Warning: Some types could not be loaded from {pluginName}");
+                }
+
                 Console.WriteLine($"[SERVER PLUGIN MANAGER] Found {allTypes.Length} types in assembly");
 
                 var pluginTypes = allTypes
@@ -210,17 +238,13 @@ namespace Pulsar.Server.Plugin
 
                 foreach (var pluginType in pluginTypes)
                 {
-                    Console.WriteLine($"[SERVER PLUGIN MANAGER] Creating instance of plugin type: {pluginType.FullName}");
-                    var plugin = Activator.CreateInstance(pluginType) as IServerPlugin;
-                    if (plugin != null)
+                    try
                     {
-                        plugin.Initialize();
-                        _loadedPlugins[plugin.Name] = plugin;
-                        Console.WriteLine($"[SERVER PLUGIN MANAGER] Loaded server plugin: {plugin.Name} from {Path.GetFileName(pluginPath)}");
+                        LoadPluginType(pluginType, pluginPath);
                     }
-                    else
+                    catch (Exception ex)
                     {
-                        Console.WriteLine($"[SERVER PLUGIN MANAGER] Failed to create instance of {pluginType.FullName}");
+                        Console.WriteLine($"[SERVER PLUGIN MANAGER] Error loading plugin type {pluginType.FullName}: {ex.Message}");
                     }
                 }
 
@@ -229,10 +253,69 @@ namespace Pulsar.Server.Plugin
                     Console.WriteLine($"[SERVER PLUGIN MANAGER] No IServerPlugin implementations found in {Path.GetFileName(pluginPath)}");
                 }
             }
+            catch (PluginException)
+            {
+                throw; // Re-throw plugin-specific exceptions
+            }
             catch (Exception ex)
             {
-                Console.WriteLine($"[SERVER PLUGIN MANAGER] Error loading plugin from {pluginPath}: {ex.Message}");
-                Console.WriteLine($"[SERVER PLUGIN MANAGER] Stack trace: {ex.StackTrace}");
+                throw new PluginLoadException(pluginName, $"Unexpected error loading plugin: {ex.Message}", ex);
+            }
+        }
+
+        /// <summary>
+        /// Loads a specific plugin type with error handling.
+        /// </summary>
+        private void LoadPluginType(Type pluginType, string pluginPath)
+        {
+            var pluginName = Path.GetFileNameWithoutExtension(pluginPath);
+            
+            try
+            {
+                Console.WriteLine($"[SERVER PLUGIN MANAGER] Creating instance of plugin type: {pluginType.FullName}");
+                
+                IServerPlugin plugin;
+                try
+                {
+                    plugin = Activator.CreateInstance(pluginType) as IServerPlugin;
+                }
+                catch (Exception ex)
+                {
+                    throw new PluginLoadException(pluginName, $"Failed to create instance of {pluginType.FullName}: {ex.Message}", ex);
+                }
+
+                if (plugin == null)
+                {
+                    throw new PluginLoadException(pluginName, $"Failed to create instance of {pluginType.FullName} - returned null");
+                }
+
+                // Initialize plugin with error handling
+                try
+                {
+                    plugin.Initialize();
+                }
+                catch (Exception ex)
+                {
+                    throw new PluginLoadException(pluginName, $"Plugin initialization failed: {ex.Message}", ex);
+                }
+
+                // Check for duplicate plugin names
+                if (_loadedPlugins.ContainsKey(plugin.Name))
+                {
+                    Console.WriteLine($"[SERVER PLUGIN MANAGER] Warning: Plugin with name '{plugin.Name}' already loaded. Skipping duplicate.");
+                    return;
+                }
+
+                _loadedPlugins[plugin.Name] = plugin;
+                Console.WriteLine($"[SERVER PLUGIN MANAGER] Loaded server plugin: {plugin.Name} v{plugin.Version} from {Path.GetFileName(pluginPath)}");
+            }
+            catch (PluginException)
+            {
+                throw; // Re-throw plugin-specific exceptions
+            }
+            catch (Exception ex)
+            {
+                throw new PluginLoadException(pluginName, $"Unexpected error loading plugin type {pluginType.FullName}: {ex.Message}", ex);
             }
         }
 
@@ -265,7 +348,10 @@ namespace Pulsar.Server.Plugin
 
             try
             {
-                PluginContext.SetExecutor(clientExecutor);
+                PluginContext.SetExecutor((pName, wId, data) =>
+                {
+                    clientExecutor("*", pName, wId, data);
+                });
 
                 Console.WriteLine($"[SERVER PLUGIN MANAGER] Executing server plugin: {pluginName}");
                 plugin.ProcessResponse("*", workId, input);
@@ -348,16 +434,8 @@ namespace Pulsar.Server.Plugin
             if (foundMatchingServerPlugin && _loadedPlugins.TryGetValue(targetServerPlugin, out var serverPlugin))
             {
                 try
-                {
-                    ExecutePluginDelegate executor = (cId, pName, wId, data) =>
-                    {
-                        ExecutePluginOnClient(cId, pName, wId, data);
-                    };                    
-                    
-                    PluginContext.SetExecutor(executor);
-
-                    string currentClientId = clientId;
-                    Pulsar.Plugin.Common.PluginContext.SetExecutor((pName, wId, data) =>
+                {                    string currentClientId = clientId;
+                    PluginContext.SetExecutor((pName, wId, data) =>
                     {
                         ExecutePluginOnClient(currentClientId, pName, wId, data);
                     });

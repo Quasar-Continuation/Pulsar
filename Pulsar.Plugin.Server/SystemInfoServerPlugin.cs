@@ -1,5 +1,7 @@
 using Pulsar.Plugin.Common;
+using Pulsar.Plugin.Common.Attributes;
 using Pulsar.Plugin.Common.Messages;
+using Pulsar.Plugin.Common.Exceptions;
 using ProtoBuf;
 using System;
 using System.Collections.Concurrent;
@@ -8,10 +10,11 @@ using System.Text;
 using System.Windows.Forms;
 
 namespace Pulsar.Plugin.Server
-{
-    /// <summary>
+{    /// <summary>
     /// Example server plugin that handles system information responses.
+    /// This plugin demonstrates how to create a server plugin that processes client data.
     /// </summary>
+    [PluginInfo("SystemInfoServer", "1.0.0", "Processes system information responses from clients", "Pulsar Team")]
     public class SystemInfoServerPlugin : IServerPlugin
     {
         private readonly ConcurrentDictionary<string, SystemInfoData> _clientData;
