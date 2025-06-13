@@ -1157,8 +1157,8 @@ namespace Pulsar.Server.Forms
                 var clientPluginFiles = Directory.GetFiles(pluginDirectory, "*.dll");
                 Console.WriteLine($"[AUTO-DISTRIBUTE] Found {clientPluginFiles.Length} DLL files");
                 
-                var distributedCount = 0;
-
+                var distributedCount = 0;                
+                
                 foreach (var pluginFile in clientPluginFiles)
                 {
                     try
@@ -1166,20 +1166,18 @@ namespace Pulsar.Server.Forms
                         var pluginName = Path.GetFileNameWithoutExtension(pluginFile);
                         Console.WriteLine($"[AUTO-DISTRIBUTE] Attempting to distribute plugin: {pluginName}");
                         
-                        var pluginBytes = _serverPluginManager.GetClientPluginBytes(pluginName);
-                        
-                        if (pluginBytes != null)
+                        lock (_clientPluginHandlers)
                         {
-                            client.Send(new DoPluginDistribution
+                            if (_clientPluginHandlers.TryGetValue(client, out var pluginHandler))
                             {
-                                PluginName = pluginName,
-                                PluginContent = pluginBytes                            });
-                            distributedCount++;
-                            Console.WriteLine($"[AUTO-DISTRIBUTE] Successfully distributed plugin: {pluginName}");
-                        }
-                        else
-                        {
-                            Console.WriteLine($"[AUTO-DISTRIBUTE] Failed to get bytes for plugin: {pluginName}");
+                                pluginHandler.DistributePlugin(pluginName);
+                                distributedCount++;
+                                Console.WriteLine($"[AUTO-DISTRIBUTE] Successfully initiated chunked distribution for plugin: {pluginName}");
+                            }
+                            else
+                            {
+                                Console.WriteLine($"[AUTO-DISTRIBUTE] No plugin handler found for client");
+                            }
                         }
                     }
                     catch (Exception ex)
@@ -1187,7 +1185,7 @@ namespace Pulsar.Server.Forms
                         EventLog($"Error distributing plugin {Path.GetFileNameWithoutExtension(pluginFile)}: {ex.Message}", "error");
                         Console.WriteLine($"[AUTO-DISTRIBUTE ERROR] {ex.Message}");
                     }
-                }                
+                }
                 
                 if (distributedCount > 0)
                 {

